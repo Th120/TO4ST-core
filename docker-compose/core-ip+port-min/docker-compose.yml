@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+    to4st:
+        image: th120/to4st-core:latest
+        restart: always
+        depends_on: 
+            - db
+        environment:
+            DATABASE_TYPE: postgres
+            DATABASE: to4st-core
+            DATABASE_HOST: db
+            DATABASE_PASSWORD: ${PG_PASS}
+            DATABASE_USERNAME: postgres
+        ports: 
+            - "5012:3000"
+        networks:
+            - web 
+    db: 
+        image: postgres:latest
+        restart: always
+        environment:
+            PGTZ: GMT
+            POSTGRES_PASSWORD: ${PG_PASS}
+            POSTGRES_USER: postgres
+            POSTGRES_DB: to4st-core
+        volumes: 
+            - ./postgres_data:/var/lib/postgresql/data
+        networks:
+            - web
+        ports:
+            - "5432:5432"
+networks:
+    web:
+        external: true

@@ -1,0 +1,1 @@
+import{r as s,h as t,H as i}from"./p-a65b63bc.js";const r=class{constructor(t){s(this,t)}render(){return t(i,null,t("section",{class:"hero is-primary is-fullheight"},t("div",{class:"hero-body"},t("div",{class:"container"},t("div",{class:"columns is-centered"},t("div",{class:"column"},t("to4st-player-statistics-list",null)))))))}};r.style="";export{r as to4st_player_statistics}

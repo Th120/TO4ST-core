@@ -1,0 +1,15 @@
+{
+  "type": "postgres",
+  "database": "to4st-core-migrations",
+  "host": "127.0.0.1",
+  "port": 5432,
+  "username": "postgres",
+  "password": "th120",
+  "synchronize": false,
+  "logging": true,
+  "entities": ["src/**/*.entity.ts"],
+  "migrations": ["src/migrations/postgres/**/*.ts"],
+  "cli": {
+    "migrationsDir": "./src/migrations/postgres"
+  }
+}

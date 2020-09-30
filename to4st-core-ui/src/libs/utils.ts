@@ -1,0 +1,54 @@
+import { ClientError } from "graphql-typed-client";
+import jsSHA from "jssha";
+
+/**
+ * CSS class list
+ */
+export type ClassList = string|Record<string, boolean>;
+
+/**
+ * Merge css classes
+ * @param classes 
+ */
+export const mergeClass = (...classes: ClassList[]) =>  
+    Object.entries(classes
+        .map(c => typeof c === "string" 
+            ? {[c.trim()]: true} 
+            : c
+        )
+        .reduce((a, b) => ({...a, ...b}))
+    )
+    .filter(([_, cond]) => cond)
+    .map(([c]) => c.trim())
+    .join(" ")
+
+
+/**
+ * Extract error string from failed request
+ * @param error 
+ */
+export function extractGraphQLErrors(error: any): string
+{
+    const err = error instanceof ClientError ? error : null;
+    if(err)
+    {
+        return error.errors?.map(e => e.message).reduce((prev, curr) => `${prev.length == 0 ? prev : prev + ",\n"} ${curr}`, "") || "GraphQL Error empty";
+    }
+    else
+    {
+        console.error(error);
+        return "Did not receive valid GraphQL Error";
+    }
+}
+
+/**
+ * Naive salting + password hash
+ * @param pass 
+ */
+export function hashPassword(pass: string)
+{
+    const shaObj = new jsSHA("SHA3-256", "TEXT");
+    shaObj.update(pass);
+    shaObj.update("T04ST"); //salt just in case
+    return shaObj.getHash("HEX");
+}

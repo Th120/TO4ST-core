@@ -1,0 +1,66 @@
+version: "3.8"
+services:
+    to4st:
+        image: th120/to4st-core:latest
+        restart: always
+        depends_on: 
+            - db
+            - traefik
+        environment:
+            DATABASE_TYPE: postgres
+            DATABASE: to4st-core
+            DATABASE_HOST: db
+            DATABASE_PASSWORD: ${PG_PASS}
+            DATABASE_USERNAME: postgres
+        networks:
+            - web 
+        labels:
+            - "traefik.enable=true" 
+            - "traefik.http.middlewares.gzipcompression.compress=true"
+            - "traefik.http.routers.to4st-core.middlewares=gzipcompression@docker"
+            - "traefik.http.routers.to4st-core-secured.middlewares=gzipcompression@docker"
+            - "traefik.http.routers.to4st-core.rule=Host(`${TO4ST_CORE_DOMAIN}`)"
+            - "traefik.http.routers.to4st-core.entrypoints=web" 
+            - "traefik.http.routers.to4st-core.middlewares=redirect-to-secure@file"
+            - "traefik.http.routers.to4st-core-secured.rule=Host(`${TO4ST_CORE_DOMAIN}`)" 
+            - "traefik.http.routers.to4st-core-secured.entrypoints=web-secured" 
+            - "traefik.http.routers.to4st-core-secured.tls.certresolver=mytlschallenge"
+    db: 
+        image: postgres:latest
+        restart: always
+        environment:
+            PGTZ: GMT
+            POSTGRES_PASSWORD: ${PG_PASS}
+            POSTGRES_USER: postgres
+            POSTGRES_DB: to4st-core
+        volumes: 
+            - ./postgres_data:/var/lib/postgresql/data
+        networks:
+            - web
+        ports:
+            - "5432:5432"
+    traefik:
+        image: traefik:latest
+        restart: always
+        ports:
+            - "80:80" 
+            - "443:443" 
+        command:
+            - --providers.docker=true 
+            - --providers.docker.exposedbydefault=false 
+            - --providers.file.filename=/dynamic.yaml 
+            - --providers.docker.network=web
+            - --entrypoints.web.address=:80 
+            - --entrypoints.web-secured.address=:443
+            - --certificatesresolvers.mytlschallenge.acme.tlschallenge=true 
+            - --certificatesresolvers.mytlschallenge.acme.email=${SSL_MAIL}
+            - --certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json 
+        volumes:
+            - ./letsencrypt:/letsencrypt 
+            - /var/run/docker.sock:/var/run/docker.sock 
+            - ./dynamic.yaml:/dynamic.yaml
+        networks:
+            - web
+networks:
+    web:
+        external: true

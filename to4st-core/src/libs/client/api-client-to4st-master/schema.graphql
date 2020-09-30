@@ -1,0 +1,164 @@
+"""
+Exposes a URL that specifies the behaviour of this scalar.
+"""
+directive @specifiedBy(
+  """
+  The URL that specifies the behaviour of this scalar.
+  """
+  url: String!
+) on SCALAR
+
+type AppConfig {
+  instanceId: String
+  steamWebApiKey: String
+}
+
+input AppConfigInput {
+  steamWebApiKey: String
+  password: String
+}
+
+type AuthKey {
+  id: Int!
+  authKey: String!
+  description: String!
+  lastUse: DateTime!
+}
+
+input AuthKeyInput {
+  id: Int
+  authKey: String
+  description: String
+}
+
+input AuthKeyQuery {
+  page: Int
+  pageSize: Int
+  search: String
+  orderDesc: Boolean
+}
+
+type CommunityBackend {
+  id: Int!
+  masterserverKey: String!
+  description: String!
+  contact: String!
+  lastUrl: String
+  enabledForStatisticsAggregation: Boolean!
+  lastHeartbeat: DateTime
+  currentState: DateTime
+  lastUpdateAttempt: DateTime
+  aggregationRunningSince: DateTime
+}
+
+input CommunityBackendInput {
+  id: Int
+  masterserverKey: String
+  description: String
+  contact: String
+  enabledForStatisticsAggregation: Boolean
+}
+
+input CommunityBackendQuery {
+  page: Int
+  pageSize: Int
+  search: String
+  orderDesc: Boolean
+}
+
+input CommunityBackendStatisticsQuery {
+  page: Int
+  pageSize: Int
+  month: Int
+  year: Int
+  steamId64: String
+  orderDesc: Boolean
+  orderBy: OrderPlayerStats
+  gameModeName: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type GameMode {
+  name: String!
+  isTeamBased: Boolean!
+}
+
+type GlobalPlayerStatistics {
+  steamId64: String!
+  rank: Int!
+  kills: Int!
+  deaths: Int!
+  suicides: Int!
+  totalScore: Int!
+  totalDamage: Int!
+  numberGamesPlayed: Int!
+  numberRoundsPlayed: Int!
+  killDeathRatio: Float!
+  avgDamagePerRound: Int!
+  avgScorePerRound: Int!
+}
+
+type LoginResponse {
+  appConfig: AppConfig!
+  jwt: String!
+}
+
+type Mutation {
+  deleteAuthKey(authKey: String!): Boolean!
+
+  """
+  X-Request-ID must be set in header
+  """
+  createUpdateAuthKey(authKey: AuthKeyInput!): AuthKey!
+  login(password: String!): LoginResponse!
+  loginDev(password: String!): LoginResponse!
+  updateAppConfig(appConfig: AppConfigInput!): AppConfig!
+  createUpdateCommunityBackend(communityBackend: CommunityBackendInput!): CommunityBackend!
+  deleteCommunityBackend(id: Float!): Boolean!
+  heartBeat(address: String!): Boolean!
+}
+
+enum OrderPlayerStats {
+  sumKills
+  sumDeaths
+  sumSuicides
+  sumDamage
+  sumScore
+  sumRoundsPlayed
+  sumGamesPlayed
+  averageKillDeath
+  averageDamagePerRound
+  averageScorePerRound
+}
+
+type PaginatedAuthKey {
+  content: [AuthKey!]
+  totalCount: Int!
+  pageCount: Int!
+}
+
+type PaginatedCommunityBackend {
+  content: [CommunityBackend!]
+  totalCount: Int!
+  pageCount: Int!
+}
+
+type PaginatedGlobalPlayerStatistics {
+  content: [GlobalPlayerStatistics!]
+  totalCount: Int!
+  pageCount: Int!
+}
+
+type Query {
+  authKeys(options: AuthKeyQuery!): PaginatedAuthKey!
+  authKey(authKey: String!): AuthKey
+  authValid: Boolean!
+  appConfig(cached: Boolean = true): AppConfig!
+  communityBackendStatistics(options: CommunityBackendStatisticsQuery!): PaginatedGlobalPlayerStatistics!
+  communityBackend(id: Float!): CommunityBackend!
+  communityBackends(options: CommunityBackendQuery!): PaginatedCommunityBackend!
+}

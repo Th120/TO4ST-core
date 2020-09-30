@@ -1,0 +1,15 @@
+{
+  "type": "mysql",
+  "database": "to4st-core-migrations",
+  "host": "127.0.0.1",
+  "port": 3306,
+  "username": "to4user",
+  "password": "to4password",
+  "synchronize": false,
+  "logging": true,
+  "entities": ["src/**/*.entity.ts"],
+  "migrations": ["src/migrations/mysql/**/*.ts"],
+  "cli": {
+    "migrationsDir": "./src/migrations/mysql"
+  }
+}
