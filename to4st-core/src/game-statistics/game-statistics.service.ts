@@ -615,6 +615,7 @@ export class GameStatisticsService {
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameserver", "gameserver");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.map", "map");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameMode", "gameMode");
+        queryBuilder = queryBuilder.leftJoinAndSelect("game.matchConfig", "matchConfig");
 
         queryBuilder = queryBuilder.where("1=1"); 
     
