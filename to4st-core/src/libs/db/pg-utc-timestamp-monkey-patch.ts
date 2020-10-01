@@ -8,18 +8,18 @@ import pg from "pg"
 export const monkeypatch = () => {
 
     DateUtils.mixedDateToDate = (mixedDate: Date|string, toUtc: boolean = true, useMilliseconds = true) => {
-        let date = typeof mixedDate === "string" ? new Date(mixedDate) : mixedDate;
+            
+            let date = typeof mixedDate === "string" ? new Date(mixedDate) : mixedDate;
    
-           if (toUtc)
-               date = new Date(
-                   date.getUTCFullYear(),
-                   date.getUTCMonth(),
-                   date.getUTCDate(),
-                   date.getUTCHours(),
-                   date.getUTCMinutes(),
-                   date.getUTCSeconds(),
-                   date.getUTCMilliseconds()
-               );
+            date = new Date(
+                date.getUTCFullYear(),
+                date.getUTCMonth(),
+                date.getUTCDate(),
+                date.getUTCHours(),
+                date.getUTCMinutes(),
+                date.getUTCSeconds(),
+                date.getUTCMilliseconds()
+            );
    
            if (!useMilliseconds)
                date.setUTCMilliseconds(0);
