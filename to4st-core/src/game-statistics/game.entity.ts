@@ -7,7 +7,7 @@ import { Gameserver} from '../gameserver/gameserver.entity';
 import { ServerMap } from './server-map.entity';
 import { GameMode } from './game-mode.entity';
 import { roundDate } from '../shared/utils';
-import { MatchConfig } from 'src/gameserver/match-config.entity';
+import { MatchConfig } from '../gameserver/match-config.entity';
 
 
 /**
@@ -29,7 +29,7 @@ export class Game {
      */
     @Field(() => Gameserver)
     @Expose()
-    @ManyToOne(() => Gameserver, { onDelete: "CASCADE", nullable: false  })
+    @ManyToOne(() => Gameserver, { onDelete: "CASCADE", nullable: false })
     gameserver: Gameserver;
 
     /**
@@ -37,7 +37,7 @@ export class Game {
      */
     @Field(() => MatchConfig)
     @Expose()
-    @ManyToOne(() => MatchConfig, { onDelete: "SET NULL", nullable: true  })
+    @ManyToOne(() => MatchConfig, { onDelete: "SET NULL", nullable: true })
     matchConfig?: MatchConfig;
 
     /**

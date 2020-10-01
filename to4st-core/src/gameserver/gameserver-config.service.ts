@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import _ from "lodash"
 import { Repository, Connection, Like } from 'typeorm';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
@@ -168,7 +168,7 @@ export class GameserverConfigService {
     }
 
   /**
-   * Calculate a hash from a match config to allow comparing them in order to detect gameplay changes
+   * Calculate a hash from a match config to allow comparing them in order to detect gameplay affecting changes
    * @param config 
    */
   getMatchConfigHash(config: MatchConfig): string
@@ -176,7 +176,7 @@ export class GameserverConfigService {
     config = {...config};
     
     // Exists only for preset management on individual backend
-    config.configName = null;
+    config.configName = "";
 
     // Those times do not affect gameplay
     config.matchendLength = 0;

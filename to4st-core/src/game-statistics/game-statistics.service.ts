@@ -102,6 +102,11 @@ export interface IRoundQuery {
      * Should be ordered descending?
      */
     orderDesc?: boolean
+
+    /**
+     * Only games which use a ranked match config
+     */
+    ranked?: boolean;
 }
 
 /**
@@ -152,6 +157,11 @@ export interface IGameQuery {
      * Should be ordered descending?
      */
     orderDesc?: boolean
+
+    /**
+     * Only games which use a ranked match config
+     */
+    ranked?: boolean;
 }
 
 /**
@@ -375,7 +385,7 @@ export class GameStatisticsService {
      */
     async getGame(id: string): Promise<Game | undefined>
     {
-        return await this.gameRepository.findOne({where: {id: id}, relations: ["gameserver", "map", "gameMode"]});
+        return await this.gameRepository.findOne({where: {id: id}, relations: ["gameserver", "map", "gameMode", "matchConfig"]});
     }
 
     /**
@@ -417,7 +427,7 @@ export class GameStatisticsService {
      */
     async getRound(id: number): Promise<Round | undefined>
     {
-        return await this.roundRepository.findOne({where: {id: id}, relations: ["game", "game.map", "game.gameMode", "game.gameserver"]});
+        return await this.roundRepository.findOne({where: {id: id}, relations: ["game", "game.map", "game.gameMode", "game.gameserver", "game.matchConfig"]});
     }
 
     /**
@@ -558,12 +568,18 @@ export class GameStatisticsService {
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameMode", "gameMode");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.map", "map");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameserver", "gameserver");
+        queryBuilder = queryBuilder.leftJoinAndSelect("game.matchConfig", "matchConfig");
 
         queryBuilder = queryBuilder.where("1=1");  
 
         if(options.game)
         {
             queryBuilder = queryBuilder.andWhere("game.id = :gameId", { gameId: options.game.id });
+        }
+
+        if(options.ranked)
+        {
+            queryBuilder = queryBuilder.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
         }
 
         if(options.onlyFinishedRounds)
@@ -619,6 +635,11 @@ export class GameStatisticsService {
 
         queryBuilder = queryBuilder.where("1=1"); 
     
+        if(options.ranked)
+        {
+            queryBuilder = queryBuilder.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
+        }
+
         if(options.gameMode)
         {
             queryBuilder = queryBuilder.andWhere(options.gameMode.id ? "gameMode.id = :gameModeId" : "gameMode.name = :gameModeName" , options.gameMode.id ? { gameModeId: options.gameMode.id } : { gameModeName: options.gameMode.name });

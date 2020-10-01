@@ -29,6 +29,7 @@ import { AggregatedGameStatisticsService } from './aggregated-game-statistics.se
 import { Repository } from 'typeorm';
 import { PlayerStatistics, OrderPlayerBaseStats } from './player-statistics';
 import { PlayerWeaponStatistics } from './player-weapon-statistics';
+import { MatchConfig } from '../gameserver/match-config.entity';
 
 /*
 const DEFAULT_GAME_TIME = 1000 * 60 * 120;
@@ -419,8 +420,8 @@ describe('AggregatedGameStatisticsService', () => {
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({isGlobal: true, load: [testConfiguration],}),
-        genTypeORMTestCFG([Game, Ban, RegisteredPlayer, Round, AuthKey, AppConfig, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, ]), 
-        TypeOrmModule.forFeature([Game, Ban, RegisteredPlayer, AuthKey, AppConfig, Round, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, ]),
+        genTypeORMTestCFG([Game, Ban, RegisteredPlayer, Round, AuthKey, AppConfig, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig]), 
+        TypeOrmModule.forFeature([Game, Ban, RegisteredPlayer, AuthKey, AppConfig, Round, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig]),
       ],
       providers: [GameStatisticsService, ConfigService, AppConfigService, SteamUserService, GameserverService, AggregatedGameStatisticsService, ],
     }).compile();

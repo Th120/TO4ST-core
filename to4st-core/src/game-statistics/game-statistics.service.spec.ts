@@ -27,6 +27,7 @@ import { SteamUserService } from '../core/steam-user.service';
 import { SteamUser } from '../core/steam-user.entity';
 
 import { Repository } from 'typeorm';
+import { MatchConfig } from '../gameserver/match-config.entity';
 
 
 /*
@@ -89,8 +90,8 @@ describe('GameStatisticsService', () => {
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({isGlobal: true, load: [testConfiguration],}),
-        genTypeORMTestCFG([Game, Ban, RegisteredPlayer, Round, AuthKey, AppConfig, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, ]), 
-        TypeOrmModule.forFeature([Game, Ban, RegisteredPlayer, AuthKey, AppConfig, Round, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, ]),
+        genTypeORMTestCFG([Game, Ban, RegisteredPlayer, Round, AuthKey, AppConfig, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig]), 
+        TypeOrmModule.forFeature([Game, Ban, RegisteredPlayer, AuthKey, AppConfig, Round, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig]),
       ],
       providers: [GameStatisticsService, ConfigService, AppConfigService, GameserverService, SteamUserService, ],
     }).compile();

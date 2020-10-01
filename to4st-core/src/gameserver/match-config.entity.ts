@@ -192,7 +192,7 @@ export class MatchConfig {
   @Field(() => Boolean)
   @Column()
   @Expose()
-  @Index()
+  @Index("idx_ranked")
   ranked?: boolean;
 
   /**
