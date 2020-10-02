@@ -18,7 +18,7 @@ import { chance } from 'jest-chance';
 import { AppConfigService } from '../core/app-config.service';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { GameserverService } from '../gameserver/gameserver.service';
-import { Team, keysMatch, asyncForEach, getNextNFromRingArray, roundDate, steamId64ToAccountId } from '../shared/utils';
+import { Team, keysMatch, asyncForEach, getNextNFromRingArray, roundDate } from '../shared/utils';
 import testConfiguration from '../testConfiguration';
 import { Logger, } from '@nestjs/common';
 import { MAX_PAGE_SIZE, } from '../globals';
@@ -28,6 +28,8 @@ import { SteamUser } from '../core/steam-user.entity';
 
 import { Repository } from 'typeorm';
 import { MatchConfig } from '../gameserver/match-config.entity';
+import { GameserverConfig } from '../gameserver/gameserver-config.entity';
+import { GameserverConfigService } from '../gameserver/gameserver-config.service';
 
 
 /*
@@ -83,24 +85,28 @@ const gameModes: Partial<GameMode>[] = [{name: "Classic", isTeamBased: true}, {n
 
 describe('GameStatisticsService', () => {
   let service: GameStatisticsService;
-  let gameserverService: GameserverService
-  let cfgService: AppConfigService
+  let gameserverService: GameserverService;
+  let cfgService: AppConfigService;
+  let gameserverConfigService: GameserverConfigService;
   let module: TestingModule;
   beforeEach(async () => {
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({isGlobal: true, load: [testConfiguration],}),
-        genTypeORMTestCFG([Game, Ban, RegisteredPlayer, Round, AuthKey, AppConfig, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig]), 
-        TypeOrmModule.forFeature([Game, Ban, RegisteredPlayer, AuthKey, AppConfig, Round, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig]),
+        genTypeORMTestCFG([Game, Ban, RegisteredPlayer, Round, AuthKey, AppConfig, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig, GameserverConfig]), 
+        TypeOrmModule.forFeature([Game, Ban, RegisteredPlayer, AuthKey, AppConfig, Round, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig, GameserverConfig]),
       ],
-      providers: [GameStatisticsService, ConfigService, AppConfigService, GameserverService, SteamUserService, ],
+      providers: [GameStatisticsService, ConfigService, AppConfigService, GameserverService, SteamUserService, GameserverConfigService],
     }).compile();
 
     service = module.get<GameStatisticsService>(GameStatisticsService);
     cfgService = module.get<AppConfigService>(AppConfigService);
     gameserverService = module.get<GameserverService>(GameserverService);
+    gameserverConfigService = module.get<GameserverConfigService>(GameserverConfigService);
 
     const gameserverRepo: Repository<Gameserver> = module.get("GameserverRepository");
+    const gameserverConfigRepo: Repository<GameserverConfig> = module.get("GameserverConfigRepository");
+    const matchConfigRepo: Repository<MatchConfig> = module.get("MatchConfigRepository");
 
     jest.spyOn(gameserverService, "createUpdateGameserver").mockImplementation(async (server: Gameserver) => {
       const cloned = new Gameserver({...server});
@@ -117,12 +123,49 @@ describe('GameStatisticsService', () => {
       return await gameserverRepo.save(cloned);
 
     });
+  
+    jest.spyOn(gameserverConfigService, "createUpdateGameserverConfig").mockImplementation(async (gameserverConfig: GameserverConfig) => {
+      const cloned = new GameserverConfig({...gameserverConfig});
+      cloned.gameserver = new Gameserver({id: gameserverConfig.gameserver.id});
+      return await gameserverConfigRepo.save(cloned);
+    });
+
+    jest.spyOn(gameserverConfigService, "createUpdateMatchConfig").mockImplementation(async (config: MatchConfig) => {
+      const cloned = new MatchConfig({...config});
+      cloned.configHash = chance.guid({version: 4});
+      return await matchConfigRepo.save(cloned);
+    });
+
   });
 
   const randomGameserverCreate = async () => {
     return await gameserverService.createUpdateGameserver(new Gameserver({currentName: chance.string({ length: 32 }), authKey: chance.guid({version: 4}), description: chance.sentence(), lastContact: chance.date()}));
   };
 
+  const randomMatchConfig = (options?: {ranked?: boolean}) => new MatchConfig({
+    configName: chance.word(),
+    matchendLength: chance.integer({min: 0, max: 30000}),
+    warmUpLength:chance.integer({min: 0, max: 30000}),
+    friendlyFireScale: chance.floating({min: 0, max: 1}),
+    mapLength: chance.integer({min: 0, max: 30000}),
+    roundLength: chance.integer({min: 0, max: 30000}),
+    preRoundLength: chance.integer({min: 0, max: 30000}),
+    roundEndLength: chance.integer({min: 0, max: 30000}),
+    roundLimit: chance.integer({min: 0, max: 30000}),
+    allowGhostcam: chance.bool(),
+    playerVoteThreshold: chance.floating({min: 0, max: 100}),
+    autoBalanceTeams: chance.bool(),
+    playerVoteTeamOnly: chance.bool(),
+    maxTeamDamage: chance.floating({min: 0}),
+    enablePlayerVote: chance.bool(),
+    autoSwapTeams: chance.bool(),
+    midGameBreakLength: chance.integer({min: 0, max: 30000}),
+    nadeRestriction: chance.bool(),
+    globalVoicechat: chance.bool(),
+    muteDeadToTeam: chance.bool(),
+    ranked: options?.ranked ?? chance.bool(),
+    private: chance.bool()
+  });
 
   const randomGameserversCreate = async (count: number) => {
     const arr: Gameserver[] = [];
@@ -134,7 +177,7 @@ describe('GameStatisticsService', () => {
     return arr;  
   };
 
-  const randomGameCreate = async (options: {gameserver?: Gameserver, startedAt?: Date, endetAt?: Date, map?: Partial<ServerMap>, gameMode?: Partial<GameMode>,}) => {
+  const randomGameCreate = async (options: {gameserver?: Gameserver, startedAt?: Date, endetAt?: Date, map?: Partial<ServerMap>, gameMode?: Partial<GameMode>, matchConfig?: Partial<MatchConfig>}) => {
     const start = options.startedAt ?? randomDateInRange(new Date(chance.date({year: 1999})), new Date(chance.date({year: 2200})));
     const end = options.endetAt ?? new Date(start.valueOf() + DEFAULT_GAME_TIME);
     return await service.createUpdateGame(new Game(
@@ -143,7 +186,8 @@ describe('GameStatisticsService', () => {
         startedAt: start,
         endedAt: end,
         map: new ServerMap(options.map ?? maps[(chance.integer({min: 1}) % maps.length)] ), 
-        gameMode: new GameMode(options.gameMode ?? gameModes[chance.integer({min: 1}) % gameModes.length])
+        gameMode: new GameMode(options.gameMode ?? gameModes[chance.integer({min: 1}) % gameModes.length]),
+        matchConfig: options?.matchConfig ? new MatchConfig(options.matchConfig) : undefined
       }));
   };
 
@@ -209,11 +253,39 @@ describe('GameStatisticsService', () => {
   });
 
   
-  it('insert + update game', async() => {
+  it('insert + update game, no matchconfig', async() => {
       
     const gameServer = await randomGameserverCreate();
 
-    const game = new Game({gameserver: gameServer, startedAt: new Date(Date.now()), map: new ServerMap({name: "TestMap1"}), gameMode: new GameMode({name: "Classic", isTeamBased: true})});
+    const game = new Game({gameserver: gameServer, startedAt: new Date(), map: new ServerMap({name: "TestMap1"}), gameMode: new GameMode({name: "Classic", isTeamBased: true})});
+    const inserted = await service.createUpdateGame(game);
+
+    expect(inserted).toMatchObject(game);
+    
+    inserted.endedAt = roundDate(new Date(Date.now() + 6000));
+    const updated = await service.createUpdateGame(inserted);
+
+    expect(updated).toMatchObject(inserted);
+    expect(updated.matchConfig).toEqual(inserted.matchConfig);
+    expect(updated.matchConfig).toBeFalsy();
+
+
+  });
+
+  it('insert get game, incl. match config', async() => {
+      
+    const gameServer = await randomGameserverCreate();
+
+    const matchConfig = await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig());
+
+    const game = new Game(
+      {
+        gameserver: gameServer, 
+        startedAt: new Date(), 
+        map: new ServerMap({name: "TestMap1"}), 
+        gameMode: new GameMode({name: "Classic", isTeamBased: true}),
+        matchConfig: matchConfig
+      });
     const inserted = await service.createUpdateGame(game);
 
     expect(inserted).toMatchObject(game);
@@ -302,6 +374,50 @@ describe('GameStatisticsService', () => {
   
   });
 
+  it('insert multi get games, ranked only, asc', async() => {
+      
+    const gameServer = await randomGameserverCreate();
+    const gameServer2 = await randomGameserverCreate();
+
+    const matchConfigR = await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: true}));
+    const matchConfigNOPE = await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: false}));
+
+    const insertedGames: Game[] = []
+
+    await forN(async (idx: number) => {
+
+      const inserted = await randomGameCreate(
+        {
+          gameserver: idx % 2 == 0 ? gameServer : gameServer2, 
+          startedAt: new Date(Date.now() + idx * 5000),
+          matchConfig: idx % 2 == 0 ? matchConfigR : (idx % 3 == 0 ? undefined : matchConfigNOPE)
+      });
+      
+      insertedGames.push(inserted);
+    });
+
+    const filtered = insertedGames.filter(x => !!x.matchConfig?.ranked);
+    
+    let [games, total, totalPages] = await service.getGames({ranked: true, orderDesc: false});    
+    expect(games.length).toBeLessThanOrEqual(MAX_PAGE_SIZE);
+    expect(total).toBe(filtered.length);
+
+    //Get all pages and merge them into result archive
+    if(games.length != total) 
+    {
+      for(let i = 2; i <= totalPages; i++)
+      {
+        games = [...games, ...(await service.getGames({page: i, ranked: true, orderDesc: false}))[0]];
+      }
+    }
+
+    expect(games.length).toBe(filtered.length);
+
+    insertedGames.filter(x => !!x.matchConfig?.ranked).sort((x, y) => roundDate(x.startedAt).valueOf() - roundDate(y.startedAt).valueOf()).forEach( (x, i) => {
+      expect(games[i]).toMatchObject(x);
+    });
+
+  });
 
   it('insert multi get games asc', async() => {
       
@@ -568,21 +684,27 @@ describe('GameStatisticsService', () => {
     expect(inserted).toMatchObject(updated);
   });
 
-  it('insert multi get rounds asc', async() => {
+  it('insert multi get rounds, ranked only, asc', async() => {
       
     const gameServer = await randomGameserverCreate();
+
+    let insertedConfigs: MatchConfig[] = [];
+
+    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: true})));
+    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: false})));
+    insertedConfigs.push(undefined);
 
     let insertedRounds: Round[] = [];
     const games = [
       await randomGameCreate(
         {gameserver: gameServer, startedAt: randomDateInRange(new Date(chance.date({year: 1980})), new Date(chance.date({year: 2001}))), 
-        endetAt: randomDateInRange(new Date(chance.date({year: 2099})), new Date(chance.date({year: 2200})))}), 
+        endetAt: randomDateInRange(new Date(chance.date({year: 2099})), new Date(chance.date({year: 2200}))), matchConfig: insertedConfigs[0]}), 
       await randomGameCreate(
         {gameserver: gameServer, startedAt: randomDateInRange(new Date(chance.date({year: 1980})), new Date(chance.date({year: 2001}))), 
-        endetAt: randomDateInRange(new Date(chance.date({year: 2099})), new Date(chance.date({year: 2200})))}), 
+        endetAt: randomDateInRange(new Date(chance.date({year: 2099})), new Date(chance.date({year: 2200}))), matchConfig: insertedConfigs[1]}), 
       await randomGameCreate(
         {gameserver: gameServer, startedAt: randomDateInRange(new Date(chance.date({year: 1980})), new Date(chance.date({year: 2001}))), 
-        endetAt: randomDateInRange(new Date(chance.date({year: 2099})), new Date(chance.date({year: 2200})))}),   
+        endetAt: randomDateInRange(new Date(chance.date({year: 2099})), new Date(chance.date({year: 2200}))), matchConfig: insertedConfigs[2]}),   
     ];
 
     await forN(async (idx: number) => {
@@ -590,25 +712,25 @@ describe('GameStatisticsService', () => {
       const inserted = await randomRoundCreate({game: games[idx % games.length], })
       insertedRounds.push(inserted);
     });
+
+    const filtered = insertedRounds.filter(x => x.game?.matchConfig?.ranked).sort((x, y) => roundDate(x.startedAt).valueOf() - roundDate(y.startedAt).valueOf());
     
-    let [rounds, total, totalPages] = await service.getRounds({orderDesc: false});    
+    let [rounds, total, totalPages] = await service.getRounds({orderDesc: false, ranked: true});    
     expect(rounds.length).toBeLessThanOrEqual(MAX_PAGE_SIZE);
-    expect(total).toBe(N);
+    expect(total).toBe(filtered.length);
 
     //Get all pages and merge them into result archive
     if(rounds.length != total) 
     {
       for(let i = 2; i <= totalPages; i++)
       {
-        rounds = [...rounds, ...(await service.getRounds({page: i, orderDesc: false}))[0]];
+        rounds = [...rounds, ...(await service.getRounds({page: i, orderDesc: false, ranked: true}))[0]];
       }
     }
 
-    insertedRounds = insertedRounds.sort((x, y) => roundDate(x.startedAt).valueOf() - roundDate(y.startedAt).valueOf());
+    expect(rounds.length).toBe(filtered.length);
 
-    expect(rounds.length).toBe(N);
-
-    insertedRounds.forEach( (x, i) => {
+    filtered.forEach( (x, i) => {
       expect(rounds[i]).toMatchObject(x);
     });
 

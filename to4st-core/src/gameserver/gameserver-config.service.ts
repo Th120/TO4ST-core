@@ -9,8 +9,8 @@ import { Gameserver } from './gameserver.entity';
 import { MAX_PAGE_SIZE } from '../globals';
 import { GameserverConfig } from './gameserver-config.entity';
 import { MatchConfig } from './match-config.entity';
-import { TIMEOUT_PROMISE_FACTORY } from 'src/shared/utils';
-import { Game } from 'src/game-statistics/game.entity';
+import { TIMEOUT_PROMISE_FACTORY } from '../shared/utils';
+import { Game } from '../game-statistics/game.entity';
 
 /**
  * Interface used to identify a gameserver

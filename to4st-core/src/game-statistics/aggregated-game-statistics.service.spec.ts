@@ -30,6 +30,8 @@ import { Repository } from 'typeorm';
 import { PlayerStatistics, OrderPlayerBaseStats } from './player-statistics';
 import { PlayerWeaponStatistics } from './player-weapon-statistics';
 import { MatchConfig } from '../gameserver/match-config.entity';
+import { GameserverConfig } from '../gameserver/gameserver-config.entity';
+import { GameserverConfigService } from '../gameserver/gameserver-config.service';
 
 /*
 const DEFAULT_GAME_TIME = 1000 * 60 * 120;
@@ -53,7 +55,7 @@ const MAX_PLAYER_COUNT_ROUND = 5;
 const DEFAULT_WEAPON_COUNT = 3;
 const DEFAULT_ROUND_COUNT = 6;
 const DEFAULT_GAME_COUNT = 20;
-const DEFAULT_GAMESERVER_COUNT = 2;
+const DEFAULT_GAMESERVER_COUNT = 3; // at least 3!
 
 const testLog = (message: string, context: string, timeDiff = true) => {
   if(SHOULD_LOG)
@@ -229,6 +231,7 @@ describe('AggregatedGameStatisticsService', () => {
   let rounds: Round[];
   let playerRoundStats: PlayerRoundStats[];
   let playerRoundWeaponStats: PlayerRoundWeaponStats[];
+  let gameserverConfigService: GameserverConfigService;
 
   /**
    * Creates random gameserver
@@ -255,7 +258,7 @@ describe('AggregatedGameStatisticsService', () => {
    * Creates random game
    * @param options
    */
-  const randomGameCreate = async (options: {gameserver?: Gameserver, startedAt?: Date, map?: Partial<ServerMap>, gameMode?: Partial<GameMode>,}) => {
+  const randomGameCreate = async (options: {gameserver?: Gameserver, startedAt?: Date, map?: Partial<ServerMap>, gameMode?: Partial<GameMode>, matchConfig?: Partial<MatchConfig>}) => {
     const start = options.startedAt ?? randomDateInRange(new Date(chance.date({year: 1999})), new Date(chance.date({year: 2200})));
     return await gameStatsService.createUpdateGame(new Game(
       {
@@ -263,7 +266,8 @@ describe('AggregatedGameStatisticsService', () => {
         startedAt: start,
         endedAt: new Date(start.valueOf() + DEFAULT_GAME_TIME),
         map: new ServerMap(options.map ?? maps[(chance.integer({min: 1}) % maps.length)] ), 
-        gameMode: new GameMode(options.gameMode ?? gameModes[chance.integer({min: 1}) % gameModes.length])
+        gameMode: new GameMode(options.gameMode ?? gameModes[chance.integer({min: 1}) % gameModes.length]),
+        matchConfig: options?.matchConfig ? new MatchConfig(options.matchConfig) : undefined
       }));
   };
 
@@ -308,6 +312,35 @@ describe('AggregatedGameStatisticsService', () => {
   };
 
   /**
+   * Generates random match config
+   * @param options 
+   */
+  const randomMatchConfig = (options?: {ranked?: boolean}) => new MatchConfig({
+    configName: chance.word(),
+    matchendLength: chance.integer({min: 0, max: 30000}),
+    warmUpLength:chance.integer({min: 0, max: 30000}),
+    friendlyFireScale: chance.floating({min: 0, max: 1}),
+    mapLength: chance.integer({min: 0, max: 30000}),
+    roundLength: chance.integer({min: 0, max: 30000}),
+    preRoundLength: chance.integer({min: 0, max: 30000}),
+    roundEndLength: chance.integer({min: 0, max: 30000}),
+    roundLimit: chance.integer({min: 0, max: 30000}),
+    allowGhostcam: chance.bool(),
+    playerVoteThreshold: chance.floating({min: 0, max: 100}),
+    autoBalanceTeams: chance.bool(),
+    playerVoteTeamOnly: chance.bool(),
+    maxTeamDamage: chance.floating({min: 0}),
+    enablePlayerVote: chance.bool(),
+    autoSwapTeams: chance.bool(),
+    midGameBreakLength: chance.integer({min: 0, max: 30000}),
+    nadeRestriction: chance.bool(),
+    globalVoicechat: chance.bool(),
+    muteDeadToTeam: chance.bool(),
+    ranked: options?.ranked ?? chance.bool(),
+    private: chance.bool()
+  });
+
+  /**
    * Generates random player weapon stats
    * @param options 
    */
@@ -338,6 +371,12 @@ describe('AggregatedGameStatisticsService', () => {
   const fillExampleDatabase = async () => {
 
     const gameServers = await randomGameserversCreate(DEFAULT_GAMESERVER_COUNT);
+  
+    let insertedConfigs: MatchConfig[] = [];
+
+    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: true})));
+    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: false})));
+    insertedConfigs.push(undefined);
 
     testLog("Inserted Gameservers", "CreateExampleDatabase");
 
@@ -358,6 +397,7 @@ describe('AggregatedGameStatisticsService', () => {
         startedAt: new Date(lastEnd.valueOf() + 1000 * 60 * 60), 
         gameMode: new GameMode(gameModes[i % gameModes.length]),
         map: new ServerMap(maps[i % maps.length]), 
+        matchConfig: insertedConfigs[i % insertedConfigs.length]
       });
       lastEnd = game.endedAt;
       games.push(game);
@@ -420,17 +460,20 @@ describe('AggregatedGameStatisticsService', () => {
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({isGlobal: true, load: [testConfiguration],}),
-        genTypeORMTestCFG([Game, Ban, RegisteredPlayer, Round, AuthKey, AppConfig, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig]), 
-        TypeOrmModule.forFeature([Game, Ban, RegisteredPlayer, AuthKey, AppConfig, Round, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig]),
+        genTypeORMTestCFG([Game, Ban, RegisteredPlayer, Round, AuthKey, AppConfig, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig, GameserverConfig]), 
+        TypeOrmModule.forFeature([Game, Ban, RegisteredPlayer, AuthKey, AppConfig, Round, GameMode, Gameserver, Weapon, ServerMap, PlayerRoundStats, PlayerRoundWeaponStats, SteamUser, MatchConfig, GameserverConfig]),
       ],
-      providers: [GameStatisticsService, ConfigService, AppConfigService, SteamUserService, GameserverService, AggregatedGameStatisticsService, ],
+      providers: [GameStatisticsService, ConfigService, AppConfigService, SteamUserService, GameserverService, AggregatedGameStatisticsService, GameserverConfigService],
     }).compile();
 
     service = module.get<AggregatedGameStatisticsService>(AggregatedGameStatisticsService);
     cfgService = module.get<AppConfigService>(AppConfigService);
     gameserverService = module.get<GameserverService>(GameserverService);
     gameStatsService = module.get<GameStatisticsService>(GameStatisticsService);
-
+    gameserverConfigService = module.get<GameserverConfigService>(GameserverConfigService);
+    
+    const gameserverConfigRepo: Repository<GameserverConfig> = module.get("GameserverConfigRepository");
+    const matchConfigRepo: Repository<MatchConfig> = module.get("MatchConfigRepository");
     const gameserverRepo: Repository<Gameserver> = module.get("GameserverRepository");
 
     jest.spyOn(gameserverService, "createUpdateGameserver").mockImplementation(async (server: Gameserver) => {
@@ -447,6 +490,18 @@ describe('AggregatedGameStatisticsService', () => {
 
       return await gameserverRepo.save(cloned);
 
+    });
+
+    jest.spyOn(gameserverConfigService, "createUpdateGameserverConfig").mockImplementation(async (gameserverConfig: GameserverConfig) => {
+      const cloned = new GameserverConfig({...gameserverConfig});
+      cloned.gameserver = new Gameserver({id: gameserverConfig.gameserver.id});
+      return await gameserverConfigRepo.save(cloned);
+    });
+
+    jest.spyOn(gameserverConfigService, "createUpdateMatchConfig").mockImplementation(async (config: MatchConfig) => {
+      const cloned = new MatchConfig({...config});
+      cloned.configHash = chance.guid({version: 4});
+      return await matchConfigRepo.save(cloned);
     });
 
     const data = await fillExampleDatabase();
@@ -790,6 +845,37 @@ describe('AggregatedGameStatisticsService', () => {
 
    }, );
 
+   it('Get Playerstats, ranked only, Sort By Kills', async() => { 
+
+    testLog("Calculate expected result ...", 'Get Playerstats, ranked only, Sort By Kills', true);
+ 
+    const sorted = aggregatedPlayerRoundStats(playerRoundStats, (x) => x.round.game.matchConfig?.ranked, (x, y) => y.kills - x.kills, true);   
+ 
+    testLog("Calculated expected result ...", 'Get Playerstats, ranked only, Sort By Kills', true);
+ 
+    testLog("Run service", 'Get Playerstats, ranked only, Sort By Kills', true);
+ 
+    let [res, total, pages] = await service.getPlayerStatistics({ranked: true, orderBy: OrderPlayerBaseStats.sumKills, orderDesc: true});
+ 
+    expect(total).toBe(sorted.length);
+
+    //Get all pages and merge them into result archive
+    if(res.length != total) 
+    {
+      for(let i = 2; i <= pages; i++)
+      {
+        res = [...res, ...(await service.getPlayerStatistics({page: i, ranked: true, orderBy: OrderPlayerBaseStats.sumKills, orderDesc: true}))[0]];
+      }
+    }
+
+    testLog("Service found result", 'Get Playerstats, ranked only, Sort By Kills', true);
+    
+    expect(res.length).toBe(sorted.length);
+    
+    res.forEach((x, idx) => expect(x.steamId64).toBe(sorted[idx].steamId64));
+
+   }, );
+
    it('Get Playerstats Sort By Deaths', async() => { 
 
     testLog("Calculate expected result ...", 'Get Playerstats Sort By Deaths', true);
@@ -873,6 +959,27 @@ describe('AggregatedGameStatisticsService', () => {
    resWeap.forEach(x => x.totalDamage = Math.round(x.totalDamage));
 
     testLog("Service found result", "Get PlayerWeaponStats Simple", true);
+
+    resWeap.forEach(x => expect(x).toMatchObject(mapWeapons.get(x.weapon.name)));
+   
+   });
+
+   it("Get PlayerWeaponStats Simple, ranked only", async () => {
+
+    const randPlayer = players[chance.integer({min: 0}) % players.length]; 
+
+    testLog("Calculate expected result ...", "Get PlayerWeaponStats Simple, ranked only", true);
+
+    const mapWeapons = aggregateWeaponStats(playerRoundWeaponStats, randPlayer, x => x.round.game.matchConfig?.ranked);
+
+    testLog("Run service", "Get PlayerWeaponStats Simple, ranked only", true);
+
+    const resWeap = await service.getPlayerWeaponStatistics({steamId64: randPlayer, ranked: true});
+
+   //db float != js float
+   resWeap.forEach(x => x.totalDamage = Math.round(x.totalDamage));
+
+    testLog("Service found result", "Get PlayerWeaponStats Simple, ranked only", true);
 
     resWeap.forEach(x => expect(x).toMatchObject(mapWeapons.get(x.weapon.name)));
    
