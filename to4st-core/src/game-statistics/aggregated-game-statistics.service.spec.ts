@@ -316,7 +316,7 @@ describe('AggregatedGameStatisticsService', () => {
    * @param options 
    */
   const randomMatchConfig = (options?: {ranked?: boolean}) => new MatchConfig({
-    configName: chance.word(),
+    configName: chance.guid({version: 4}),
     matchendLength: chance.integer({min: 0, max: 30000}),
     warmUpLength:chance.integer({min: 0, max: 30000}),
     friendlyFireScale: chance.floating({min: 0, max: 1}),

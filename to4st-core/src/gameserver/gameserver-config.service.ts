@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import _ from "lodash"
-import { Repository, Connection, Like } from 'typeorm';
+import { Repository, Connection, Like, Brackets } from 'typeorm';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import jsSHA from "jssha";
 import pRetry from "p-retry";
@@ -19,7 +19,7 @@ export interface IMatchConfigIdentifier {
   /**
    * Name of the configuration preset
    */
-  name?: string, 
+  configName?: string, 
 
   /**
    * Id of config preset
@@ -28,13 +28,48 @@ export interface IMatchConfigIdentifier {
 }
 
 /**
- * Interface used to query match configuration presets
+ * Interface used to query gameservers
  */
-export interface IMatchConfigQuery {
+export interface IGameserverConfigsQuery {
   /**
    * Desired page
    */
   page?: number, 
+
+  /**
+   * Desired page size
+   */
+  pageSize?: number, 
+
+  /**
+   * Search gameserver id, gameserver name, match config name
+   */
+  search?: string, 
+
+  /**
+   * Should order by gameserver name?
+   */
+  orderByGameserverName?: boolean, 
+
+  /**
+   * Should order desc by matchConfigName?
+   */
+  orderDesc?: boolean
+}
+
+/**
+ * Interface used to query match configuration presets
+ */
+export interface IMatchConfigsQuery {
+  /**
+   * Desired page
+   */
+  page?: number, 
+
+  /**
+   * Name of a configuration preset
+   */
+  configName?: string, 
 
   /**
    * Desired page size
@@ -66,14 +101,79 @@ export class GameserverConfigService {
    */
   async getGameserverConfig(gameserver: Partial<Gameserver>)
   {
-    return await this.gameserverConfigRepository.findOne({relations: ["gameserver, currentMatchConfig"], where: {gameserver: {id: gameserver.id}}});
+    return await this.gameserverConfigRepository.findOne({relations: ["gameserver", "currentMatchConfig"], where: {gameserver: {id: gameserver.id}}});
+  }
+
+  /**
+   * Get gameserver configs 
+   * @param gameserver 
+   */
+  async getGameserverConfigs(options: IGameserverConfigsQuery): Promise<[GameserverConfig[], number, number]>
+  {
+    options.orderDesc = options.orderDesc ?? false;
+    options.pageSize = options.pageSize ?? MAX_PAGE_SIZE;
+    options.page = options.page ?? 1;
+    options.orderByGameserverName = options.orderByGameserverName ?? false;
+    options.search = options.search?.trim() ?? "";
+
+    let queryBuilder = this.connection.createQueryBuilder().select("gameserverConfig").from(GameserverConfig, "gameserverConfig");
+
+    queryBuilder = queryBuilder.leftJoinAndSelect("gameserverConfig.gameserver", "gameserver");
+    queryBuilder = queryBuilder.leftJoinAndSelect("gameserverConfig.matchConfig", "matchConfig");
+
+    queryBuilder = queryBuilder.where("1=1"); 
+
+    if(options.search)
+    {
+      queryBuilder = queryBuilder.andWhere(new Brackets(qb => {
+        qb.orWhere("gameserver.id like :search", {search: `%${options.search}%`})
+          .orWhere("gameserver.currentName like :search", {search: `%${options.search}%`})
+          .orWhere("matchConfig.configName like :search", {search: `%${options.search}%`})
+      }));
+    }
+    
+    queryBuilder = queryBuilder.skip(options.pageSize * (options.page - 1)).take(options.pageSize);
+
+    queryBuilder = queryBuilder.orderBy(options.orderByGameserverName ? "matchConfig.configName" : "gameserver.currentName", options.orderDesc ? "DESC" : "ASC");
+
+    const ret = await queryBuilder.getManyAndCount();
+
+    return [ret[0], ret[1], Math.ceil(ret[1] / options.pageSize)];
+  }
+
+  /**
+   * 
+   * order: options.orderByGameserverName ? {
+            gameserver: {
+              name: options.orderDesc ? "DESC" : "ASC"
+            }
+          } : 
+          {
+            currentMatchConfig: {
+              configName: options.orderDesc ? "DESC" : "ASC"
+            }
+          },
+   */
+
+  /**
+   * Delete gameserver config
+   * @param options 
+   */
+  async deleteGameserverConfig(gameserver: Partial<Gameserver>): Promise<void>
+  {
+      await this.connection
+      .createQueryBuilder()
+      .delete()
+      .from(GameserverConfig)
+      .where("gameserver.id = :id" ,  { id: gameserver.id })
+      .execute();
   }
 
   /**
    * Create or update gameserver configuration
    * @param gameserverConfig 
    */
-  async createUpdateGameserverConfig(gameserverConfig: GameserverConfig)
+  async createUpdateGameserverConfig(gameserverConfig: GameserverConfig): Promise<GameserverConfig>
   {
     gameserverConfig = {...gameserverConfig};
     gameserverConfig.gameserver = new Gameserver({id: gameserverConfig.gameserver.id});
@@ -87,8 +187,38 @@ export class GameserverConfigService {
       gameserverConfig.currentMatchConfig = new MatchConfig({id: gameserverConfig.currentMatchConfig.id});
     }
 
-    const inserted = await this.gameserverConfigRepository.save(gameserverConfig);
-    return await this.getGameserverConfig(inserted.gameserver);
+    let ret = null;
+
+    await pRetry(async () => {
+      await this.connection.transaction("SERIALIZABLE", async manager => 
+      {   
+        const foundMatchConfig = await manager.findOne(MatchConfig, {where: {id: gameserverConfig.currentMatchConfig.id}});
+
+        const passwordSet = gameserverConfig.gamePassword?.trim() || (await manager.findOne(GameserverConfig, {where: {gameserver: gameserverConfig.gameserver }}))?.gamePassword?.trim(); 
+
+        if((foundMatchConfig.private || gameserverConfig.reservedSlots > 0) && !passwordSet)
+        {
+          throw new pRetry.AbortError(new HttpException("A private match or reserved slots require a gameserver password", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+        else if(!passwordSet) // the server does not need to handle a password in that case
+        {
+          gameserverConfig.gamePassword = "";
+        }
+
+        const inserted = await manager.save(GameserverConfig, gameserverConfig);
+
+        ret = await manager.findOne(GameserverConfig, {
+          where: {
+            gameserver: inserted.gameserver
+          }, 
+          relations: ["gameserver", "currentMatchConfig"]
+        });
+
+      }), 
+      { retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0] }
+    });
+
+    return ret;
   }
 
   /**
@@ -97,7 +227,7 @@ export class GameserverConfigService {
    */
   async getMatchConfig(options: IMatchConfigIdentifier)
   {
-    return await this.matchConfigRepository.findOne({where: options.id ? {id: options.id} : {name: Like(`%${options.name.trim()}%`)}});
+    return await this.matchConfigRepository.findOne({where: options.id ? {id: options.id} : {configName: options.configName}});
   }
 
   /**
@@ -105,13 +235,13 @@ export class GameserverConfigService {
    * A config can't be edited if it is referenced by a game and the changed variables affect the gameplay.
    * @param config 
    */
-  async createUpdateMatchConfig(config: MatchConfig)
+  async createUpdateMatchConfig(config: MatchConfig): Promise<MatchConfig>
   {
     config = {...config};
 
     const hash = this.getMatchConfigHash(config);
 
-    let saved: MatchConfig = null;
+    let ret = null;
 
     await pRetry(async () => {
       await this.connection.transaction("SERIALIZABLE", async manager => 
@@ -119,7 +249,7 @@ export class GameserverConfigService {
         // Don't update config if it was already used by a game and the change affects gameplay
         if(config.id)
         {
-          const countGamesUsingConfigPromise = manager.count(Game, {where: {id: config.id}});
+          const countGamesUsingConfigPromise = manager.count(Game, {where: {matchConfig: {id: config.id}}});
           const countEqualConfigPromise = manager.count(MatchConfig, {where: {id: config.id, configHash: hash}});
           const [countGamesUsing, countEqualConfig] = await Promise.all([countGamesUsingConfigPromise, countEqualConfigPromise]);
 
@@ -131,27 +261,35 @@ export class GameserverConfigService {
         
         config.configHash = hash;
 
-        saved = await manager.save(MatchConfig, config);          
+        const saved = await manager.save(MatchConfig, config);     
+        ret = await manager.findOne(MatchConfig, {where: {id: saved.id}});        
       });
     }, 
-      { retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.12)[0] }
+      { retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0] }
     );
       
-    return await this.getMatchConfig(saved);
+    return ret;
   }
 
   /**
    * Get match configs
    * @param options 
    */
-  async getMatchConfigs(options: IMatchConfigQuery): Promise<[MatchConfig[], number, number]>
+  async getMatchConfigs(options: IMatchConfigsQuery): Promise<[MatchConfig[], number, number]>
   {
     options.page = Math.max(options.page ?? 1, 1);
     options.pageSize = _.clamp(options.pageSize ?? MAX_PAGE_SIZE, 1, MAX_PAGE_SIZE);
-    const ret = await this.matchConfigRepository.findAndCount({take: options.pageSize, skip: options.pageSize * (options.page - 1), order: {configName: options.orderDesc ? "DESC" : "ASC"}});
+    const ret = await this.matchConfigRepository.findAndCount(
+      {
+        take: options.pageSize, 
+        skip: options.pageSize * (options.page - 1), 
+        order: {configName: options.orderDesc ? "DESC" : "ASC"},
+        where: options.configName ? {configName: Like(`%${options.configName.trim()}%`)} : undefined
+      });
 
     return [ret[0], ret[1], Math.ceil(ret[1] / options.pageSize)];
   }
+
 
   /**
    * Delete match config
@@ -159,11 +297,18 @@ export class GameserverConfigService {
    */
   async deleteMatchConfig(options: IMatchConfigIdentifier): Promise<void>
     {
+        const foundInUse = await this.gameserverConfigRepository.findOne({relations: ["currentMatchConfig", "gameserver"], where: {currentMatchConfig: options.id ? {id: options.id} : {configName: options.configName}}});
+        
+        if(foundInUse)
+        {
+          throw new HttpException(`Config: <${foundInUse.currentMatchConfig.configName}> can't be deleted. Still referenced by at least gameserver: <${foundInUse.gameserver.id}>`, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         await this.connection
         .createQueryBuilder()
         .delete()
         .from(MatchConfig)
-        .where(options.id ? "id = :id" : "name: :name", options.id ? { id: options.id } : { name: options.name })
+        .where(options.id ? "id = :id" : "configName = :configName", options.id ? { id: options.id } : { configName: options.configName })
         .execute();
     }
 
@@ -175,8 +320,10 @@ export class GameserverConfigService {
   {
     config = {...config};
     
-    // Exists only for preset management on individual backend
+    // Exist only for preset management on individual backend
     config.configName = "";
+    config.id = 0;
+    config.configHash = "";
 
     // Those times do not affect gameplay
     config.matchendLength = 0;
@@ -195,8 +342,10 @@ export class GameserverConfigService {
       .sort(([kx, vx], [ky, vy]) => kx.toLowerCase().localeCompare(ky.toLowerCase()))
       .reduce((acc, [k, v]) => ({...acc, [k]: v}), {});
 
+    const asString = JSON.stringify(toBeHashed);
+
     const shaObj = new jsSHA("SHA3-256", "TEXT");
-    shaObj.update(JSON.stringify(toBeHashed));
+    shaObj.update(asString);
     return shaObj.getHash("HEX");
   }
 

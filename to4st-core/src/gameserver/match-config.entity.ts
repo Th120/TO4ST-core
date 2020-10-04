@@ -35,7 +35,7 @@ export class MatchConfig {
   configHash?: string;
 
   /**
-   * Time the scoreboard is shown (etc) after a game is finished
+   * Time the scoreboard is shown (etc) after a game is finished in s
    */
   @Field(() => Int)
   @Expose()
@@ -179,7 +179,7 @@ export class MatchConfig {
   globalVoicechat?: boolean;
 
   /**
-   * Mute voicechat of dead team mates
+   * Mute voicechat of dead team members
    */
   @Field(() => Boolean)
   @Column()

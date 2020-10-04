@@ -18,6 +18,7 @@ import { Game } from 'src/game-statistics/game.entity';
 import { MatchConfig } from './match-config.entity';
 import { GameserverConfig } from './gameserver-config.entity';
 import { GameserverConfigService } from './gameserver-config.service';
+import { GameserverConfigResolver, MatchConfigResolver } from './gameserver-config.resolver';
 
 /**
  * Module for all gameserver related services
@@ -45,7 +46,9 @@ import { GameserverConfigService } from './gameserver-config.service';
     BanService,
     PlayerAuthService,
     PlayerAuthResolver,
-    GameserverConfigService
+    GameserverConfigService,
+    MatchConfigResolver,
+    GameserverConfigResolver
   ],
   exports: [GameserverService, RegisteredPlayerService, BanService, GameserverConfigService],
 })

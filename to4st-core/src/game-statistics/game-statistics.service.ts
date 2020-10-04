@@ -309,7 +309,7 @@ export class GameStatisticsService {
                             game.gameMode.id = inserted.id;
                         }
                     });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.12)[0]}
+                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
             );
         }
 
@@ -334,7 +334,7 @@ export class GameStatisticsService {
                         }
                     }
                 });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.12)[0]}
+                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
             );
         }
 
@@ -525,7 +525,7 @@ export class GameStatisticsService {
             
                     }
                 });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.12)[0]}
+                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
             );
         }
 

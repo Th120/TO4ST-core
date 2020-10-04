@@ -47,7 +47,7 @@ export class GameserverConfig {
   @Field(() => String)
   @Column()
   @Expose({groups: [Role.admin, Role.authKey, Role.authPlayer]})
-  gamePassword: number;
+  gamePassword: string;
 
   /**
    * Number of reserved slots 
