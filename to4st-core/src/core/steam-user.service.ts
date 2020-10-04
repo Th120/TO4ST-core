@@ -24,7 +24,7 @@ const LAZY_UPDATE_OUTDATED_INTERVAL = 15 * 60 * 1000;
 /**
  * Default cachesize
  */
-const CACHESIZE = 5555;
+const CACHESIZE = 7777;
 
 /**
  * Max age before user info must be updated

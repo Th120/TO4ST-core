@@ -91,7 +91,8 @@ export class AuthKeyService {
             authKey.lastUse = new Date();
         }
 
-        return await this.authKeyRepository.save(authKey);
+        const insert = await this.authKeyRepository.save(authKey);
+        return await this.getAuthKey({id: insert.id});
     }
 
 

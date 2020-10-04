@@ -58,7 +58,7 @@ export class AppConfigService implements OnModuleInit {
     /**
      * Get the configuration of this instance
      */
-    private async _getAppConfig(): Promise<AppConfig>
+    private async _getAppConfig(): Promise<AppConfig | undefined>
     {
         const found = await this.appConfigRepository.findOne({where: { instanceId: this.configService.get<string>("instanceId")}});
         return found;

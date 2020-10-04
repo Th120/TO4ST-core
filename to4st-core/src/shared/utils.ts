@@ -168,19 +168,28 @@ export function roundDate(date: Date)
 }
 
 /**
- * Factory for a timeout promise, can be cancelled
- * @param time 
+ * Factory for a timeout promise, can be cancelled, allows to use a random time within a range
+ * @param minTime minimal Time of range, default duration if maxTime not defined
+ * @param maxTime maxTime for random time range
  * @returns Promise of timeout to await, callback to clear timeout
  */
-export const TIMEOUT_PROMISE_FACTORY: (time: number) => [Promise<null>, () => void] = (time: number) => {
+export const TIMEOUT_PROMISE_FACTORY: (minTime: number, maxTime?: number) => [Promise<null>, () => void] = (minTime: number, maxTime?: number) => {
   
+  let time = minTime;
+  
+  if(maxTime)
+  {
+    time = _.random(minTime, maxTime);
+  }
+
   let cb: () => void = () => {};
 
   const promise: Promise<null> = new Promise((resolve, reject) => {
     const x = setTimeout(() => resolve(null), time);
     cb = () => {
       clearTimeout(x);
-      reject();};
+      reject();
+    };
   });
 
   return [promise, cb];
