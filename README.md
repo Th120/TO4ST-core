@@ -18,10 +18,6 @@ The preferred way of deploying is Docker. You can find some "EZ preset" docker-c
 [The TO4ST-core image is available on dockerhub.](https://hub.docker.com/r/th120/to4st-core)  
 The alternative to docker right now is cloning the repo and using the builded version with tools like pm2.
 
-### First run
-When an instance using an unused instance id is started it is initialized with a random password which is logged.  
-The software will use a different random password on every start until a new password is assigned in the UI. 
-
 ### ENV Variables
 - PORT  
 The port which is used by the application
@@ -44,3 +40,23 @@ MySQL or Postgres username
 Password for MySQL / Postgres database
 - SQLITE_PATH  
 The path to the SQLite database if used
+
+## Getting started
+When an instance, which ist using an unused instance id, is started for the first time it is initialized with a random password that is logged.  
+The software will use a different random password on every start until a new password is assigned in the UI.        
+
+In order to use the software with your gameservers you need to generate an auth key for each server which has to be done using the "Gameservers" settings page. The auth key and the address of the backend has to be added to the TO4cfg.ini which is located in the root dir of the gameserver package.
+
+```
+TO4STCoreAddress=https:to4st.your-domain.com
+TO4STAuthKey=YourUniqueAuthKey
+```  
+The URL format is not a mistake, if your backend does not use https your entry might look like this: 
+```
+TO4STCoreAddress=http:123.123.123.123:5000
+```    
+If you want to use the data the backend collects in other applications you can create API keys using the TO4ST settings page.  
+When you query the API you need to assign that key to the Authorization header like this
+```
+AuthKey ThisIsAnApiKey
+```    
