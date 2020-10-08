@@ -32,7 +32,7 @@ To update to a newer version you have two possible workflows:
     ```bash
     docker-compose down
     ```
-    After it has finished just run the "docker-compose up"-command from above again, it download the new version you specified in the docker-compose file.  
+    After it has finished just run the "docker-compose up"-command from above again, it will download the new version you specified in the docker-compose file.  
 
 2. If you just keep it like it is ("latest") you have to run the command 
     ```bash
