@@ -12,6 +12,9 @@ import { TransactionInterceptor } from '../shared/transaction.interceptor';
 import { GameserverConfig } from './gameserver-config.entity';
 import { GameserverConfigService } from './gameserver-config.service';
 import { MatchConfig } from './match-config.entity';
+import { GameModeInput } from '../game-statistics/game-statistics.resolver';
+import { GameMode } from '../game-statistics/game-mode.entity';
+import { GameStatisticsService } from '../game-statistics/game-statistics.service';
 
 
 /**
@@ -48,6 +51,14 @@ class GameserverConfigInput
     @IsInt()
     @Field(() => Int, {nullable: true})
     currentMatchConfigId?: number;
+
+    /**
+     * Current gameserver name
+     */
+    @ValidateIf(x => x.currentGameserverName !== undefined)
+    @IsString()
+    @Field(() => String, {nullable: true})
+    currentGameserverName?: string;
 
     /**
      * Current vote length
@@ -191,6 +202,14 @@ class MatchConfigInput
     @IsString()
     @Field(() => String, {nullable: true})
     configName?: string;
+
+    /**
+     * Current gamemode
+     */
+    @ValidateIf(x => x.gameMode !== undefined)
+    @ValidateNested()
+    @Field(() => GameModeInput, {nullable: true})
+    gameMode?: GameModeInput;
 
     /**
      * Time the scoreboard is shown (etc) after a game is finished in s
@@ -542,12 +561,13 @@ export class GameserverConfigResolver {
      * @param gameserverConfig 
      */
     @OnlyRole(Role.admin)
-    @Mutation(() => GameserverConfig, {description: "X-Request-ID must be set in header"})
+    @Mutation(() => MatchConfig, {description: "X-Request-ID must be set in header"})
     @UseInterceptors(TransactionInterceptor)
-    async createUpdateGameserverConfig(@Args({name: "gameserver", type: () => GameserverConfigInput}) gameserverConfig: GameserverConfigInput)
+    async createUpdateGameserverConfig(@Args({name: "gameserverConfig", type: () => GameserverConfigInput}) gameserverConfig: GameserverConfigInput)
     {
         const nuGameserverConfig = new GameserverConfig({
             gameserver: gameserverConfig.gameserverId ? new Gameserver({id: gameserverConfig.gameserverId}) : undefined,
+            currentName: gameserverConfig.currentGameserverName,
             currentMatchConfig: gameserverConfig.currentMatchConfigId ? new MatchConfig({id: gameserverConfig.currentMatchConfigId}) : undefined,
             voteLength: gameserverConfig.voteLength,
             gamePassword: gameserverConfig.gamePassword,
@@ -576,7 +596,7 @@ export class GameserverConfigResolver {
 @Resolver(() => MatchConfig)
 export class MatchConfigResolver {
 
-    constructor(private readonly gameserverConfigService: GameserverConfigService,)
+    constructor(private readonly gameserverConfigService: GameserverConfigService, private readonly gameStatisticsService: GameStatisticsService)
     {
     }
 
@@ -626,12 +646,25 @@ export class MatchConfigResolver {
      * @param matchConfig 
      */
     @OnlyRole(Role.admin)
-    @Mutation(() => GameserverConfig, {description: "X-Request-ID must be set in header"})
+    @Mutation(() => MatchConfig, {description: "X-Request-ID must be set in header"})
     @UseInterceptors(TransactionInterceptor)
-    async createUpdateGameserverConfig(@Args({name: "gameserver", type: () => MatchConfigInput}) matchConfig: MatchConfigInput)
+    async createUpdateMatchConfig(@Args({name: "matchConfig", type: () => MatchConfigInput}) matchConfig: MatchConfigInput)
     {
+        let gameMode = null;
+
+        if(matchConfig.gameMode?.name)
+        {
+            gameMode = await this.gameStatisticsService.getGameMode({name: matchConfig.gameMode.name});
+
+            if(!gameMode)
+            {
+                throw new HttpException(`GameMode <${matchConfig.gameMode.name}> does not exist`, HttpStatus.INTERNAL_SERVER_ERROR)
+            }
+        }
+
         const nuMatchConfig = new MatchConfig({
             id: matchConfig.id,
+            gameMode: gameMode ? new GameMode({id: gameMode.id}) : undefined,
             configName: matchConfig.configName,
             matchendLength: matchConfig.matchendLength,
             warmUpLength: matchConfig.warmUpLength,

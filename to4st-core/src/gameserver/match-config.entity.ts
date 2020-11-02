@@ -1,6 +1,7 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
+import { GameMode } from '../game-statistics/game-mode.entity';
 
 
 /**
@@ -25,6 +26,12 @@ export class MatchConfig {
   @Column({unique: true})
   @Expose()
   configName?: string;
+
+  @ManyToOne(() => GameMode, {nullable: false})
+  @JoinColumn()
+  @Field(() => GameMode)
+  @Expose()
+  gameMode: GameMode;
 
   /**
    * Hash to identify the config by its props

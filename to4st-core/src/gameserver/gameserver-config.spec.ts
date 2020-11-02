@@ -81,7 +81,22 @@ describe('GameserverConfigService', () => {
     return arr;  
   };
 
-  const randomMatchConfig = (options?: {ranked?: boolean, private?: boolean}) => new MatchConfig({
+  const randomGameMode = (random: number) => {
+    const arr = [
+      new GameMode({name: "Classic", isTeamBased: true}),
+      new GameMode({name: "Capture the Flag", isTeamBased: true}),
+      new GameMode({name: "Team Deathmatch", isTeamBased: true}),
+    ];
+
+    return arr[random % arr.length];
+  };
+
+  const randomGameModeCreate = async (random: number) => {
+    return await gameStatisticsService.createUpdateGameMode(randomGameMode(random));
+  };
+
+  const randomMatchConfig = async (options?: {ranked?: boolean, gameMode?: GameMode, private?: boolean}) => new MatchConfig({
+    gameMode: options?.gameMode ?? await randomGameModeCreate(chance.integer({min: 0, max: 30000})), 
     configName: chance.guid({version: 4}),
     matchendLength: chance.integer({min: 0, max: 30000}),
     warmUpLength:chance.integer({min: 0, max: 30000}),
@@ -106,8 +121,13 @@ describe('GameserverConfigService', () => {
     private: options?.private ??  chance.bool()
   });
 
+  const randomMatchConfigCreate = async (options?: {ranked?: boolean, gameMode?: GameMode, private?: boolean}) => {
+    return await service.createUpdateMatchConfig(await randomMatchConfig(options));
+  }
+
   const randomGameserverConfig = (options?: {matchConfig?: MatchConfig, gameserver?: Gameserver, password?: string, reservedSlots?: number}) => new GameserverConfig({
     gameserver: options.gameserver,
+    currentName: chance.name(),
     currentMatchConfig: options.matchConfig,
     voteLength: chance.integer({min: 0, max: 30000}),
     gamePassword: options?.password ?? chance.word(),
@@ -160,28 +180,29 @@ describe('GameserverConfigService', () => {
   });
 
   it('create match config', async () => {
-    const toInsert = randomMatchConfig();
+    const toInsert = await randomMatchConfig();
     const added = await service.createUpdateMatchConfig(toInsert);
 
     expect(added).toMatchObject(toInsert);
   });
+ 
 
   it('update match config', async () => {
-    const toInsert = randomMatchConfig();
+    const toInsert = await randomMatchConfig();
     const added = await service.createUpdateMatchConfig(toInsert);
 
-    const updatedRaw = randomMatchConfig();
+    const updatedRaw = await randomMatchConfig();
     updatedRaw.id = added.id;
     const updated = await service.createUpdateMatchConfig(updatedRaw);
 
     expect(updated).toMatchObject(updatedRaw);
   });
 
+
   it('create gameserver config', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig());
-
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig());
     const toInsert = randomGameserverConfig({matchConfig: matchConfig, gameserver: randomGameserver});
     const added = await service.createUpdateGameserverConfig(toInsert);
 
@@ -200,7 +221,7 @@ describe('GameserverConfigService', () => {
   it('delete used match config (gameserver config)', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig());
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig());
 
     const toInsert = randomGameserverConfig({matchConfig: matchConfig, gameserver: randomGameserver});
     const added = await service.createUpdateGameserverConfig(toInsert);
@@ -209,10 +230,11 @@ describe('GameserverConfigService', () => {
 
   });
 
+
   it('delete used match config (game)', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig());
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig());
     const game = await randomGameCreate({gameserver: randomGameserver, matchConfig: matchConfig});
 
     expect(game.matchConfig).toMatchObject(matchConfig);
@@ -228,7 +250,7 @@ describe('GameserverConfigService', () => {
   it('change used match config, gameplay affecting', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig());
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig());
     const game = await randomGameCreate({gameserver: randomGameserver, matchConfig: matchConfig});
 
     expect(game.matchConfig).toMatchObject(matchConfig);
@@ -242,7 +264,7 @@ describe('GameserverConfigService', () => {
   it('change used match config, not gameplay affecting', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig());
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig());
     const game = await randomGameCreate({gameserver: randomGameserver, matchConfig: matchConfig});
 
     expect(game.matchConfig).toMatchObject(matchConfig);
@@ -258,7 +280,7 @@ describe('GameserverConfigService', () => {
   it('create gameserver config, not priv / reserved', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig({private: false}));
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig({private: false}));
 
     const toInsert = randomGameserverConfig({matchConfig: matchConfig, gameserver: randomGameserver, reservedSlots: 0, password: ""});
     const added = await service.createUpdateGameserverConfig(toInsert);
@@ -269,7 +291,7 @@ describe('GameserverConfigService', () => {
   it('create gameserver config, priv, no pw', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig({private: true}));
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig({private: true}));
 
     const toInsert = randomGameserverConfig({matchConfig: matchConfig, gameserver: randomGameserver, reservedSlots: 0, password: ""});
     
@@ -279,7 +301,7 @@ describe('GameserverConfigService', () => {
   it('create gameserver config, reserved, no pw', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig({private: false}));
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig({private: false}));
 
     const toInsert = randomGameserverConfig({matchConfig: matchConfig, gameserver: randomGameserver, reservedSlots: chance.integer({min: 1}), password: ""});
     
@@ -289,7 +311,7 @@ describe('GameserverConfigService', () => {
   it('create delete gameserver config', async () => {
     
     const randomGameservers = await randomGameserversCreate(N);
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig());
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig());
 
     const promises = randomGameservers.map(x => service.createUpdateGameserverConfig(randomGameserverConfig({matchConfig: matchConfig, gameserver: x})));
     const inserted = await Promise.all(promises);
@@ -307,9 +329,10 @@ describe('GameserverConfigService', () => {
 
   it('create delete match config', async () => {
     
-    const randomConfigsPromises = _.range(N).map(x => randomMatchConfig()).map(x => service.createUpdateMatchConfig(x));
-  
-    const inserted = await Promise.all(randomConfigsPromises);
+    const inserted = [];
+    await forN(async () => {
+      inserted.push(await randomMatchConfigCreate())
+    });
 
     const keep = inserted.filter((x, i) => i % 3 !== 0);
     const toDelete = inserted.filter((x, i) => i % 3 === 0);
@@ -325,7 +348,7 @@ describe('GameserverConfigService', () => {
   it('create gameserver config', async () => {
     
     const randomGameserver = await randomGameserverCreate();
-    const matchConfig = await service.createUpdateMatchConfig(randomMatchConfig());
+    const matchConfig = await service.createUpdateMatchConfig(await randomMatchConfig());
 
     const toInsert = randomGameserverConfig({matchConfig: matchConfig, gameserver: randomGameserver});
     const added = await service.createUpdateGameserverConfig(toInsert);

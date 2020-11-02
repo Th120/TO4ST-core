@@ -3,7 +3,7 @@ import _, { delay } from 'lodash';
 import memoizee from 'memoizee';
 import { clamp } from 'lodash';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
-import { Repository, Connection, } from 'typeorm';
+import { Repository, Connection, EntityManager, } from 'typeorm';
 import pRetry from "p-retry";
 
 import { Round } from './round.entity';
@@ -13,7 +13,7 @@ import { SteamUserService } from '../core/steam-user.service';
 import { Gameserver } from '../gameserver/gameserver.entity';
 import { ServerMap } from './server-map.entity';
 import { GameMode } from './game-mode.entity';
-import { MAX_PAGE_SIZE, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, MIN_ID_LENGTH } from '../globals';
+import { MAX_PAGE_SIZE, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, MIN_ID_LENGTH, MAX_RETRIES } from '../globals';
 import { Game } from './game.entity';
 import { Weapon } from './weapon.entity';
 import { mapDateForQuery, isValidSteamId, TIMEOUT_PROMISE_FACTORY } from '../shared/utils';
@@ -266,6 +266,51 @@ export class GameStatisticsService {
     private _cachedNumberOfGamesPlayed = memoizee(async () => (await this.getGames({pageSize: 1, onlyFinishedGames: true}))[1], {promise: true, maxAge: TTL_CACHE_MS, preFetch: CACHE_PREFETCH });
 
     /**
+     * Create or update a gameMode
+     * @param gameMode 
+     * @param manager which is used for transactions (optional)
+     */
+    async createUpdateGameMode(gameMode: GameMode, manager?: EntityManager): Promise<GameMode>
+    {
+        let ret = null;
+
+        const saveGameMode = async (man) => {
+            const found = await man.findOne(GameMode, {where: {name: gameMode.name.trim()}});
+            if(found)
+            {
+                gameMode.id = found.id;
+            }
+
+            const saved = await man.save(GameMode, new GameMode(
+                {
+                    id: gameMode.id,
+                    name: gameMode.name.trim(), 
+                    isTeamBased: gameMode.isTeamBased
+                }
+            ));
+
+            return await man.findOne(GameMode, {id: saved.id});
+        };
+        
+        if(manager)
+        {
+            ret = await saveGameMode(manager);
+        }
+        else
+        {
+            await pRetry(async () => {
+                    await this.connection.transaction("SERIALIZABLE", async manager => 
+                    {
+                        ret = await saveGameMode(manager);
+                    });
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+            );
+        }
+
+        return ret;
+    }    
+
+    /**
      * Create or update game
      * Cascades included gameMode and map
      * @param game 
@@ -304,12 +349,12 @@ export class GameStatisticsService {
                         }
                         else
                         {
-                            const inserted = await manager.save(GameMode, new GameMode({name: game.gameMode.name, isTeamBased: game.gameMode.isTeamBased}));
+                            const inserted = await this.createUpdateGameMode(game.gameMode, manager);
                             this.gameModeIdCache.set(game.gameMode.name, inserted.id);
                             game.gameMode.id = inserted.id;
                         }
                     });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
             );
         }
 
@@ -334,7 +379,7 @@ export class GameStatisticsService {
                         }
                     }
                 });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
             );
         }
 
@@ -358,7 +403,7 @@ export class GameStatisticsService {
      */
     async getGameMode(options: IGameModeIdentifier): Promise<GameMode | undefined>
     {
-        return await this.gameModeRepository.findOne({where: !!options.id  ? {id: options.id} : {name: options.name}});
+        return await this.gameModeRepository.findOne({where: !!options.id  ? {id: options.id} : {name: options.name.trim()}});
     }
 
     /**
@@ -385,7 +430,7 @@ export class GameStatisticsService {
      */
     async getGame(id: string): Promise<Game | undefined>
     {
-        return await this.gameRepository.findOne({where: {id: id}, relations: ["gameserver", "map", "gameMode", "matchConfig"]});
+        return await this.gameRepository.findOne({where: {id: id}, relations: ["gameserver", "map", "gameMode", "matchConfig", "matchConfig.gameMode"]});
     }
 
     /**
@@ -525,7 +570,7 @@ export class GameStatisticsService {
             
                     }
                 });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
             );
         }
 
@@ -632,6 +677,7 @@ export class GameStatisticsService {
         queryBuilder = queryBuilder.leftJoinAndSelect("game.map", "map");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameMode", "gameMode");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.matchConfig", "matchConfig");
+        queryBuilder = queryBuilder.leftJoinAndSelect("matchConfig.gameMode", "matchConfigGameMode");
 
         queryBuilder = queryBuilder.where("1=1"); 
     

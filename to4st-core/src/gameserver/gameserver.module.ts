@@ -19,6 +19,7 @@ import { MatchConfig } from './match-config.entity';
 import { GameserverConfig } from './gameserver-config.entity';
 import { GameserverConfigService } from './gameserver-config.service';
 import { GameserverConfigResolver, MatchConfigResolver } from './gameserver-config.resolver';
+import { GameMode } from '../game-statistics/game-mode.entity';
 
 /**
  * Module for all gameserver related services
@@ -31,6 +32,7 @@ import { GameserverConfigResolver, MatchConfigResolver } from './gameserver-conf
       AppConfig,
       Ban,
       Gameserver,
+      GameMode,
       RegisteredPlayer,
       Game,
       MatchConfig, 

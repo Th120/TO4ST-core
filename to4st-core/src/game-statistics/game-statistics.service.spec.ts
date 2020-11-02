@@ -142,7 +142,16 @@ describe('GameStatisticsService', () => {
     return await gameserverService.createUpdateGameserver(new Gameserver({currentName: chance.string({ length: 32 }), authKey: chance.guid({version: 4}), description: chance.sentence(), lastContact: chance.date()}));
   };
 
-  const randomMatchConfig = (options?: {ranked?: boolean}) => new MatchConfig({
+  const randomGameMode = (random: number) => {
+    return new GameMode(gameModes[random % gameModes.length]);
+  };
+
+  const randomGameModeCreate = async (random: number) => {
+    return await service.createUpdateGameMode(randomGameMode(random));
+  };
+
+  const randomMatchConfig = async (options?: {ranked?: boolean, gameMode?: GameMode, private?: boolean}) => new MatchConfig({
+    gameMode: options?.gameMode ?? await randomGameModeCreate(chance.integer({min: 0, max: 30000})), 
     configName: chance.guid({version: 4}),
     matchendLength: chance.integer({min: 0, max: 30000}),
     warmUpLength:chance.integer({min: 0, max: 30000}),
@@ -164,7 +173,7 @@ describe('GameStatisticsService', () => {
     globalVoicechat: chance.bool(),
     muteDeadToTeam: chance.bool(),
     ranked: options?.ranked ?? chance.bool(),
-    private: chance.bool()
+    private: options?.private ??  chance.bool()
   });
 
   const randomGameserversCreate = async (count: number) => {
@@ -276,7 +285,7 @@ describe('GameStatisticsService', () => {
       
     const gameServer = await randomGameserverCreate();
 
-    const matchConfig = await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig());
+    const matchConfig = await gameserverConfigService.createUpdateMatchConfig(await randomMatchConfig());
 
     const game = new Game(
       {
@@ -379,8 +388,8 @@ describe('GameStatisticsService', () => {
     const gameServer = await randomGameserverCreate();
     const gameServer2 = await randomGameserverCreate();
 
-    const matchConfigR = await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: true}));
-    const matchConfigNOPE = await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: false}));
+    const matchConfigR = await gameserverConfigService.createUpdateMatchConfig(await randomMatchConfig({ranked: true}));
+    const matchConfigNOPE = await gameserverConfigService.createUpdateMatchConfig(await randomMatchConfig({ranked: false}));
 
     const insertedGames: Game[] = []
 
@@ -690,8 +699,8 @@ describe('GameStatisticsService', () => {
 
     let insertedConfigs: MatchConfig[] = [];
 
-    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: true})));
-    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: false})));
+    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(await randomMatchConfig({ranked: true})));
+    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(await randomMatchConfig({ranked: false})));
     insertedConfigs.push(undefined);
 
     let insertedRounds: Round[] = [];

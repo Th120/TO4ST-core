@@ -6,7 +6,7 @@ import jsSHA from "jssha";
 import pRetry from "p-retry";
 
 import { Gameserver } from './gameserver.entity';
-import { MAX_PAGE_SIZE } from '../globals';
+import { MAX_PAGE_SIZE, MAX_RETRIES } from '../globals';
 import { GameserverConfig } from './gameserver-config.entity';
 import { MatchConfig } from './match-config.entity';
 import { TIMEOUT_PROMISE_FACTORY } from '../shared/utils';
@@ -101,7 +101,7 @@ export class GameserverConfigService {
    */
   async getGameserverConfig(gameserver: Partial<Gameserver>)
   {
-    return await this.gameserverConfigRepository.findOne({relations: ["gameserver", "currentMatchConfig"], where: {gameserver: {id: gameserver.id}}});
+    return await this.gameserverConfigRepository.findOne({relations: ["gameserver", "currentMatchConfig", "currentMatchConfig.gameMode"], where: {gameserver: {id: gameserver.id}}});
   }
 
   /**
@@ -120,6 +120,7 @@ export class GameserverConfigService {
 
     queryBuilder = queryBuilder.leftJoinAndSelect("gameserverConfig.gameserver", "gameserver");
     queryBuilder = queryBuilder.leftJoinAndSelect("gameserverConfig.matchConfig", "matchConfig");
+    queryBuilder = queryBuilder.leftJoinAndSelect("matchConfig.gameMode", "gameMode");
 
     queryBuilder = queryBuilder.where("1=1"); 
 
@@ -129,6 +130,7 @@ export class GameserverConfigService {
         qb.orWhere("gameserver.id like :search", {search: `%${options.search}%`})
           .orWhere("gameserver.currentName like :search", {search: `%${options.search}%`})
           .orWhere("matchConfig.configName like :search", {search: `%${options.search}%`})
+          .orWhere("gameMode.name like :search", {search: `%${options.search}%`})
       }));
     }
     
@@ -190,6 +192,7 @@ export class GameserverConfigService {
     let ret = null;
 
     await pRetry(async () => {
+
       await this.connection.transaction("SERIALIZABLE", async manager => 
       {   
         const foundMatchConfig = await manager.findOne(MatchConfig, {where: {id: gameserverConfig.currentMatchConfig.id}});
@@ -211,12 +214,12 @@ export class GameserverConfigService {
           where: {
             gameserver: inserted.gameserver
           }, 
-          relations: ["gameserver", "currentMatchConfig"]
+          relations: ["gameserver", "currentMatchConfig", "currentMatchConfig.gameMode"]
         });
-
-      }), 
-      { retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0] }
-    });
+      
+      })}, 
+      { retries: 6, onFailedAttempt: async (error) => {await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]} }
+    );
 
     return ret;
   }
@@ -227,7 +230,7 @@ export class GameserverConfigService {
    */
   async getMatchConfig(options: IMatchConfigIdentifier)
   {
-    return await this.matchConfigRepository.findOne({where: options.id ? {id: options.id} : {configName: options.configName}});
+    return await this.matchConfigRepository.findOne({relations: ["gameMode"], where: options.id ? {id: options.id} : {configName: options.configName}});
   }
 
   /**
@@ -262,10 +265,10 @@ export class GameserverConfigService {
         config.configHash = hash;
 
         const saved = await manager.save(MatchConfig, config);     
-        ret = await manager.findOne(MatchConfig, {where: {id: saved.id}});        
+        ret = await manager.findOne(MatchConfig, {relations: ["gameMode"], where: {id: saved.id}});        
       });
     }, 
-      { retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0] }
+      { retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0] }
     );
       
     return ret;
@@ -281,6 +284,7 @@ export class GameserverConfigService {
     options.pageSize = _.clamp(options.pageSize ?? MAX_PAGE_SIZE, 1, MAX_PAGE_SIZE);
     const ret = await this.matchConfigRepository.findAndCount(
       {
+        relations: ["gameMode"],
         take: options.pageSize, 
         skip: options.pageSize * (options.page - 1), 
         order: {configName: options.orderDesc ? "DESC" : "ASC"},

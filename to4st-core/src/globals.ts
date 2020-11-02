@@ -64,6 +64,11 @@ export const TTL_CACHE_MS = 2 * 60 * 1000;
 export const CACHE_PREFETCH = 0.6;
 
 /**
+ * Max retries for transactions, etc (pRetry)
+ */
+export const MAX_RETRIES = 4;
+
+/**
  * Default steam api key used for testing / development
  */
 export const STEAM_API_KEY = process.env.STEAM_API_KEY_OVERRIDE || "";

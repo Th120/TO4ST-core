@@ -40,7 +40,7 @@ class ServerMapInput
  * Input type used for gameMode
  */
 @InputType()
-class GameModeInput
+export class GameModeInput
 {
     /**
      * Name of gameMode

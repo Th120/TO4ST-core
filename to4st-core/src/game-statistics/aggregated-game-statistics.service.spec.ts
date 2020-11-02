@@ -312,10 +312,27 @@ describe('AggregatedGameStatisticsService', () => {
   };
 
   /**
+   * Get random gameMode from data
+   * @param random 
+   */
+  const randomGameMode = (random: number) => {
+    return new GameMode(gameModes[random % gameModes.length]);
+  };
+
+  /**
+   * Create and save a random gameMode
+   * @param random 
+   */
+  const randomGameModeCreate = async (random: number) => {
+    return await gameStatsService.createUpdateGameMode(randomGameMode(random));
+  };
+
+  /**
    * Generates random match config
    * @param options 
    */
-  const randomMatchConfig = (options?: {ranked?: boolean}) => new MatchConfig({
+  const randomMatchConfig = async (options?: {ranked?: boolean, gameMode?: GameMode, private?: boolean}) => new MatchConfig({
+    gameMode: options?.gameMode ?? await randomGameModeCreate(chance.integer({min: 0, max: 30000})), 
     configName: chance.guid({version: 4}),
     matchendLength: chance.integer({min: 0, max: 30000}),
     warmUpLength:chance.integer({min: 0, max: 30000}),
@@ -337,7 +354,7 @@ describe('AggregatedGameStatisticsService', () => {
     globalVoicechat: chance.bool(),
     muteDeadToTeam: chance.bool(),
     ranked: options?.ranked ?? chance.bool(),
-    private: chance.bool()
+    private: options?.private ??  chance.bool()
   });
 
   /**
@@ -374,8 +391,8 @@ describe('AggregatedGameStatisticsService', () => {
   
     let insertedConfigs: MatchConfig[] = [];
 
-    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: true})));
-    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(randomMatchConfig({ranked: false})));
+    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(await randomMatchConfig({ranked: true})));
+    insertedConfigs.push(await gameserverConfigService.createUpdateMatchConfig(await randomMatchConfig({ranked: false})));
     insertedConfigs.push(undefined);
 
     testLog("Inserted Gameservers", "CreateExampleDatabase");

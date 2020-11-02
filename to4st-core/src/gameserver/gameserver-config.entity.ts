@@ -33,6 +33,15 @@ export class GameserverConfig {
   @Expose()
   currentMatchConfig?: MatchConfig;
 
+
+  /**
+   * Current gameserver name
+   */
+  @Field(() => String)
+  @Column()
+  @Expose()
+  currentName: string;
+
   /**
    * Map vote time if enabled
    */
