@@ -243,15 +243,22 @@ export class GameserverConfigService implements OnApplicationBootstrap{
       gameserverConfig.currentMatchConfig = new MatchConfig({id: gameserverConfig.currentMatchConfig.id});
     }
 
-    let ret = null;
+
+    let ret: GameserverConfig = null;
 
     await pRetry(async () => {
 
       await this.connection.transaction("SERIALIZABLE", async manager => 
       {   
         const foundMatchConfig = await manager.findOne(MatchConfig, {where: {id: gameserverConfig.currentMatchConfig.id}});
+        const existingConfig = await manager.findOne(GameserverConfig, {where: {gameserver: gameserverConfig.gameserver }});
 
-        const passwordSet = gameserverConfig.gamePassword?.trim() || (await manager.findOne(GameserverConfig, {where: {gameserver: gameserverConfig.gameserver }}))?.gamePassword?.trim(); 
+        const passwordSet = !!gameserverConfig.gamePassword?.trim() || !!existingConfig?.gamePassword?.trim(); 
+
+        if(!existingConfig?.currentName && !gameserverConfig.currentName)
+        {
+          throw new pRetry.AbortError(new HttpException("A gameserver name must be set", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
 
         if((foundMatchConfig.private || gameserverConfig.reservedSlots > 0) && !passwordSet)
         {
@@ -271,7 +278,7 @@ export class GameserverConfigService implements OnApplicationBootstrap{
           relations: ["gameserver", "currentMatchConfig", "currentMatchConfig.gameMode"]
         });
 
-        await manager.save(Gameserver, new Gameserver({id: inserted.gameserver.id, gameserverConfig: new GameserverConfig({gameserver: new Gameserver({id: inserted.gameserver.id})})}));
+        await manager.save(Gameserver, new Gameserver({id: inserted.gameserver.id, currentName: ret.currentName || undefined, gameserverConfig: new GameserverConfig({gameserver: new Gameserver({id: inserted.gameserver.id})})}));
 
       })}, 
       { retries: 6, onFailedAttempt: async (error) => {await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]} }
