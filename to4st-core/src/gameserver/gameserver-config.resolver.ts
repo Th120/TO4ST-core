@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, InputType, Field, Int, ObjectType, Float } from '@nestjs/graphql';
-import { ValidateIf, IsInt, IsString, IsBoolean, ValidateNested } from 'class-validator';
+import { ValidateIf, IsInt, IsString, IsBoolean, ValidateNested, IsNumber } from 'class-validator';
 import { UseInterceptors, HttpException, HttpStatus } from '@nestjs/common';
 
 
@@ -217,7 +217,7 @@ class MatchConfigInput
     @ValidateIf(x => x.matchendLength !== undefined)
     @IsInt()
     @Field(() => Int, {nullable: true})
-    matchendLength: number;
+    matchEndLength: number;
 
     /**
      * WarmUp length in s
@@ -279,7 +279,7 @@ class MatchConfigInput
      * Friendly fire in %
      */
     @ValidateIf(x => x.friendlyFireScale !== undefined)
-    @IsInt()
+    @IsNumber()
     @Field(() => Float, {nullable: true})
     friendlyFireScale: number;
 
@@ -287,7 +287,7 @@ class MatchConfigInput
      * Min % of votes for a temp kick ban
      */
     @ValidateIf(x => x.playerVoteThreshold !== undefined)
-    @IsInt()
+    @IsNumber()
     @Field(() => Float, {nullable: true})
     playerVoteThreshold: number;
 
@@ -295,7 +295,7 @@ class MatchConfigInput
      * Team damage before temp kickban
      */
     @ValidateIf(x => x.maxTeamDamage !== undefined)
-    @IsInt()
+    @IsNumber()
     @Field(() => Float, {nullable: true})
     maxTeamDamage: number;
 
@@ -405,7 +405,7 @@ class MatchConfigQuery
      * Id of match config
      */
     @ValidateIf(x => x.id !== undefined)
-    @IsString()
+    @IsInt()
     @Field(() => Int, {nullable: true})
     id?: number;
 
@@ -561,7 +561,7 @@ export class GameserverConfigResolver {
      * @param gameserverConfig 
      */
     @OnlyRole(Role.admin)
-    @Mutation(() => MatchConfig, {description: "X-Request-ID must be set in header"})
+    @Mutation(() => GameserverConfig, {description: "X-Request-ID must be set in header"})
     @UseInterceptors(TransactionInterceptor)
     async createUpdateGameserverConfig(@Args({name: "gameserverConfig", type: () => GameserverConfigInput}) gameserverConfig: GameserverConfigInput)
     {
@@ -666,7 +666,7 @@ export class MatchConfigResolver {
             id: matchConfig.id,
             gameMode: gameMode ? new GameMode({id: gameMode.id}) : undefined,
             configName: matchConfig.configName,
-            matchendLength: matchConfig.matchendLength,
+            matchEndLength: matchConfig.matchEndLength,
             warmUpLength: matchConfig.warmUpLength,
             friendlyFireScale: matchConfig.friendlyFireScale,
             mapLength: matchConfig.mapLength,

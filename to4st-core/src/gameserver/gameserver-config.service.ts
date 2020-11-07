@@ -1,8 +1,9 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, OnApplicationBootstrap } from '@nestjs/common';
 import _ from "lodash"
 import { Repository, Connection, Like, Brackets } from 'typeorm';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import jsSHA from "jssha";
+import hash from "string-hash";
 import pRetry from "p-retry";
 
 import { Gameserver } from './gameserver.entity';
@@ -11,6 +12,9 @@ import { GameserverConfig } from './gameserver-config.entity';
 import { MatchConfig } from './match-config.entity';
 import { TIMEOUT_PROMISE_FACTORY } from '../shared/utils';
 import { Game } from '../game-statistics/game.entity';
+import { DEFAULT_GAMEMODES, GameStatisticsService } from '../game-statistics/game-statistics.service';
+
+
 
 /**
  * Interface used to identify a gameserver
@@ -82,18 +86,82 @@ export interface IMatchConfigsQuery {
   orderDesc?: boolean
 }
 
+
+const DEFAULT_GAMESERVER_CONFIG = {
+  currentName: "TO4 Gameserver",
+  voteLength: 25,
+  gamePassword: "",
+  reservedSlots: 0,
+  balanceClans: true,
+  allowSkipMapVote: true,
+  tempKickBanTime: 30,
+  autoRecordReplay: false,
+  playerGameControl: false,
+  enableMapVote: true,
+  serverAdmins: "",
+  serverDescription: "",
+  website: "",
+  contact: "",
+  mapNoReplay: 3,
+  enableVoicechat: true,
+} as Partial<GameserverConfig>;
+
+const DEFAULT_MATCH_CONFIG = {
+  configName: "Default",
+  matchEndLength: 10,
+  warmUpLength: 30,
+  friendlyFireScale: 20,
+  mapLength: 20,
+  roundLength: 180,
+  preRoundLength: 6,
+  roundEndLength: 5,
+  roundLimit: 24,
+  allowGhostcam: true,
+  playerVoteThreshold: 60,
+  autoBalanceTeams: true,
+  playerVoteTeamOnly: false,
+  maxTeamDamage: 520,
+  enablePlayerVote: true,
+  autoSwapTeams: false,
+  midGameBreakLength: 0,
+  nadeRestriction: true,
+  globalVoicechat: false,
+  muteDeadToTeam: false,
+  ranked: false,
+  private: false
+} as Partial<MatchConfig>;
+
 /**
  * Service used to set configs for gameservers
  */
 @Injectable()
-export class GameserverConfigService {
+export class GameserverConfigService implements OnApplicationBootstrap{
     constructor(
+        private readonly gameStatisticsService: GameStatisticsService,
         @InjectRepository(MatchConfig) private readonly matchConfigRepository: Repository<MatchConfig>, 
         @InjectRepository(GameserverConfig) private readonly gameserverConfigRepository: Repository<GameserverConfig>, 
         @InjectConnection() private readonly connection: Connection,
         )
     {
     }
+
+
+
+  /**
+   * Nestjs lifecycle event
+   */
+  async onApplicationBootstrap()
+  {
+    // Create default config if no config exists
+    const [cfgs, count] = await this.getMatchConfigs({pageSize: 1});
+    if(count === 0)
+    {
+      const defaultGameMode = await this.gameStatisticsService.createUpdateGameMode(DEFAULT_GAMEMODES[0]); //Might be earlier than init insert of that service
+      const defConfig = new MatchConfig(DEFAULT_MATCH_CONFIG);
+      defConfig.gameMode = defaultGameMode;
+      await this.createUpdateMatchConfig(defConfig);
+    }
+  }
 
   /**
    * Get gameserver config for gameserver
@@ -142,20 +210,6 @@ export class GameserverConfigService {
 
     return [ret[0], ret[1], Math.ceil(ret[1] / options.pageSize)];
   }
-
-  /**
-   * 
-   * order: options.orderByGameserverName ? {
-            gameserver: {
-              name: options.orderDesc ? "DESC" : "ASC"
-            }
-          } : 
-          {
-            currentMatchConfig: {
-              configName: options.orderDesc ? "DESC" : "ASC"
-            }
-          },
-   */
 
   /**
    * Delete gameserver config
@@ -216,7 +270,9 @@ export class GameserverConfigService {
           }, 
           relations: ["gameserver", "currentMatchConfig", "currentMatchConfig.gameMode"]
         });
-      
+
+        await manager.save(Gameserver, new Gameserver({id: inserted.gameserver.id, gameserverConfig: new GameserverConfig({gameserver: new Gameserver({id: inserted.gameserver.id})})}));
+
       })}, 
       { retries: 6, onFailedAttempt: async (error) => {await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]} }
     );
@@ -244,11 +300,23 @@ export class GameserverConfigService {
 
     const hash = this.getMatchConfigHash(config);
 
+    if(!config.id && !config.configName)
+    {
+      throw new HttpException(`MatchConfig requires a name`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     let ret = null;
 
     await pRetry(async () => {
       await this.connection.transaction("SERIALIZABLE", async manager => 
       {   
+        const [usingName, count] = await manager.findAndCount(MatchConfig, {where:{configName: config.configName}});
+
+        if(count > 0 && (!config.id || config.id !== usingName[0].id))
+        {
+          throw new pRetry.AbortError(new HttpException(`MatchConfig with name <${config.configName}> already exists.`, HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+
         // Don't update config if it was already used by a game and the change affects gameplay
         if(config.id)
         {
@@ -330,8 +398,9 @@ export class GameserverConfigService {
     config.configHash = "";
 
     // Those times do not affect gameplay
-    config.matchendLength = 0;
+    config.matchEndLength = 0;
     config.warmUpLength = 0;
+
 
     
     // Player vote variables do not matter if voting is disabled
@@ -348,9 +417,11 @@ export class GameserverConfigService {
 
     const asString = JSON.stringify(toBeHashed);
 
-    const shaObj = new jsSHA("SHA3-256", "TEXT");
+    const shaObj = new jsSHA("SHA3-512", "TEXT");
     shaObj.update(asString);
-    return shaObj.getHash("HEX");
+
+    const realHash = shaObj.getHash("HEX");
+    return hash(realHash).toString(); // 32bit should be enough
   }
 
 }

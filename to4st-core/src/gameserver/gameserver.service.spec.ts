@@ -9,6 +9,9 @@ import { forN, N, genTypeORMTestCFG, MIN_N,  } from '../testUtils';
 
 import _ from 'lodash'
 import { MIN_AUTH_KEY_LENGTH, MIN_ID_LENGTH } from '../globals';
+import { GameserverConfig } from './gameserver-config.entity';
+import { GameMode } from '../game-statistics/game-mode.entity';
+import { MatchConfig } from './match-config.entity';
 
 
 describe('GameserverService', () => {
@@ -17,8 +20,8 @@ describe('GameserverService', () => {
   beforeEach(async () => { 
     module = await Test.createTestingModule({
       imports: [ 
-        genTypeORMTestCFG([Gameserver, ]), 
-        TypeOrmModule.forFeature([Gameserver, ],), 
+        genTypeORMTestCFG([Gameserver, GameserverConfig, MatchConfig, GameMode]), 
+        TypeOrmModule.forFeature([Gameserver, GameserverConfig, MatchConfig, GameMode],), 
        
       ], 
       providers: [GameserverService, ]

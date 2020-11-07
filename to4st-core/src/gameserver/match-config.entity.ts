@@ -47,7 +47,7 @@ export class MatchConfig {
   @Field(() => Int)
   @Expose()
   @Column({type: "smallint", unsigned: true })
-  matchendLength: number;
+  matchEndLength: number;
 
   /**
    * WarmUp length in s

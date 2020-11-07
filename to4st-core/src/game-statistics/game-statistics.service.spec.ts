@@ -153,7 +153,7 @@ describe('GameStatisticsService', () => {
   const randomMatchConfig = async (options?: {ranked?: boolean, gameMode?: GameMode, private?: boolean}) => new MatchConfig({
     gameMode: options?.gameMode ?? await randomGameModeCreate(chance.integer({min: 0, max: 30000})), 
     configName: chance.guid({version: 4}),
-    matchendLength: chance.integer({min: 0, max: 30000}),
+    matchEndLength: chance.integer({min: 0, max: 30000}),
     warmUpLength:chance.integer({min: 0, max: 30000}),
     friendlyFireScale: chance.floating({min: 0, max: 1}),
     mapLength: chance.integer({min: 0, max: 30000}),

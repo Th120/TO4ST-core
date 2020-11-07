@@ -21,6 +21,9 @@ import testConfiguration from '../testConfiguration';
 
 import { BanService } from './ban.service';
 import { Repository } from 'typeorm';
+import { GameserverConfig } from './gameserver-config.entity';
+import { MatchConfig } from './match-config.entity';
+import { GameMode } from '../game-statistics/game-mode.entity';
 
 
 
@@ -35,8 +38,8 @@ describe('BanService', () => {
     module = await Test.createTestingModule({
       imports: [ 
         ConfigModule.forRoot({isGlobal: true, load: [testConfiguration],}),
-        genTypeORMTestCFG([AppConfig, Ban, Gameserver,  SteamUser, ]), 
-        TypeOrmModule.forFeature([AppConfig, Ban, Gameserver, SteamUser, ],), 
+        genTypeORMTestCFG([AppConfig, Ban, Gameserver,  SteamUser, GameserverConfig, MatchConfig, GameMode]), 
+        TypeOrmModule.forFeature([AppConfig, Ban, Gameserver, SteamUser, GameserverConfig, MatchConfig, GameMode],), 
        
       ], 
       providers: [SteamUserService, AppConfigService, ConfigService, SteamUserService, BanService, GameserverService, ]

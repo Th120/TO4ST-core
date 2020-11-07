@@ -56,6 +56,12 @@ export class Gameserver {
   @Expose({groups: [Role.authKey, Role.admin]})
   lastContact?: Date;
 
+  @OneToOne(() => GameserverConfig, {onDelete: "SET NULL", nullable: true})
+  @JoinColumn()
+  @Field(() => GameserverConfig, {nullable: true})
+  @Expose()
+  gameserverConfig?: GameserverConfig;
+
   /**
    * Remove ms
    */

@@ -3,7 +3,7 @@ import { ValidateIf, IsInt, IsString, IsBoolean } from 'class-validator';
 import { ValidationPipe, UsePipes, UseGuards, UseInterceptors, HttpException, HttpStatus } from '@nestjs/common';
 
 
-import { GameserverService } from './gameserver.service';
+import { GameserverConfigFilter, GameserverService } from './gameserver.service';
 import { AuthGuard } from '../shared/auth.guard';
 import { Gameserver } from './gameserver.entity';
 import { Paginated } from '../shared/paginated';
@@ -56,6 +56,14 @@ class GameserversQuery
     @IsString()
     @Field(() => String, {nullable: true})
     search?: string;
+
+    /**
+     * Filter for configs
+     */
+    @ValidateIf(x => x.configFilter !== undefined)
+    @IsString()
+    @Field(() => GameserverConfigFilter, {nullable: true})
+    configFilter?: GameserverConfigFilter;
 }
 
 /**
@@ -164,9 +172,10 @@ export class GameserverResolver {
             pageSize: options.pageSize,
             search: options.search,
             orderDesc: options.orderDesc,
-            orderByCurrentName: options.orderByCurrentName
+            orderByCurrentName: options.orderByCurrentName,
+            configFilter: options.configFilter
         });
-        
+       
         return { content: gameservers, totalCount: count , pageCount: pageCount};
     }
 

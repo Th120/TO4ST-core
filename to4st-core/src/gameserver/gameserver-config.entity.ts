@@ -29,7 +29,7 @@ export class GameserverConfig {
    */
   @ManyToOne(() => MatchConfig, {nullable: false})
   @JoinColumn()
-  @Field(() => MatchConfig)
+  @Field(() => MatchConfig, {nullable: true})
   @Expose()
   currentMatchConfig?: MatchConfig;
 

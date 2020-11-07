@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, OnApplicationBootstrap } from '@nestjs/common';
 import _, { delay } from 'lodash';
 import memoizee from 'memoizee';
 import { clamp } from 'lodash';
@@ -16,8 +16,11 @@ import { GameMode } from './game-mode.entity';
 import { MAX_PAGE_SIZE, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, MIN_ID_LENGTH, MAX_RETRIES } from '../globals';
 import { Game } from './game.entity';
 import { Weapon } from './weapon.entity';
-import { mapDateForQuery, isValidSteamId, TIMEOUT_PROMISE_FACTORY } from '../shared/utils';
+import { mapDateForQuery, isValidSteamId, TIMEOUT_PROMISE_FACTORY, asyncForEach } from '../shared/utils';
 import { customAlphabet } from 'nanoid/async';
+import { GameserverConfig } from '../gameserver/gameserver-config.entity';
+import { MatchConfig } from '../gameserver/match-config.entity';
+
 
 /**
  * Interface used to identify a round
@@ -220,11 +223,21 @@ export interface IGameModeQuery {
     pageSize?: number,
 }
 
+
+
+export const DEFAULT_GAMEMODES = [
+    new GameMode({name: "Classic", isTeamBased: true}),
+    new GameMode({name: "Capture the Flag", isTeamBased: true}),
+    new GameMode({name: "Team Deathmatch", isTeamBased: true}),
+  ];
+
+
+
 /**
  * Service for basic game statistics
  */
 @Injectable()
-export class GameStatisticsService {
+export class GameStatisticsService implements OnApplicationBootstrap {
 
     constructor(
         @InjectRepository(Round) private readonly roundRepository: Repository<Round>, 
@@ -265,6 +278,17 @@ export class GameStatisticsService {
      */
     private _cachedNumberOfGamesPlayed = memoizee(async () => (await this.getGames({pageSize: 1, onlyFinishedGames: true}))[1], {promise: true, maxAge: TTL_CACHE_MS, preFetch: CACHE_PREFETCH });
 
+
+    /**
+     * Nestjs lifecycle event
+     */
+    async onApplicationBootstrap()
+    {
+        await asyncForEach(DEFAULT_GAMEMODES, async (elem) => {
+            await this.createUpdateGameMode(elem);
+        });
+    }
+
     /**
      * Create or update a gameMode
      * @param gameMode 
@@ -272,15 +296,31 @@ export class GameStatisticsService {
      */
     async createUpdateGameMode(gameMode: GameMode, manager?: EntityManager): Promise<GameMode>
     {
-        let ret = null;
+        let ret: GameMode  = null;
+
+        gameMode = {...gameMode};
+
+        if(!gameMode.id)
+        {
+            gameMode.id = this.gameModeIdCache.get(gameMode.name);
+        }
+
+        if(gameMode.id)//No need for a transaction in that case
+        {
+            manager = this.connection.createEntityManager();
+        }
 
         const saveGameMode = async (man) => {
-            const found = await man.findOne(GameMode, {where: {name: gameMode.name.trim()}});
-            if(found)
+            
+            if(!gameMode.id)
             {
-                gameMode.id = found.id;
+                const found = await man.findOne(GameMode, {where: {name: gameMode.name.trim()}});
+                if(found)
+                {
+                    gameMode.id = found.id;
+                }
             }
-
+            
             const saved = await man.save(GameMode, new GameMode(
                 {
                     id: gameMode.id,
@@ -298,6 +338,7 @@ export class GameStatisticsService {
         }
         else
         {
+
             await pRetry(async () => {
                     await this.connection.transaction("SERIALIZABLE", async manager => 
                     {
@@ -306,6 +347,8 @@ export class GameStatisticsService {
                 }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
             );
         }
+
+        this.gameModeIdCache.set(ret.name, ret.id);
 
         return ret;
     }    
@@ -350,7 +393,6 @@ export class GameStatisticsService {
                         else
                         {
                             const inserted = await this.createUpdateGameMode(game.gameMode, manager);
-                            this.gameModeIdCache.set(game.gameMode.name, inserted.id);
                             game.gameMode.id = inserted.id;
                         }
                     });

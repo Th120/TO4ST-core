@@ -1,12 +1,31 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import _ from "lodash"
-import { Repository, Connection, Like } from 'typeorm';
+import { Repository, Connection, Like, Brackets } from 'typeorm';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { nanoid, customAlphabet } from 'nanoid/async';
+import { registerEnumType } from '@nestjs/graphql';
 
 
 import { Gameserver } from './gameserver.entity';
 import { MIN_AUTH_KEY_LENGTH, MIN_ID_LENGTH, PASSWORD_ALPHABET, MIN_SEARCH_LEN, MAX_PAGE_SIZE } from '../globals';
+
+
+/**
+ * Enum used to filter gameservers 
+ */
+export enum GameserverConfigFilter {
+    none = "none",
+    withConfig = "withConfig",
+    withoutConfig = "withoutConfig"
+}
+
+/**
+ * Register enum type in graphQL
+ */
+registerEnumType(GameserverConfigFilter, {
+    name: "GameserverConfigFilter",
+});
+
 
 /**
  * Interface used to identify a gameserver
@@ -51,6 +70,11 @@ export interface IGameserverQuery {
      * Should order desc by last contact?
      */
     orderDesc?: boolean
+
+    /**
+     * Filter server with / without config
+     */
+    configFilter?: GameserverConfigFilter;
 }
 
 /**
@@ -87,13 +111,38 @@ export class GameserverService {
         options.search = options.search ?? "";
         options.orderByCurrentName = options.orderByCurrentName ?? false;
         options.orderDesc = options.orderDesc ?? true;
+        options.configFilter = options.configFilter ?? GameserverConfigFilter.none;        	
 
-        const ret = await this.gameserverRepository.findAndCount({
-            take: options.pageSize,
-            skip: options.pageSize * (options.page - 1),
-            where: options.search.length >= MIN_SEARCH_LEN ? [{description: Like(`%${options.search}%`)}, {authKey: Like(`%${options.search}%`)}, {currentName: Like(`%${options.search}%`)}] : undefined,
-            order: options.orderByCurrentName ? {currentName: options.orderDesc ? "DESC" : "ASC"} : {lastContact: options.orderDesc ? "DESC" : "ASC"} 
-        });
+        let queryBuilder = this.connection.createQueryBuilder().select("gameserver").from(Gameserver, "gameserver");
+
+        queryBuilder = queryBuilder.leftJoinAndSelect("gameserver.gameserverConfig", "gameserverConfig");
+        queryBuilder = queryBuilder.leftJoinAndSelect("gameserverConfig.currentMatchConfig", "matchConfig");
+        queryBuilder = queryBuilder.leftJoinAndSelect("matchConfig.gameMode", "gameMode");
+
+        queryBuilder = queryBuilder.where("1=1"); 
+
+        if(options.search)
+        {
+            queryBuilder = queryBuilder.andWhere(new Brackets(qb => {
+                qb.orWhere("gameserver.description like :search", {search: `%${options.search}%`})
+                .orWhere("gameserver.authKey like :search", {search: `%${options.search}%`})
+                .orWhere("gameserver.currentName like :search", {search: `%${options.search}%`})
+                .orWhere("gameserver.id like :search", {search: `%${options.search}%`})
+            }));
+        }
+
+        if(options.configFilter !== GameserverConfigFilter.none)
+        {
+            queryBuilder = queryBuilder.andWhere(`gameserver.gameserverConfig IS ${options.configFilter === GameserverConfigFilter.withConfig ? "NOT" : ""} NULL`)
+        }
+
+        queryBuilder = queryBuilder.skip(options.pageSize * (options.page - 1)).take(options.pageSize);
+
+        queryBuilder = queryBuilder.orderBy(options.orderByCurrentName ? "gameserver.currentName" : "gameserver.lastContact", options.orderDesc ? "DESC" : "ASC");
+
+        const ret = await queryBuilder.getManyAndCount();
+
+        const gameserversMappedConfig = ret[0].map(x => {x.gameserverConfig = x.gameserverConfig?.currentMatchConfig ? x.gameserverConfig : null; return x;})
 
         return [ret[0], ret[1], Math.ceil(ret[1] / options.pageSize)];
     }

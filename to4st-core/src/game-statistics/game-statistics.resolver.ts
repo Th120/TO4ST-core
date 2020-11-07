@@ -52,8 +52,9 @@ export class GameModeInput
     /**
      * Is this gameMode based on teams?
      */
+    @ValidateIf(x => x.isTeamBased !== undefined)
     @IsBoolean()
-    @Field(() => Boolean)
+    @Field(() => Boolean, {nullable: true})
     isTeamBased!: boolean;
 }
 
