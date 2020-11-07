@@ -319,6 +319,8 @@ describe('GameserverConfigService', () => {
     const keep = inserted.filter((x, i) => i % 3 !== 0);
     const toDelete = inserted.filter((x, i) => i % 3 === 0);
 
+    keep.forEach(x => x.gameserver.currentName = x.currentName) //if a gameserver name is set in the config the gameserver name variable is overridden
+
     const deletePromises = toDelete.map(x => service.deleteGameserverConfig(x.gameserver));
     await Promise.all(deletePromises);
 

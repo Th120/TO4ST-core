@@ -210,6 +210,12 @@ input GameserverConfigInput {
   enableVoicechat: Boolean
 }
 
+enum GameserverConfigOrder {
+  currentName
+  lastContact
+  hasConfig
+}
+
 input GameserverConfigQuery {
   id: String
 }
@@ -238,7 +244,7 @@ input GameserversQuery {
   page: Int
   pageSize: Int
   orderDesc: Boolean
-  orderByCurrentName: Boolean
+  orderBy: GameserverConfigOrder
   search: String
   configFilter: GameserverConfigFilter
 }

@@ -26,6 +26,22 @@ registerEnumType(GameserverConfigFilter, {
     name: "GameserverConfigFilter",
 });
 
+/**
+ * Enum used to sort gameservers 
+ */
+export enum GameserverConfigOrder {
+    currentName = "currentName",
+    lastContact = "lastContact",
+    hasConfig = "hasConfig"
+}
+
+/**
+ * Register enum type in graphQL
+ */
+registerEnumType(GameserverConfigOrder, {
+    name: "GameserverConfigOrder",
+});
+
 
 /**
  * Interface used to identify a gameserver
@@ -64,7 +80,7 @@ export interface IGameserverQuery {
     /**
      * Should order by current name?
      */
-    orderByCurrentName?: boolean, 
+    orderBy?: GameserverConfigOrder, 
 
     /**
      * Should order desc by last contact?
@@ -96,6 +112,10 @@ export class GameserverService {
     async getGameserver(options: IGameserverIdentifier): Promise<Gameserver | undefined>
     {
         const res = await this.gameserverRepository.findOne(!!options.id ? { id: options.id } : { authKey: options.authKey });
+        if(res?.gameserverConfig?.currentName)
+        {
+            res.currentName = res.gameserverConfig.currentName;
+        }
         return res;
     }
 
@@ -109,7 +129,7 @@ export class GameserverService {
         options.page = options.page ?? 1;
         options.pageSize = _.clamp(options.pageSize ?? MAX_PAGE_SIZE, 1, MAX_PAGE_SIZE);
         options.search = options.search ?? "";
-        options.orderByCurrentName = options.orderByCurrentName ?? false;
+        options.orderBy = options.orderBy ?? GameserverConfigOrder.currentName;
         options.orderDesc = options.orderDesc ?? true;
         options.configFilter = options.configFilter ?? GameserverConfigFilter.none;        	
 
@@ -138,11 +158,32 @@ export class GameserverService {
 
         queryBuilder = queryBuilder.skip(options.pageSize * (options.page - 1)).take(options.pageSize);
 
-        queryBuilder = queryBuilder.orderBy(options.orderByCurrentName ? "gameserver.currentName" : "gameserver.lastContact", options.orderDesc ? "DESC" : "ASC");
+        let orderString = "currentName";
+
+        switch (options.orderBy) {
+            case GameserverConfigOrder.lastContact:
+                orderString = "lastContact";
+                break;
+            case GameserverConfigOrder.hasConfig:
+                orderString = "gameserverConfig";
+                break;
+        }
+
+        queryBuilder = queryBuilder.orderBy("gameserver." + orderString, options.orderDesc ? "DESC" : "ASC");
 
         const ret = await queryBuilder.getManyAndCount();
 
-        const gameserversMappedConfig = ret[0].map(x => {x.gameserverConfig = x.gameserverConfig?.currentMatchConfig ? x.gameserverConfig : null; return x;})
+        ret[0].forEach(x => {
+            if(x?.gameserverConfig?.currentName)
+            {
+                x.currentName = x.gameserverConfig.currentName; 
+            }
+
+            if(x.gameserverConfig && !x.gameserverConfig.currentMatchConfig)
+            {
+                x.gameserverConfig = null; // getting rid of null case object (wtf)
+            }
+        })
 
         return [ret[0], ret[1], Math.ceil(ret[1] / options.pageSize)];
     }

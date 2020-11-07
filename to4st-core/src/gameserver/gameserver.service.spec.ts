@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GameserverService } from './gameserver.service';
+import { GameserverConfigOrder, GameserverService } from './gameserver.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Gameserver } from './gameserver.entity';
 
@@ -100,7 +100,7 @@ describe('GameserverService', () => {
       await service.createUpdateGameserver(toInsert);
     });
       
-    let [res, total, pages] = await service.getGameservers({orderByCurrentName: true});    
+    let [res, total, pages] = await service.getGameservers({orderBy: GameserverConfigOrder.currentName});    
     expect(total).toBe(N);
 
     //Get all pages and merge them into result archive
@@ -108,7 +108,7 @@ describe('GameserverService', () => {
     {
       for(let i = 2; i <= pages; i++)
       {
-        res = [...res, ...(await service.getGameservers({page: i, orderByCurrentName: true}))[0]];
+        res = [...res, ...(await service.getGameservers({page: i, orderBy: GameserverConfigOrder.currentName}))[0]];
       }
     }
 
@@ -257,7 +257,7 @@ describe('GameserverService', () => {
       await service.createUpdateGameserver(toInsert);
     });
       
-    let [res, total, pages] = await service.getGameservers({orderByCurrentName: true});    
+    let [res, total, pages] = await service.getGameservers({orderBy: GameserverConfigOrder.currentName});    
     expect(total).toBe(N);
 
     //Get all pages and merge them into result archive
@@ -265,7 +265,7 @@ describe('GameserverService', () => {
     {
       for(let i = 2; i <= pages; i++)
       {
-        res = [...res, ...(await service.getGameservers({page: i, orderByCurrentName: true}))[0]];
+        res = [...res, ...(await service.getGameservers({page: i, orderBy: GameserverConfigOrder.currentName}))[0]];
       }
     }
 

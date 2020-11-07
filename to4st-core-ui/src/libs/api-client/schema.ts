@@ -278,6 +278,12 @@ export interface PlayerWeaponStatistics {
   __typename: 'PlayerWeaponStatistics'
 }
 
+export enum GameserverConfigOrder {
+  currentName = 'currentName',
+  lastContact = 'lastContact',
+  hasConfig = 'hasConfig',
+}
+
 export enum GameserverConfigFilter {
   none = 'none',
   withConfig = 'withConfig',
@@ -755,7 +761,7 @@ export interface GameserversQuery {
   page?: Int | null
   pageSize?: Int | null
   orderDesc?: Boolean | null
-  orderByCurrentName?: Boolean | null
+  orderBy?: GameserverConfigOrder | null
   search?: String | null
   configFilter?: GameserverConfigFilter | null
 }
