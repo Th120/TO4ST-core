@@ -18,10 +18,15 @@ export namespace Components {
     }
     interface To4stDetails {
         /**
+          * Allows overriding visibility of delete
+         */
+        "canItemBeDeleted": (item: any) => boolean;
+        /**
           * Properties for columns
          */
         "columns": ColumnDetailProps<any>[];
         "columnsCount": number;
+        "defaultCreateObject": any;
         /**
           * Filters
          */
@@ -35,6 +40,10 @@ export namespace Components {
           * Block all inputs, display loading modal
          */
         "loadingInputBlock": boolean;
+        /**
+          * Override orderBy assign
+         */
+        "mapOrderByAssign": (orderByString: string) => string;
         "mapPreSerializeEntity": (entity: any) => { mapped: any, fileName?: string };
         "name": string;
         /**
@@ -168,6 +177,7 @@ export namespace Components {
     interface To4stSettings {
     }
     interface To4stSwitch {
+        "disabled": boolean;
         /**
           * Error appearence
          */
@@ -359,10 +369,15 @@ declare namespace LocalJSX {
     }
     interface To4stDetails {
         /**
+          * Allows overriding visibility of delete
+         */
+        "canItemBeDeleted"?: (item: any) => boolean;
+        /**
           * Properties for columns
          */
         "columns"?: ColumnDetailProps<any>[];
         "columnsCount"?: number;
+        "defaultCreateObject"?: any;
         /**
           * Filters
          */
@@ -376,6 +391,10 @@ declare namespace LocalJSX {
           * Block all inputs, display loading modal
          */
         "loadingInputBlock"?: boolean;
+        /**
+          * Override orderBy assign
+         */
+        "mapOrderByAssign"?: (orderByString: string) => string;
         "mapPreSerializeEntity"?: (entity: any) => { mapped: any, fileName?: string };
         "name"?: string;
         /**
@@ -640,6 +659,7 @@ declare namespace LocalJSX {
     interface To4stSettings {
     }
     interface To4stSwitch {
+        "disabled"?: boolean;
         /**
           * Error appearence
          */

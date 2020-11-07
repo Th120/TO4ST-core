@@ -32,6 +32,8 @@ export class To4stSwitch {
    */
   @Prop() rtl = false;
 
+  @Prop() disabled = false;
+
   /**
    * Warning appearence
    */
@@ -50,8 +52,11 @@ export class To4stSwitch {
    * Toggle!
    */
   doToggle() {
-    this.value = !this.value;
-    this.toggle.emit(this.value);
+    if(!this.disabled)
+    {
+      this.value = !this.value;
+      this.toggle.emit(this.value);
+    }
   }
 
   /**
@@ -68,6 +73,7 @@ export class To4stSwitch {
           }}
         >
           <input
+            disabled={this.disabled}
             class={{
               switch: true,
               "is-danger": this.isError,

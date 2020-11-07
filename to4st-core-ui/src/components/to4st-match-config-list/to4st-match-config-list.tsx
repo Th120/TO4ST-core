@@ -132,6 +132,7 @@ export class To4stMatchConfigList implements ComponentInterface {
       name: "Auto Balance Teams",
       detailInput: (item, cb) => <to4st-switch value={item?.autoBalanceTeams} onToggle={event => cb("autoBalanceTeams", event.detail)} />,
       shouldBeVisible: () => false,
+      tooltip: () => "Swaps players automatically to keep teams even"
     },
     {
       name: "Player Vote Team Only",
@@ -147,21 +148,25 @@ export class To4stMatchConfigList implements ComponentInterface {
       name: "Enable Player Vote",
       shouldBeVisible: () => false,
       detailInput: (item, cb) => <to4st-switch value={item?.enablePlayerVote} onToggle={event => cb("enablePlayerVote", event.detail)} />,
+      tooltip: () => "Players can vote other players out"
     },
     {
       name: "Auto Swap Teams",
       shouldBeVisible: () => false,
       detailInput: (item, cb) => <to4st-switch value={item?.autoSwapTeams} onToggle={event => cb("autoSwapTeams", event.detail)} />,
+      tooltip: () => "If a roundlimit is used the players swap teams after half of the rounds"
     },
     {
       name: "Mid Game Break Length",
       shouldBeVisible: () => false,
       detailInput: (item, cb) => <input type="number" placeholder="Mid Game Break Length" min="0" max="300" value={item?.midGameBreakLength ?? 0} class="input" onChange={event => cb("midGameBreakLength", parseInt((event.target as HTMLInputElement).value)) } />,
+      tooltip: () => "If a roundlimit is used the game pauses for given seconds when half of the rounds are over"
     },
     {
       name: "Nade Restriction",
       shouldBeVisible: () => false,
       detailInput: (item, cb) => <to4st-switch value={item?.nadeRestriction} onToggle={event => cb("nadeRestriction", event.detail)} />,
+      tooltip: () => "Only one nade of each kind can be bought at round begin"
     },
     {
       name: "Global Voicechat",
@@ -176,12 +181,14 @@ export class To4stMatchConfigList implements ComponentInterface {
     {
       name: "Ranked",
       shouldBeVisible: () => false,
-      detailInput: (item, cb) => <to4st-switch value={item?.ranked} onToggle={event => cb("ranked", event.detail)} />
+      detailInput: (item, cb) => <to4st-switch value={item?.ranked} onToggle={event => cb("ranked", event.detail)} />,
+      tooltip: () => "Allows to seperate ranked / unranked player stats"
     },
     {
       name: "Private",
       shouldBeVisible: () => false,
       detailInput: (item, cb) => <to4st-switch value={item?.private} onToggle={event => cb("private", event.detail)} />,
+      tooltip: () => "Server requires password or reserved slot access"
     }
   ] as ColumnDetailProps<MatchConfig>[];
 

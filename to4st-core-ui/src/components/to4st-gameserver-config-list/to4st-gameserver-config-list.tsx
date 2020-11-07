@@ -8,7 +8,7 @@ import {
   Watch
 } from "@stencil/core";
 
-import { Gameserver, APIClient, GameserverConfig, GameserverConfigInput, MatchConfig } from "../../libs/api";
+import { Gameserver, APIClient, GameserverConfig, GameserverConfigInput, MatchConfig, GameserverConfigOrder } from "../../libs/api";
 import { ColumnProps, FilterProps } from "../general-ui-stuff/to4st-list/to4st-list";
 import { app } from "../../global/context";
 import { extractGraphQLErrors } from "../../libs/utils";
@@ -54,14 +54,22 @@ export class To4stGameserverConfigList implements ComponentInterface {
   {
     if(this.matchConfigs !== undefined)
     {
+      if(!this.defaultGameserverConfig.currentMatchConfig && this.matchConfigs.length > 0)
+      {
+        this.defaultGameserverConfig.currentMatchConfig = this.matchConfigs[0];
+      }      
+
       this.columns = [...this.columns] // needed to rerender details component
     }
   }
+
+  @State() defaultGameserverConfig = DEFAULT_GAMESERVER_CONFIG;
 
   @State() columns = [
     {
       name: "Current Name",
       tableContent: gameserverCfg => <p>{gameserverCfg?.gameserver?.currentName}</p>,
+      detailInput: (item, cb) => <input type="text" placeholder="Current Name" value={item?.currentName ?? ""} class="input" onChange={event => cb("currentName", (event.target as HTMLInputElement).value.trim()) } />,
       sortable: true
     },
     {
@@ -70,9 +78,15 @@ export class To4stGameserverConfigList implements ComponentInterface {
       hiddenMobile: () => true,
     },
     {
+      name: "Has config",
+      tableContent: gameserverCfg => <p>{this.getSymbol(!!gameserverCfg?.gameserver?.gameserverConfig)}</p>,
+      hiddenMobile: () => true,
+      sortable: () => true
+    },
+    {
       name: "Current Match Config",
       shouldBeVisible: () => false,
-    detailInput: (item, cb) => <div class="select"><select onChange={e => cb("currentMatchConfig", {configName: (e.target as HTMLSelectElement).value.trim()})}>{this.matchConfigs.map(x => <option selected={item?.currentMatchConfig?.configName === x.configName}>{x.configName}</option>)}</select></div>
+      detailInput: (item, cb) => <div class="select"><select onChange={e => cb("currentMatchConfig", {id: this.matchConfigs.find(x => x.configName === (e.target as HTMLSelectElement).value.trim())?.id})}>{this.matchConfigs.map(x => <option selected={item?.currentMatchConfig?.configName === x.configName}>{x.configName}</option>)}</select></div>
     },
     {
       name: "Game Password",
@@ -81,6 +95,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
     },
     {
       name: "Reserved Slots",
+      detailInput: (item, cb) => <input type="number" placeholder="Reserved slots" min="0" max="100" value={item?.reservedSlots ?? 0} class="input" onChange={event => cb("reservedSlots", parseInt((event.target as HTMLInputElement).value)) } />,
       shouldBeVisible: () => false,
     },
     {
@@ -90,26 +105,33 @@ export class To4stGameserverConfigList implements ComponentInterface {
     },
     {
       name: "Allow Skip Mapvote",
+      detailInput: (item, cb) => <to4st-switch value={item?.allowSkipMapVote} onToggle={event => cb("allowSkipMapVote", event.detail)} />,
       shouldBeVisible: () => false,
     },
     {
       name: "Temp Kick Ban Time",
+      detailInput: (item, cb) => <input type="number" placeholder="Temp Kick Ban Time" min="1" value={item?.tempKickBanTime ?? 0} class="input" onChange={event => cb("tempKickBanTime", parseInt((event.target as HTMLInputElement).value)) } />,
       shouldBeVisible: () => false,
     },
     {
       name: "Auto Record Replay",
+      detailInput: (item, cb) => <to4st-switch value={item?.autoRecordReplay} onToggle={event => cb("autoRecordReplay", event.detail)} />,
       shouldBeVisible: () => false,
     },
     {
       name: "Player Game Control",
+      detailInput: (item, cb) => <to4st-switch value={item?.playerGameControl} onToggle={event => cb("playerGameControl", event.detail)} />,
       shouldBeVisible: () => false,
+      tooltip: () => "Players can vote for match actions (reset, map change, pause)"
     },
     {
       name: "Enable Mapvote",
+      detailInput: (item, cb) => <to4st-switch value={item?.enableMapVote} onToggle={event => cb("enableMapVote", event.detail)} />,
       shouldBeVisible: () => false,
     },
     {
       name: "Vote Length",
+      detailInput: (item, cb) => <input type="number" placeholder="Vote Length" min="5" value={item?.voteLength ?? 0} class="input" onChange={event => cb("voteLength", parseInt((event.target as HTMLInputElement).value)) } />,
       shouldBeVisible: () => false,
     },
     {
@@ -134,10 +156,13 @@ export class To4stGameserverConfigList implements ComponentInterface {
     },
     {
       name: "Map No Replay",
+      detailInput: (item, cb) => <input type="number" placeholder="Map No Replay" min="0" max="30" value={item?.mapNoReplay ?? 0} class="input" onChange={event => cb("warmUpLength", parseInt((event.target as HTMLInputElement).value)) } />,
       shouldBeVisible: () => false,
+      tooltip: () => "A map can't be voted for the given count of map switches"
     },
     {
       name: "Enable Voicechat",
+      detailInput: (item, cb) => <to4st-switch value={item?.enableVoicechat} onToggle={event => cb("enableVoicechat", event.detail)} />,
       shouldBeVisible: () => false,
     }
   ] as ColumnDetailProps<GameserverConfig>[];
@@ -145,6 +170,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
   async saveGameserverConfig(entity: any, transactionId: string, afterEx: EventEmitter<string>) 
   {
     const o = entity as GameserverConfig;
+
     try {
       this.apiClient.setTransactionId(transactionId);
       await this.apiClient.client.chain.mutation.createUpdateGameserverConfig({
@@ -176,6 +202,14 @@ export class To4stGameserverConfigList implements ComponentInterface {
     }
   }
 
+  /**
+   * Get symbol to render bool
+   * @param checked 
+   */
+  getSymbol(checked: boolean)
+  {
+    return checked ? (<i class="fas fa-check"></i>) : (<i class="fas fa-times"></i>);
+  }
 
   async removeGameserverConfig(entity: any, onDeletedEntity: () => void)
   {
@@ -192,7 +226,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
   {
     try 
     {
-      const res = await this.apiClient.client.chain.query.gameservers({options: {pageSize: PAGE_SIZE, page: page, search: search, orderDesc: orderDesc, orderByCurrentName: orderBy === "Current Name"}}).execute(
+      const res = await this.apiClient.client.chain.query.gameservers({options: {pageSize: PAGE_SIZE, page: page, search: search, orderDesc: orderDesc, orderBy: orderBy as GameserverConfigOrder || GameserverConfigOrder.hasConfig}}).execute(
         {
           pageCount: true, content: {
             id: true, 
@@ -251,11 +285,13 @@ export class To4stGameserverConfigList implements ComponentInterface {
       const mapped = res.content.map(x => {
         if(x.gameserverConfig)
         {
-          return x;
+          x.gameserverConfig.gameserver = x;
+          return x.gameserverConfig;
         }
 
         const def = {...DEFAULT_GAMESERVER_CONFIG};
         def.gameserver = x;
+
 
         return def;
 
@@ -277,7 +313,17 @@ export class To4stGameserverConfigList implements ComponentInterface {
         <to4st-details
           name="Gameservers"
           columns={this.columns}
-          hasSearch={true}               
+          hasSearch={true}    
+          defaultCreateObject={this.defaultGameserverConfig}  
+          mapOrderByAssign={(raw) => {
+            if(raw === "Current Name")
+            {
+              return GameserverConfigOrder.currentName as string;
+            }
+            
+            return GameserverConfigOrder.hasConfig as string;
+          }}
+          canItemBeDeleted={(item: GameserverConfig) => !!item?.gameserver?.gameserverConfig}         
           onUpdateEntities={e => this.updateGameserverConfigs(e.detail.page, e.detail.search, e.detail.orderBy, e.detail.orderDesc, e.detail.onFetchedData)}
           onSaveEntity={e => this.saveGameserverConfig(e.detail.entity as GameserverConfig, e.detail.transactionId, e.detail.afterEx)}
           onDeleteEntity={e => this.removeGameserverConfig(e.detail.entity as GameserverConfig, e.detail.onDeletedEntity)}

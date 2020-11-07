@@ -52,6 +52,17 @@ export class To4stDetailEdit implements ComponentInterface {
 
   @Prop() columnsCount = 3;
 
+  @Prop() defaultCreateObject: any;
+
+  @Watch("defaultCreateObject")
+  defaultCreateObjectChanged()
+  {
+    if(this.defaultCreateObject && this.currentItem)
+    {
+      this.currentItem = {...this.defaultCreateObject, ...this.currentItem};
+      this.reset();
+    }
+  }
   /**
    * Properties for columns
    */
@@ -61,6 +72,16 @@ export class To4stDetailEdit implements ComponentInterface {
    * Block all inputs, display loading modal
    */
   @Prop() loadingInputBlock = false;
+
+  /**
+   * Allows overriding visibility of delete
+   */
+  @Prop() canItemBeDeleted: (item: any) => boolean;
+
+  /**
+   * Override orderBy assign
+   */
+  @Prop() mapOrderByAssign: (orderByString: string) => string;
 
    /**
    * Striped table
@@ -185,6 +206,10 @@ export class To4stDetailEdit implements ComponentInterface {
       onFetchedData: (data, pageCount) => {
         this.entities = data;
         this.currentPageCount = pageCount;
+        if(this.entities.length > 0 && (!this.currentItem || !this.currentItemClone))
+        {
+         // this.itemSelected(this.entities[0]);
+        }
       }
     })
   }
@@ -228,12 +253,12 @@ export class To4stDetailEdit implements ComponentInterface {
   async removeEntity(entity: any)
   {
     this.deleteActive = false;
-    this.deleteEntity.emit({entity: entity, onDeletedEntity: () => {this.updateContent(); this.currentItem = undefined; this.currentItemClone = undefined;}}); 
+    this.deleteEntity.emit({entity: entity, onDeletedEntity: () => {this.updateContent(); this.currentItem = undefined; this.currentItemClone = undefined; console.log()}}); 
   }
 
   itemSelected(item: any)
   {
-    this.currentItem = item;
+    this.currentItem = {...this.defaultCreateObject, ...item};
     this.reset();
   }
 
@@ -312,6 +337,13 @@ export class To4stDetailEdit implements ComponentInterface {
       });
       this.currentItemClone = temp;
     }
+  }
+
+  orderBy(orderByKey: string, orderDesc: boolean)
+  {
+    this.orderDesc = orderDesc;
+    this.currentOrderBy = this.mapOrderByAssign?.(orderByKey) ?? orderByKey;
+    this.updateContent();
   }
 
   getIdentString()
@@ -406,6 +438,7 @@ export class To4stDetailEdit implements ComponentInterface {
               hasCreate={this.useDefaultListCreate}
               hasPagination={this.listHasPagination}
               hasUpdate={false}
+              onChangedOrder={e => this.orderBy(e.detail.orderBy, e.detail.orderDesc)}
               onItemSelected={e => this.itemSelected(e.detail)}
               onPagination={e => this.goToPage(e.detail)}
               onSaveItem={e => this._saveEntity(e.detail.item as {}, e.detail.isEdit, e.detail.afterSaveExecuted)}
@@ -531,6 +564,7 @@ export class To4stDetailEdit implements ComponentInterface {
                           <div class="field">
                             <div class="control">
                               <to4st-switch
+                                disabled={!this.currentItemClone || !this.canItemBeDeleted?.(this.currentItemClone)}
                                 value={this.deleteActive}
                                 onToggle={e => (this.deleteActive = e.detail)}
                               ></to4st-switch>
@@ -550,7 +584,7 @@ export class To4stDetailEdit implements ComponentInterface {
                               >
                                 <button
                                   class="button is-danger"
-                                  disabled={!this.deleteActive || !this.currentItemClone}
+                                  disabled={!this.deleteActive || !this.currentItemClone || !this.canItemBeDeleted?.(this.currentItemClone)}
                                   onClick={() => this.removeEntity(this.currentItemClone)}
                                 >
                                   <i class="fas fa-trash-alt"></i>
