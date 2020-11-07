@@ -150,6 +150,7 @@ export class To4stRoot implements ComponentInterface {
           <stencil-router>
             <stencil-route-switch scrollTopOffset={0}>
               <stencil-route url="/" component="to4st-home" exact={true} />
+              <stencil-route url="/gameserver-config" component="to4st-gameserver-config" />
               <stencil-route url="/to4st-settings" component="to4st-settings" />
               <stencil-route
                 url="/gameserver-settings"

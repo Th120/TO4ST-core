@@ -57,7 +57,7 @@ export class To4stGameserverList implements ComponentInterface {
       tableContent: server => <p>{server.lastContact}</p>,
       sortable: true
     }
-  ] as ColumnProps[];
+  ] as ColumnProps<Gameserver>[];
 
   filters = [] as FilterProps[];
 

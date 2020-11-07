@@ -1,6 +1,6 @@
 
 import { Entanglement, qt } from "stencil-quantum";
-import { AppConfig } from "../libs/api-client/schema";
+import { AppConfig, MatchConfig } from "../libs/api-client/schema";
 import { APIClient } from "../libs/api";
 
 /**
@@ -21,4 +21,9 @@ export const app = new Entanglement({
      * User logged in as admin
      */
     isAdmin: qt<boolean>({default: false}),
+
+    /**
+     * Match Configs
+     */
+    matchConfigs: qt<MatchConfig[]>({mutable: true}),
 });

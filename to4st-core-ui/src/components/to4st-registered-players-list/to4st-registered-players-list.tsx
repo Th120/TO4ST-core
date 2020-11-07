@@ -87,50 +87,50 @@ export class To4stRegisteredPlayersList implements ComponentInterface {
     {
       name: "Root Admin",
       tableContent: player => <p>{this.getSymbol(player.rootAdmin)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.rootAdmin ?? false} onToggle={event => cb.emit({key: "rootAdmin", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.rootAdmin} onToggle={event => cb.emit({key: "rootAdmin", value: event.detail})} />
     },
     {
       name: "Kick",
       tableContent: player => <p>{this.getSymbol(player.kick)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.kick ?? false} onToggle={event => cb.emit({key: "kick", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.kick} onToggle={event => cb.emit({key: "kick", value: event.detail})} />
     },
     {
       name: "Ban",
       tableContent: player => <p>{this.getSymbol(player.ban)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.ban ?? false} onToggle={event => cb.emit({key: "ban", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.ban} onToggle={event => cb.emit({key: "ban", value: event.detail})} />
     },
     {
       name: "Temp KickBan",
       tableContent: player => <p>{this.getSymbol(player.tempKickBan)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.tempKickBan ?? false} onToggle={event => cb.emit({key: "tempKickBan", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.tempKickBan} onToggle={event => cb.emit({key: "tempKickBan", value: event.detail})} />
     },
     {
       name: "Mute",
       tableContent: player => <p>{this.getSymbol(player.mute)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.mute ?? false} onToggle={event => cb.emit({key: "mute", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.mute} onToggle={event => cb.emit({key: "mute", value: event.detail})} />
     },
     {
       name: "Make Teams",
       tableContent: player => <p>{this.getSymbol(player.makeTeams)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.makeTeams ?? false} onToggle={event => cb.emit({key: "makeTeams", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.makeTeams} onToggle={event => cb.emit({key: "makeTeams", value: event.detail})} />
     },
     {
       name: "Reserved Slots",
       tableContent: player => <p>{this.getSymbol(player.reservedSlots)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.reservedSlots ?? false} onToggle={event => cb.emit({key: "reservedSlots", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.reservedSlots} onToggle={event => cb.emit({key: "reservedSlots", value: event.detail})} />
     },
     {
       name: "Broadcast Message",
       tableContent: player => <p>{this.getSymbol(player.broadcastMessage)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.broadcastMessage ?? false} onToggle={event => cb.emit({key: "broadcastMessage", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.broadcastMessage} onToggle={event => cb.emit({key: "broadcastMessage", value: event.detail})} />
     },
     {
       name: "Game Control",
       tableContent: player => <p>{this.getSymbol(player.gameControl)}</p>,
-      input: (item, cb) => <to4st-switch value={item?.gameControl ?? false} onToggle={event => cb.emit({key: "gameControl", value: event.detail})} />
+      input: (item, cb) => <to4st-switch value={item?.gameControl} onToggle={event => cb.emit({key: "gameControl", value: event.detail})} />
     },
     
-  ] as ColumnProps[];
+  ] as ColumnProps<RegisteredPlayer>[];
 
   /**
    * Get symbol to render bool

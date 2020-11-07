@@ -138,7 +138,7 @@ type GameMode {
 
 input GameModeInput {
   name: String!
-  isTeamBased: Boolean!
+  isTeamBased: Boolean
 }
 
 input GameQuery {
@@ -159,11 +159,13 @@ type Gameserver {
   currentName: String!
   description: String
   lastContact: DateTime
+  gameserverConfig: GameserverConfig
 }
 
 type GameserverConfig {
   gameserver: Gameserver!
-  currentMatchConfig: MatchConfig!
+  currentMatchConfig: MatchConfig
+  currentName: String!
   voteLength: Int!
   gamePassword: String!
   reservedSlots: Int!
@@ -179,6 +181,33 @@ type GameserverConfig {
   contact: String!
   mapNoReplay: Int!
   enableVoicechat: Boolean!
+}
+
+enum GameserverConfigFilter {
+  none
+  withConfig
+  withoutConfig
+}
+
+input GameserverConfigInput {
+  gameserverId: String
+  currentMatchConfigId: Int
+  currentGameserverName: String
+  voteLength: Int
+  tempKickBanTime: Int
+  gamePassword: String
+  serverAdmins: String
+  serverDescription: String
+  website: String
+  contact: String
+  reservedSlots: Int
+  mapNoReplay: Int
+  balanceClans: Boolean
+  allowSkipMapVote: Boolean
+  autoRecordReplay: Boolean
+  playerGameControl: Boolean
+  enableMapVote: Boolean
+  enableVoicechat: Boolean
 }
 
 input GameserverConfigQuery {
@@ -211,6 +240,7 @@ input GameserversQuery {
   orderDesc: Boolean
   orderByCurrentName: Boolean
   search: String
+  configFilter: GameserverConfigFilter
 }
 
 input GameserverUpdateInput {
@@ -225,8 +255,9 @@ type LoginResponse {
 type MatchConfig {
   id: Int!
   configName: String!
+  gameMode: GameMode!
   configHash: String!
-  matchendLength: Int!
+  matchEndLength: Int!
   warmUpLength: Int!
   friendlyFireScale: Float!
   mapLength: Int!
@@ -252,7 +283,8 @@ type MatchConfig {
 input MatchConfigInput {
   id: Int
   configName: String
-  matchendLength: Int
+  gameMode: GameModeInput
+  matchEndLength: Int
   warmUpLength: Int
   mapLength: Int
   roundLength: Int
@@ -327,8 +359,13 @@ type Mutation {
   """
   X-Request-ID must be set in header
   """
-  createUpdateGameserverConfig(gameserver: MatchConfigInput!): GameserverConfig!
+  createUpdateGameserverConfig(gameserverConfig: GameserverConfigInput!): GameserverConfig!
   deleteMatchConfig(options: MatchConfigQuery!): Boolean!
+
+  """
+  X-Request-ID must be set in header
+  """
+  createUpdateMatchConfig(matchConfig: MatchConfigInput!): MatchConfig!
   deleteAuthKey(authKey: String!): Boolean!
 
   """

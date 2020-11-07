@@ -7,7 +7,8 @@ import {
   Prop,
   EventEmitter,
   State,
-  Listen
+  Listen,
+  Watch
 } from "@stencil/core";
 
 import { nanoid } from "nanoid";
@@ -15,7 +16,7 @@ import { nanoid } from "nanoid";
 /**
  * Interface used to specify content to render
  */
-export interface ColumnProps {
+export interface ColumnProps<T> {
   /**
    * Name of column
    */
@@ -29,13 +30,13 @@ export interface ColumnProps {
   /**
    * Get content from item
    */
-  tableContent: (item: any) => any;
+  tableContent: (item: T) => any;
 
   /**
    * Input element for create / update
    */
   input?: (
-    item: any,
+    item: T,
     emit: EventEmitter<{ key: string; value: any }>,
     isCreate?: boolean
   ) => any;
@@ -49,6 +50,7 @@ export interface ColumnProps {
    * Should be visible by predicate
    */
   shouldBeVisible?: () => boolean;
+
 }
 
 /**
@@ -84,7 +86,7 @@ export class To4stList implements ComponentInterface {
   /**
    * Properties for columns
    */
-  @Prop() columns = [] as ColumnProps[];
+  @Prop() columns = [] as ColumnProps<any>[];
 
   /**
    * Filters
@@ -112,6 +114,11 @@ export class To4stList implements ComponentInterface {
   @Prop() hasPagination = true;
 
   /**
+   * Allow selection of rows
+   */
+  @Prop() allowSelect = false;
+
+  /**
    * Name of list
    */
   @Prop() name = "";
@@ -127,14 +134,24 @@ export class To4stList implements ComponentInterface {
   @Prop() striped = false;
 
   /**
-   * Supports create, update, delete
+   * Supports update, delete
    */
-  @Prop() hasCreateUpdate = true;
+  @Prop() hasUpdate = true;
+
+  /**
+   * Supports Create
+   */
+  @Prop() hasCreate = true;
 
   /**
    * Current item that is being edited
    */
   @State() currentItem: any;
+
+  /**
+   * Item that is currently selected (table row)
+   */
+  @State() currentSelectedItem: any;
 
   /**
    * Current input state
@@ -209,6 +226,12 @@ export class To4stList implements ComponentInterface {
   @Event() removeItem: EventEmitter<any>;
 
   /**
+   * Event fired with item that is selected
+   * @emits item which is selected
+   */
+  @Event() itemSelected: EventEmitter<any>;
+
+  /**
    * Event for search
    * @emits search string
    */
@@ -235,11 +258,27 @@ export class To4stList implements ComponentInterface {
     orderDesc: boolean;
   }>;
 
+  async componentWillUpdate()
+  {
+    this.resetSelectedItem();
+  }
+
   /**
    * Before loading component
    */
   async componentWillLoad() {
     this.resetTransactionId();
+    
+    this.resetSelectedItem();
+
+  }
+
+  resetSelectedItem() {
+    if(this.allowSelect && this.content.length > 0 && (!this.currentSelectedItem || !this.content.find(x => x === this.currentSelectedItem)))
+    {
+      this.currentSelectedItem = this.content[0];
+      this.itemSelected.emit(this.currentSelectedItem);
+    }
   }
 
   /**
@@ -387,7 +426,7 @@ export class To4stList implements ComponentInterface {
                   <div
                     class={{
                       control: true,
-                      "is-hidden": !this.hasCreateUpdate
+                      "is-hidden": !this.hasCreate
                     }}
                   >
                     <button
@@ -483,11 +522,21 @@ export class To4stList implements ComponentInterface {
                     ""
                   )
                 )}
-                {!this.hasCreateUpdate ? "" : <th></th>}
+                {!this.hasUpdate ? "" : <th></th>}
               </thead>
               <tbody>
                 {this.content.map(item => (
-                  <tr>
+                  <tr 
+                  onClick={() => 
+                    {
+                      if(this.allowSelect)
+                      {
+                        this.currentSelectedItem = item;
+                        this.itemSelected.emit(item);
+                      }
+                    }}
+                    class={{"is-selected": this.allowSelect && this.currentSelectedItem === item}}
+                    >
                     {this.columns.map(col =>
                       !col.shouldBeVisible || col.shouldBeVisible() ? (
                         <td class={{ "is-hidden-mobile": !!col.hiddenMobile }}>
@@ -497,7 +546,7 @@ export class To4stList implements ComponentInterface {
                         ""
                       )
                     )}
-                    {!this.hasCreateUpdate ? (
+                    {!this.hasUpdate ? (
                       ""
                     ) : (
                       <td>
@@ -510,7 +559,7 @@ export class To4stList implements ComponentInterface {
                                   class="button is-warning"
                                   onClick={() => this.editItem(item)}
                                 >
-                                  <i class="fas fa-edit"></i>
+                                  <i class="fas is-small fa-edit"></i>
                                 </a>
                               </p>
                             </div>
@@ -532,7 +581,7 @@ export class To4stList implements ComponentInterface {
                 <nav
                   class={{
                     "pagination is-right": true,
-                    "is-hidden": !this.hasPagination || this.content.length == 0
+                    "is-hidden": !this.hasPagination || this.pagesCount <=1 || this.content.length == 0
                   }}
                   role="navigation"
                   aria-label="pagination"

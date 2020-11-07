@@ -6,20 +6,48 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ColumnProps, FilterProps, InputState } from "./components/general-ui-stuff/to4st-list/to4st-list";
+import { ColumnDetailProps } from "./components/general-ui-stuff/to4st-details/to4st-details";
+import { EventEmitter } from "@stencil/core";
 import { RouterHistory } from "@stencil/router";
 import { ColumnProps as ColumnProps1, FilterProps as FilterProps1 } from "./components/general-ui-stuff/to4st-list/to4st-list";
-import { EventEmitter } from "@stencil/core";
 import { AppConfig } from "./libs/api";
 export namespace Components {
     interface To4stApiKeys {
     }
     interface To4stBanlistPartners {
     }
+    interface To4stDetails {
+        /**
+          * Properties for columns
+         */
+        "columns": ColumnDetailProps<any>[];
+        "columnsCount": number;
+        /**
+          * Filters
+         */
+        "filters": FilterProps[];
+        "hasSearch": boolean;
+        /**
+          * Has pagination
+         */
+        "listHasPagination": boolean;
+        /**
+          * Block all inputs, display loading modal
+         */
+        "loadingInputBlock": boolean;
+        "mapPreSerializeEntity": (entity: any) => { mapped: any, fileName?: string };
+        "name": string;
+        /**
+          * Striped table
+         */
+        "stripedTable": boolean;
+        "useDefaultListCreate": boolean;
+    }
     interface To4stEditModal {
         /**
           * Properties used to retrieve input elements
          */
-        "columns": ColumnProps[];
+        "columns": ColumnProps<any>[];
         /**
           * Current input error
          */
@@ -47,6 +75,10 @@ export namespace Components {
          */
         "isVisible": boolean;
     }
+    interface To4stGameserverConfig {
+    }
+    interface To4stGameserverConfigList {
+    }
     interface To4stGameserverList {
     }
     interface To4stGameserverSettings {
@@ -63,9 +95,13 @@ export namespace Components {
     }
     interface To4stList {
         /**
+          * Allow selection of rows
+         */
+        "allowSelect": boolean;
+        /**
           * Properties for columns
          */
-        "columns": ColumnProps[];
+        "columns": ColumnProps<any>[];
         /**
           * Current items
          */
@@ -79,9 +115,9 @@ export namespace Components {
          */
         "filters": FilterProps[];
         /**
-          * Supports create, update, delete
+          * Supports Create
          */
-        "hasCreateUpdate": boolean;
+        "hasCreate": boolean;
         /**
           * Display pagination features
          */
@@ -90,6 +126,10 @@ export namespace Components {
           * Display search input box
          */
         "hasSearch": boolean;
+        /**
+          * Supports update, delete
+         */
+        "hasUpdate": boolean;
         /**
           * Block all inputs, display loading modal
          */
@@ -112,6 +152,8 @@ export namespace Components {
           * Is visible?
          */
         "visible": boolean;
+    }
+    interface To4stMatchConfigList {
     }
     interface To4stPlayerStatistics {
     }
@@ -165,6 +207,12 @@ declare global {
         prototype: HTMLTo4stBanlistPartnersElement;
         new (): HTMLTo4stBanlistPartnersElement;
     };
+    interface HTMLTo4stDetailsElement extends Components.To4stDetails, HTMLStencilElement {
+    }
+    var HTMLTo4stDetailsElement: {
+        prototype: HTMLTo4stDetailsElement;
+        new (): HTMLTo4stDetailsElement;
+    };
     interface HTMLTo4stEditModalElement extends Components.To4stEditModal, HTMLStencilElement {
     }
     var HTMLTo4stEditModalElement: {
@@ -176,6 +224,18 @@ declare global {
     var HTMLTo4stFilterModalElement: {
         prototype: HTMLTo4stFilterModalElement;
         new (): HTMLTo4stFilterModalElement;
+    };
+    interface HTMLTo4stGameserverConfigElement extends Components.To4stGameserverConfig, HTMLStencilElement {
+    }
+    var HTMLTo4stGameserverConfigElement: {
+        prototype: HTMLTo4stGameserverConfigElement;
+        new (): HTMLTo4stGameserverConfigElement;
+    };
+    interface HTMLTo4stGameserverConfigListElement extends Components.To4stGameserverConfigList, HTMLStencilElement {
+    }
+    var HTMLTo4stGameserverConfigListElement: {
+        prototype: HTMLTo4stGameserverConfigListElement;
+        new (): HTMLTo4stGameserverConfigListElement;
     };
     interface HTMLTo4stGameserverListElement extends Components.To4stGameserverList, HTMLStencilElement {
     }
@@ -218,6 +278,12 @@ declare global {
     var HTMLTo4stLoginModalElement: {
         prototype: HTMLTo4stLoginModalElement;
         new (): HTMLTo4stLoginModalElement;
+    };
+    interface HTMLTo4stMatchConfigListElement extends Components.To4stMatchConfigList, HTMLStencilElement {
+    }
+    var HTMLTo4stMatchConfigListElement: {
+        prototype: HTMLTo4stMatchConfigListElement;
+        new (): HTMLTo4stMatchConfigListElement;
     };
     interface HTMLTo4stPlayerStatisticsElement extends Components.To4stPlayerStatistics, HTMLStencilElement {
     }
@@ -264,8 +330,11 @@ declare global {
     interface HTMLElementTagNameMap {
         "to4st-api-keys": HTMLTo4stApiKeysElement;
         "to4st-banlist-partners": HTMLTo4stBanlistPartnersElement;
+        "to4st-details": HTMLTo4stDetailsElement;
         "to4st-edit-modal": HTMLTo4stEditModalElement;
         "to4st-filter-modal": HTMLTo4stFilterModalElement;
+        "to4st-gameserver-config": HTMLTo4stGameserverConfigElement;
+        "to4st-gameserver-config-list": HTMLTo4stGameserverConfigListElement;
         "to4st-gameserver-list": HTMLTo4stGameserverListElement;
         "to4st-gameserver-settings": HTMLTo4stGameserverSettingsElement;
         "to4st-general-settings": HTMLTo4stGeneralSettingsElement;
@@ -273,6 +342,7 @@ declare global {
         "to4st-home": HTMLTo4stHomeElement;
         "to4st-list": HTMLTo4stListElement;
         "to4st-login-modal": HTMLTo4stLoginModalElement;
+        "to4st-match-config-list": HTMLTo4stMatchConfigListElement;
         "to4st-player-statistics": HTMLTo4stPlayerStatisticsElement;
         "to4st-player-statistics-list": HTMLTo4stPlayerStatisticsListElement;
         "to4st-registered-players-list": HTMLTo4stRegisteredPlayersListElement;
@@ -287,11 +357,61 @@ declare namespace LocalJSX {
     }
     interface To4stBanlistPartners {
     }
+    interface To4stDetails {
+        /**
+          * Properties for columns
+         */
+        "columns"?: ColumnDetailProps<any>[];
+        "columnsCount"?: number;
+        /**
+          * Filters
+         */
+        "filters"?: FilterProps[];
+        "hasSearch"?: boolean;
+        /**
+          * Has pagination
+         */
+        "listHasPagination"?: boolean;
+        /**
+          * Block all inputs, display loading modal
+         */
+        "loadingInputBlock"?: boolean;
+        "mapPreSerializeEntity"?: (entity: any) => { mapped: any, fileName?: string };
+        "name"?: string;
+        /**
+          * Event called when save request resolves
+          * @emits error to display, empty string for if successful
+         */
+        "onAfterSave"?: (event: CustomEvent<string>) => void;
+        "onDeleteEntity"?: (event: CustomEvent<{
+    entity: any;
+    onDeletedEntity: () => void;
+  }>) => void;
+        "onSaveEntity"?: (event: CustomEvent<{
+    entity: any;
+    transactionId: string;
+    afterEx: EventEmitter<string>;
+  }>) => void;
+        "onUpdateEntities"?: (event: CustomEvent<{
+
+    page?: number;
+    search?: string;
+    orderBy?: string;
+    orderDesc?: boolean;
+
+    onFetchedData: (data: any[], pageCount: number) => void;
+  }>) => void;
+        /**
+          * Striped table
+         */
+        "stripedTable"?: boolean;
+        "useDefaultListCreate"?: boolean;
+    }
     interface To4stEditModal {
         /**
           * Properties used to retrieve input elements
          */
-        "columns"?: ColumnProps[];
+        "columns"?: ColumnProps<any>[];
         /**
           * Current input error
          */
@@ -343,6 +463,10 @@ declare namespace LocalJSX {
          */
         "onClose"?: (event: CustomEvent<void>) => void;
     }
+    interface To4stGameserverConfig {
+    }
+    interface To4stGameserverConfigList {
+    }
     interface To4stGameserverList {
     }
     interface To4stGameserverSettings {
@@ -367,9 +491,13 @@ declare namespace LocalJSX {
     }
     interface To4stList {
         /**
+          * Allow selection of rows
+         */
+        "allowSelect"?: boolean;
+        /**
           * Properties for columns
          */
-        "columns"?: ColumnProps[];
+        "columns"?: ColumnProps<any>[];
         /**
           * Current items
          */
@@ -383,9 +511,9 @@ declare namespace LocalJSX {
          */
         "filters"?: FilterProps[];
         /**
-          * Supports create, update, delete
+          * Supports Create
          */
-        "hasCreateUpdate"?: boolean;
+        "hasCreate"?: boolean;
         /**
           * Display pagination features
          */
@@ -394,6 +522,10 @@ declare namespace LocalJSX {
           * Display search input box
          */
         "hasSearch"?: boolean;
+        /**
+          * Supports update, delete
+         */
+        "hasUpdate"?: boolean;
         /**
           * Block all inputs, display loading modal
          */
@@ -415,6 +547,11 @@ declare namespace LocalJSX {
     orderBy: string;
     orderDesc: boolean;
   }>) => void;
+        /**
+          * Event fired with item that is selected
+          * @emits item which is selected
+         */
+        "onItemSelected"?: (event: CustomEvent<any>) => void;
         /**
           * Event to handle pagination
           * @emits page
@@ -488,6 +625,8 @@ declare namespace LocalJSX {
          */
         "visible"?: boolean;
     }
+    interface To4stMatchConfigList {
+    }
     interface To4stPlayerStatistics {
     }
     interface To4stPlayerStatisticsList {
@@ -533,8 +672,11 @@ declare namespace LocalJSX {
     interface IntrinsicElements {
         "to4st-api-keys": To4stApiKeys;
         "to4st-banlist-partners": To4stBanlistPartners;
+        "to4st-details": To4stDetails;
         "to4st-edit-modal": To4stEditModal;
         "to4st-filter-modal": To4stFilterModal;
+        "to4st-gameserver-config": To4stGameserverConfig;
+        "to4st-gameserver-config-list": To4stGameserverConfigList;
         "to4st-gameserver-list": To4stGameserverList;
         "to4st-gameserver-settings": To4stGameserverSettings;
         "to4st-general-settings": To4stGeneralSettings;
@@ -542,6 +684,7 @@ declare namespace LocalJSX {
         "to4st-home": To4stHome;
         "to4st-list": To4stList;
         "to4st-login-modal": To4stLoginModal;
+        "to4st-match-config-list": To4stMatchConfigList;
         "to4st-player-statistics": To4stPlayerStatistics;
         "to4st-player-statistics-list": To4stPlayerStatisticsList;
         "to4st-registered-players-list": To4stRegisteredPlayersList;
@@ -557,8 +700,11 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             "to4st-api-keys": LocalJSX.To4stApiKeys & JSXBase.HTMLAttributes<HTMLTo4stApiKeysElement>;
             "to4st-banlist-partners": LocalJSX.To4stBanlistPartners & JSXBase.HTMLAttributes<HTMLTo4stBanlistPartnersElement>;
+            "to4st-details": LocalJSX.To4stDetails & JSXBase.HTMLAttributes<HTMLTo4stDetailsElement>;
             "to4st-edit-modal": LocalJSX.To4stEditModal & JSXBase.HTMLAttributes<HTMLTo4stEditModalElement>;
             "to4st-filter-modal": LocalJSX.To4stFilterModal & JSXBase.HTMLAttributes<HTMLTo4stFilterModalElement>;
+            "to4st-gameserver-config": LocalJSX.To4stGameserverConfig & JSXBase.HTMLAttributes<HTMLTo4stGameserverConfigElement>;
+            "to4st-gameserver-config-list": LocalJSX.To4stGameserverConfigList & JSXBase.HTMLAttributes<HTMLTo4stGameserverConfigListElement>;
             "to4st-gameserver-list": LocalJSX.To4stGameserverList & JSXBase.HTMLAttributes<HTMLTo4stGameserverListElement>;
             "to4st-gameserver-settings": LocalJSX.To4stGameserverSettings & JSXBase.HTMLAttributes<HTMLTo4stGameserverSettingsElement>;
             "to4st-general-settings": LocalJSX.To4stGeneralSettings & JSXBase.HTMLAttributes<HTMLTo4stGeneralSettingsElement>;
@@ -566,6 +712,7 @@ declare module "@stencil/core" {
             "to4st-home": LocalJSX.To4stHome & JSXBase.HTMLAttributes<HTMLTo4stHomeElement>;
             "to4st-list": LocalJSX.To4stList & JSXBase.HTMLAttributes<HTMLTo4stListElement>;
             "to4st-login-modal": LocalJSX.To4stLoginModal & JSXBase.HTMLAttributes<HTMLTo4stLoginModalElement>;
+            "to4st-match-config-list": LocalJSX.To4stMatchConfigList & JSXBase.HTMLAttributes<HTMLTo4stMatchConfigListElement>;
             "to4st-player-statistics": LocalJSX.To4stPlayerStatistics & JSXBase.HTMLAttributes<HTMLTo4stPlayerStatisticsElement>;
             "to4st-player-statistics-list": LocalJSX.To4stPlayerStatisticsList & JSXBase.HTMLAttributes<HTMLTo4stPlayerStatisticsListElement>;
             "to4st-registered-players-list": LocalJSX.To4stRegisteredPlayersList & JSXBase.HTMLAttributes<HTMLTo4stRegisteredPlayersListElement>;

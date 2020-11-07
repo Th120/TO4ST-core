@@ -23,7 +23,7 @@ export class To4stEditModal implements ComponentInterface {
   /**
    * Properties used to retrieve input elements
    */
-  @Prop() columns = [] as ColumnProps[];
+  @Prop() columns = [] as ColumnProps<any>[];
 
   /**
    * Freeze commit button

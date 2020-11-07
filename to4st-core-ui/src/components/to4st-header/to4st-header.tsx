@@ -72,6 +72,11 @@ export class To4stHeader implements ComponentInterface {
       condition: () => !!this.isAdmin || !!this.appConfig?.publicStats
     },
     {
+      title: "Gameserver Config",
+      url: "/gameserver-config",
+      condition: () => !!this.isAdmin
+    },
+    {
       title: "Settings",
       children: [
         {
