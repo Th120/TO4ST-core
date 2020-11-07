@@ -74,12 +74,6 @@ export class To4stDetailEdit implements ComponentInterface {
 
   @Prop() mapPreSerializeEntity: (entity: any) => { mapped: any, fileName?: string };
 
-  @Watch('columns')
-  watchHandler()
-  {
-    console.log("ddett")
-  }
-
   @Event() updateEntities: EventEmitter<{
 
     page?: number;
@@ -234,7 +228,7 @@ export class To4stDetailEdit implements ComponentInterface {
   async removeEntity(entity: any)
   {
     this.deleteActive = false;
-    this.deleteEntity.emit({entity: entity, onDeletedEntity: () => this.updateContent()}); 
+    this.deleteEntity.emit({entity: entity, onDeletedEntity: () => {this.updateContent(); this.currentItem = undefined; this.currentItemClone = undefined;}}); 
   }
 
   itemSelected(item: any)

@@ -25,7 +25,7 @@ export class To4stGameserverConfig implements ComponentInterface {
   /**
    * Current matchConfigs
    */
-  @app.Provide("matchConfigs") matchConfigs!: MatchConfig[];
+  @app.Provide("matchConfigs") matchConfigs = [] as MatchConfig[];
 
   render() {
     return (

@@ -54,12 +54,9 @@ export class To4stGameserverConfigList implements ComponentInterface {
   {
     if(this.matchConfigs !== undefined)
     {
-      this._matchConfigs = this.matchConfigs;
-      this.columns = [...this.columns] // needed to rerender child
+      this.columns = [...this.columns] // needed to rerender details component
     }
   }
-
-  @State() _matchConfigs = [] as MatchConfig[];
 
   @State() columns = [
     {
@@ -75,7 +72,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
     {
       name: "Current Match Config",
       shouldBeVisible: () => false,
-    detailInput: (item, cb) => <div class="select"><select onChange={e => cb("currentMatchConfig", {configName: (e.target as HTMLSelectElement).value.trim()})}>{this._matchConfigs.map(x => {console.log("dafuk"); return <option selected={item?.currentMatchConfig?.configName === x.configName}>{x.configName}</option>})}</select></div>
+    detailInput: (item, cb) => <div class="select"><select onChange={e => cb("currentMatchConfig", {configName: (e.target as HTMLSelectElement).value.trim()})}>{this.matchConfigs.map(x => <option selected={item?.currentMatchConfig?.configName === x.configName}>{x.configName}</option>)}</select></div>
     },
     {
       name: "Game Password",

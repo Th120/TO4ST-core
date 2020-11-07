@@ -56,8 +56,6 @@ export class To4stMatchConfigList implements ComponentInterface {
 
   @State() gameModes: GameMode[] = [];
 
-
-
   @State() columns = [
     {
       name: "Id",
