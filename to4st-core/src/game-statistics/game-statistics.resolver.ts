@@ -829,6 +829,8 @@ export class PlayerRoundStatsResolver {
                 team: x.team
             })));
 
+        await this.steamUserService.updateSteamUsers(stats.map(x => x.steamId64)); // Don't update when weapon stats are set, this should be enough since update round / weapon stats are usually used at the same time
+
         await this.statsService.createUpdatePlayerRoundStats(stats);
 
         return true;

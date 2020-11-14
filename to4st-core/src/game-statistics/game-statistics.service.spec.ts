@@ -321,7 +321,7 @@ describe('GameStatisticsService', () => {
     const findByName = await service.getMap({name: mapName});
     expect(findByName.name).toEqual(mapName);
 
-    const findById = await service.getMap({id: game.map.id});
+    const findById = await service.getMap({id: inserted.map.id});
     expect(findById.name).toEqual(mapName);
 
   });
@@ -341,7 +341,7 @@ describe('GameStatisticsService', () => {
     const findByName = await service.getGameMode({name: modeName});
     expect(findByName.name).toEqual(modeName);
 
-    const findById = await service.getGameMode({id: game.gameMode.id});
+    const findById = await service.getGameMode({id: inserted.gameMode.id});
     expect(findById.name).toEqual(modeName);
   });
 
