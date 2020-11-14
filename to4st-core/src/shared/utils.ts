@@ -69,7 +69,7 @@ export function steamId64ToAccountId(steamId64: string): number
  */
 export function isValidSteamId(steamId64: string): boolean
 {
-    return steamId64ToAccountId(steamId64) > 0;
+    return steamId64 && steamId64ToAccountId(steamId64) > 0;
 }
 
 /**
