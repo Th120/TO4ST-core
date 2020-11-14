@@ -7,7 +7,7 @@ import { GameserverService } from './gameserver.service';
 import { AuthGuard } from '../shared/auth.guard';
 import { Gameserver } from './gameserver.entity';
 import { Paginated } from '../shared/paginated';
-import { Role, AllowTacByteAccess, OnlyRole, RequestingGameserver } from '../shared/auth.utils';
+import { Role, AllowTacByteAccess, OnlyRole, RequestingGameserver, RequiredAuthPlayerRoles, AuthPlayerRole } from '../shared/auth.utils';
 import { TransactionInterceptor } from '../shared/transaction.interceptor';
 import { GameserverConfig } from './gameserver-config.entity';
 import { GameserverConfigService } from './gameserver-config.service';
@@ -39,10 +39,9 @@ class GameserverConfigInput
     /**
      * Id of gameserver, is uuid should be unique globally
      */
-    @ValidateIf(x => x.gameserver !== undefined)
     @IsString()
-    @Field(() => String, {nullable: true})
-    gameserverId?: string;
+    @Field(() => String)
+    gameserverId: string;
 
     /**
      * Id of ini used by gameserver
@@ -393,6 +392,15 @@ class GameserverConfigQuery
     @IsString()
     @Field(() => String, {nullable: true})
     id?: string;
+
+    /**
+     * AuthKey of gameserver
+     */
+    @ValidateIf(x => x.authKey !== undefined)
+    @IsString()
+    @Field(() => String, {nullable: true})
+    authKey?: string;
+
 }
 
 /**
@@ -541,7 +549,7 @@ export class GameserverConfigResolver {
     @AllowTacByteAccess()
     async gameserverConfig(@Args({name: "options", type: () => GameserverConfigQuery}) options: GameserverConfigQuery)
     {
-        return await this.gameserverConfigService.getGameserverConfig({id: options.id});
+        return await this.gameserverConfigService.getGameserverConfig(options.id ? {id: options.id} : {authKey: options.authKey});
     }
 
     /**
@@ -561,12 +569,10 @@ export class GameserverConfigResolver {
      * @param gameserverConfig 
      */
     @OnlyRole(Role.admin)
-    @Mutation(() => GameserverConfig, {description: "X-Request-ID must be set in header"})
-    @UseInterceptors(TransactionInterceptor)
     async createUpdateGameserverConfig(@Args({name: "gameserverConfig", type: () => GameserverConfigInput}) gameserverConfig: GameserverConfigInput)
     {
         const nuGameserverConfig = new GameserverConfig({
-            gameserver: gameserverConfig.gameserverId ? new Gameserver({id: gameserverConfig.gameserverId}) : undefined,
+            gameserver: new Gameserver({id: gameserverConfig.gameserverId}),
             currentName: gameserverConfig.currentGameserverName,
             currentMatchConfig: gameserverConfig.currentMatchConfigId ? new MatchConfig({id: gameserverConfig.currentMatchConfigId}) : undefined,
             voteLength: gameserverConfig.voteLength,
@@ -588,6 +594,27 @@ export class GameserverConfigResolver {
         const ret = await this.gameserverConfigService.createUpdateGameserverConfig(nuGameserverConfig);
         return ret;
     }
+
+    @Mutation(() => GameserverConfig, {description: "Used to assign MatchConfig and password to a server from the game by an authed player"})
+    @RequiredAuthPlayerRoles([AuthPlayerRole.gameControl])
+    async assignMatchConfig(@Args({name: "gameserverConfig", type: () => GameserverConfigInput}) gameserverConfig: GameserverConfigInput)
+    {
+        const existingConfig = await this.gameserverConfigService.getGameserverConfig(new Gameserver({id: gameserverConfig.gameserverId}));
+        if(!existingConfig)
+        {
+            throw new HttpException("Gameserver must have an existing gameserver config", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        const nuGameserverConfig = new GameserverConfig({
+            gameserver: new Gameserver({id: gameserverConfig.gameserverId}),
+            currentMatchConfig: gameserverConfig.currentMatchConfigId ? new MatchConfig({id: gameserverConfig.currentMatchConfigId}) : undefined,
+            gamePassword: gameserverConfig.gamePassword
+        });
+
+        const ret = await this.gameserverConfigService.createUpdateGameserverConfig(nuGameserverConfig);
+        return ret;
+    }
+
 }
 
 /**
@@ -605,6 +632,7 @@ export class MatchConfigResolver {
      * @param options 
      */
     @Query(() => PaginatedMatchConfig)
+    @RequiredAuthPlayerRoles([AuthPlayerRole.gameControl])
     @AllowTacByteAccess()
     async matchConfigs(@Args({name: "options", type: () => MatchConfigsQuery}) options: MatchConfigsQuery): Promise<PaginatedMatchConfig>
     {
@@ -624,6 +652,7 @@ export class MatchConfigResolver {
      */
     @Query(() => MatchConfig)
     @AllowTacByteAccess()
+    @RequiredAuthPlayerRoles([AuthPlayerRole.gameControl])
     async matchConfig(@Args({name: "options", type: () => MatchConfigQuery}) options: MatchConfigQuery)
     {
         return await this.gameserverConfigService.getMatchConfig({id: options.id, configName: options.configName});

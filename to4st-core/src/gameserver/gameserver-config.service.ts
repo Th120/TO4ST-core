@@ -169,7 +169,7 @@ export class GameserverConfigService implements OnApplicationBootstrap{
    */
   async getGameserverConfig(gameserver: Partial<Gameserver>)
   {
-    return await this.gameserverConfigRepository.findOne({relations: ["gameserver", "currentMatchConfig", "currentMatchConfig.gameMode"], where: {gameserver: {id: gameserver.id}}});
+    return await this.gameserverConfigRepository.findOne({relations: ["gameserver", "currentMatchConfig", "currentMatchConfig.gameMode"], where: {gameserver: gameserver.id ? {id: gameserver.id} : {authKey: gameserver.authKey}}});
   }
 
   /**
