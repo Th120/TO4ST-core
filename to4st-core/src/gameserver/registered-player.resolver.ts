@@ -251,6 +251,8 @@ export class RegisteredPlayerResolver {
                 reservedSlots: registeredPlayer.reservedSlots
             });
 
+        await this.steamUserService.updateSteamUsers([nuPlayer.steamId64]);
+
         const ret = await this.registeredPlayerService.createUpdateRegisteredPlayer(nuPlayer);
         return ret;
     }
