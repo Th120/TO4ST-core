@@ -569,6 +569,7 @@ export class GameserverConfigResolver {
      * @param gameserverConfig 
      */
     @OnlyRole(Role.admin)
+    @Mutation(() => GameserverConfig)
     async createUpdateGameserverConfig(@Args({name: "gameserverConfig", type: () => GameserverConfigInput}) gameserverConfig: GameserverConfigInput)
     {
         const nuGameserverConfig = new GameserverConfig({

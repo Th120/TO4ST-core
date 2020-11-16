@@ -190,7 +190,7 @@ enum GameserverConfigFilter {
 }
 
 input GameserverConfigInput {
-  gameserverId: String
+  gameserverId: String!
   currentMatchConfigId: Int
   currentGameserverName: String
   voteLength: Int
@@ -218,6 +218,7 @@ enum GameserverConfigOrder {
 
 input GameserverConfigQuery {
   id: String
+  authKey: String
 }
 
 input GameserverConfigsQuery {
@@ -300,7 +301,7 @@ input MatchConfigInput {
   midGameBreakLength: Int
   friendlyFireScale: Float
   playerVoteThreshold: Float
-  maxTeamDamage: Float
+  maxTeamDamage: Int
   allowGhostcam: Boolean
   autoBalanceTeams: Boolean
   playerVoteTeamOnly: Boolean
@@ -361,11 +362,12 @@ type Mutation {
   createUpdateBan(banInput: BanInput!): Ban!
   authPlayerToken(steamId64: String!): String!
   deleteGameserverConfig(gameserverId: String!): Boolean!
+  createUpdateGameserverConfig(gameserverConfig: GameserverConfigInput!): GameserverConfig!
 
   """
-  X-Request-ID must be set in header
+  Used to assign MatchConfig and password to a server from the game by an authed player
   """
-  createUpdateGameserverConfig(gameserverConfig: GameserverConfigInput!): GameserverConfig!
+  assignMatchConfig(gameserverConfig: GameserverConfigInput!): GameserverConfig!
   deleteMatchConfig(options: MatchConfigQuery!): Boolean!
 
   """

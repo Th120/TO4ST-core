@@ -412,8 +412,9 @@ export interface Mutation {
   createUpdateBan: Ban
   authPlayerToken: String
   deleteGameserverConfig: Boolean
-  /** X-Request-ID must be set in header */
   createUpdateGameserverConfig: GameserverConfig
+  /** Used to assign MatchConfig and password to a server from the game by an authed player */
+  assignMatchConfig: GameserverConfig
   deleteMatchConfig: Boolean
   /** X-Request-ID must be set in header */
   createUpdateMatchConfig: MatchConfig
@@ -879,6 +880,7 @@ export interface PaginatedGameserverConfigRequest {
 
 export interface GameserverConfigQuery {
   id?: String | null
+  authKey?: String | null
 }
 
 export interface MatchConfigsQuery {
@@ -968,8 +970,9 @@ export interface MutationRequest {
   createUpdateBan?: [{ banInput: BanInput }, BanRequest]
   authPlayerToken?: [{ steamId64: String }]
   deleteGameserverConfig?: [{ gameserverId: String }]
-  /** X-Request-ID must be set in header */
   createUpdateGameserverConfig?: [{ gameserverConfig: GameserverConfigInput }, GameserverConfigRequest]
+  /** Used to assign MatchConfig and password to a server from the game by an authed player */
+  assignMatchConfig?: [{ gameserverConfig: GameserverConfigInput }, GameserverConfigRequest]
   deleteMatchConfig?: [{ options: MatchConfigQuery }]
   /** X-Request-ID must be set in header */
   createUpdateMatchConfig?: [{ matchConfig: MatchConfigInput }, MatchConfigRequest]
@@ -1066,7 +1069,7 @@ export interface BanInput {
 }
 
 export interface GameserverConfigInput {
-  gameserverId?: String | null
+  gameserverId: String
   currentMatchConfigId?: Int | null
   currentGameserverName?: String | null
   voteLength?: Int | null
@@ -1100,7 +1103,7 @@ export interface MatchConfigInput {
   midGameBreakLength?: Int | null
   friendlyFireScale?: Float | null
   playerVoteThreshold?: Float | null
-  maxTeamDamage?: Float | null
+  maxTeamDamage?: Int | null
   allowGhostcam?: Boolean | null
   autoBalanceTeams?: Boolean | null
   playerVoteTeamOnly?: Boolean | null
@@ -2303,8 +2306,13 @@ export interface MutationPromiseChain {
   deleteGameserverConfig: (args: {
     gameserverId: String
   }) => { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
-  /** X-Request-ID must be set in header */
   createUpdateGameserverConfig: (args: {
+    gameserverConfig: GameserverConfigInput
+  }) => GameserverConfigPromiseChain & {
+    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Promise<GameserverConfig>
+  }
+  /** Used to assign MatchConfig and password to a server from the game by an authed player */
+  assignMatchConfig: (args: {
     gameserverConfig: GameserverConfigInput
   }) => GameserverConfigPromiseChain & {
     execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Promise<GameserverConfig>
@@ -2397,8 +2405,13 @@ export interface MutationObservableChain {
   deleteGameserverConfig: (args: {
     gameserverId: String
   }) => { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
-  /** X-Request-ID must be set in header */
   createUpdateGameserverConfig: (args: {
+    gameserverConfig: GameserverConfigInput
+  }) => GameserverConfigObservableChain & {
+    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Observable<GameserverConfig>
+  }
+  /** Used to assign MatchConfig and password to a server from the game by an authed player */
+  assignMatchConfig: (args: {
     gameserverConfig: GameserverConfigInput
   }) => GameserverConfigObservableChain & {
     execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Observable<GameserverConfig>
