@@ -3,7 +3,7 @@ import { ValidateIf, IsInt, IsString, IsBoolean } from 'class-validator';
 import { ValidationPipe, UsePipes, UseGuards, UseInterceptors, HttpException, HttpStatus } from '@nestjs/common';
 
 
-import { GameserverService } from './gameserver.service';
+import { GameserverConfigFilter, GameserverConfigOrder, GameserverService } from './gameserver.service';
 import { AuthGuard } from '../shared/auth.guard';
 import { Gameserver } from './gameserver.entity';
 import { Paginated } from '../shared/paginated';
@@ -42,12 +42,12 @@ class GameserversQuery
     orderDesc?: boolean;
 
     /**
-     * Should be ordered by current name?
+     * Should be ordered by 
      */
-    @ValidateIf(x => x.orderByCurrentName !== undefined)
-    @IsBoolean()
-    @Field(() => Boolean, {nullable: true})
-    orderByCurrentName?: boolean;
+    @ValidateIf(x => x.orderBy !== undefined)
+    @IsString()
+    @Field(() => GameserverConfigOrder, {nullable: true})
+    orderBy?: GameserverConfigOrder;
 
     /**
      * Search by current name, authKey, description
@@ -56,6 +56,14 @@ class GameserversQuery
     @IsString()
     @Field(() => String, {nullable: true})
     search?: string;
+
+    /**
+     * Filter for configs
+     */
+    @ValidateIf(x => x.configFilter !== undefined)
+    @IsString()
+    @Field(() => GameserverConfigFilter, {nullable: true})
+    configFilter?: GameserverConfigFilter;
 }
 
 /**
@@ -164,9 +172,10 @@ export class GameserverResolver {
             pageSize: options.pageSize,
             search: options.search,
             orderDesc: options.orderDesc,
-            orderByCurrentName: options.orderByCurrentName
+            orderBy: options.orderBy,
+            configFilter: options.configFilter
         });
-        
+       
         return { content: gameservers, totalCount: count , pageCount: pageCount};
     }
 

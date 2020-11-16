@@ -64,7 +64,7 @@ export class To4stApiKeys implements ComponentInterface {
         <input
           type="text"
           placeholder="Leave blank to auto-generate"
-          value={item?.key ?? ""}
+          value={item?.authKey ?? ""}
           class="input"
           onChange={event =>
             cb.emit({
@@ -98,7 +98,7 @@ export class To4stApiKeys implements ComponentInterface {
       tableContent: key => <p>{key.lastUse}</p>,
       sortable: true
     }
-  ] as ColumnProps[];
+  ] as ColumnProps<AuthKey>[];
 
   /**
    * Init

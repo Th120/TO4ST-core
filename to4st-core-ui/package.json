@@ -24,6 +24,7 @@
     "bulma-switch": "^2.0.0",
     "bulmaswatch": "^0.8.1",
     "graphql-typed-client": "^1.7.4",
+    "iso8601-validator": "^1.0.1",
     "jssha": "^3.1.2",
     "jwt-decode": "^2.2.0",
     "nanoid": "^3.1.12",

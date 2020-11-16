@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GameserverService } from './gameserver.service';
+import { GameserverConfigOrder, GameserverService } from './gameserver.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Gameserver } from './gameserver.entity';
 
@@ -9,6 +9,9 @@ import { forN, N, genTypeORMTestCFG, MIN_N,  } from '../testUtils';
 
 import _ from 'lodash'
 import { MIN_AUTH_KEY_LENGTH, MIN_ID_LENGTH } from '../globals';
+import { GameserverConfig } from './gameserver-config.entity';
+import { GameMode } from '../game-statistics/game-mode.entity';
+import { MatchConfig } from './match-config.entity';
 
 
 describe('GameserverService', () => {
@@ -17,8 +20,8 @@ describe('GameserverService', () => {
   beforeEach(async () => { 
     module = await Test.createTestingModule({
       imports: [ 
-        genTypeORMTestCFG([Gameserver, ]), 
-        TypeOrmModule.forFeature([Gameserver, ],), 
+        genTypeORMTestCFG([Gameserver, GameserverConfig, MatchConfig, GameMode]), 
+        TypeOrmModule.forFeature([Gameserver, GameserverConfig, MatchConfig, GameMode],), 
        
       ], 
       providers: [GameserverService, ]
@@ -97,7 +100,7 @@ describe('GameserverService', () => {
       await service.createUpdateGameserver(toInsert);
     });
       
-    let [res, total, pages] = await service.getGameservers({orderByCurrentName: true});    
+    let [res, total, pages] = await service.getGameservers({orderBy: GameserverConfigOrder.currentName});    
     expect(total).toBe(N);
 
     //Get all pages and merge them into result archive
@@ -105,7 +108,7 @@ describe('GameserverService', () => {
     {
       for(let i = 2; i <= pages; i++)
       {
-        res = [...res, ...(await service.getGameservers({page: i, orderByCurrentName: true}))[0]];
+        res = [...res, ...(await service.getGameservers({page: i, orderBy: GameserverConfigOrder.currentName}))[0]];
       }
     }
 
@@ -254,7 +257,7 @@ describe('GameserverService', () => {
       await service.createUpdateGameserver(toInsert);
     });
       
-    let [res, total, pages] = await service.getGameservers({orderByCurrentName: true});    
+    let [res, total, pages] = await service.getGameservers({orderBy: GameserverConfigOrder.currentName});    
     expect(total).toBe(N);
 
     //Get all pages and merge them into result archive
@@ -262,7 +265,7 @@ describe('GameserverService', () => {
     {
       for(let i = 2; i <= pages; i++)
       {
-        res = [...res, ...(await service.getGameservers({page: i, orderByCurrentName: true}))[0]];
+        res = [...res, ...(await service.getGameservers({page: i, orderBy: GameserverConfigOrder.currentName}))[0]];
       }
     }
 

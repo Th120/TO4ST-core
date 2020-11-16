@@ -1,10 +1,11 @@
-import { Entity, Column, Index, BeforeUpdate, BeforeInsert, PrimaryColumn } from 'typeorm';
+import { Entity, Column, Index, BeforeUpdate, BeforeInsert, PrimaryColumn, JoinColumn, OneToOne } from 'typeorm';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
 
 
 import { Role } from '../shared/auth.utils';
 import { roundDate } from '../shared/utils';
+import { GameserverConfig } from './gameserver-config.entity';
 
 
 /**
@@ -54,6 +55,12 @@ export class Gameserver {
   @Field({nullable: true})
   @Expose({groups: [Role.authKey, Role.admin]})
   lastContact?: Date;
+
+  @OneToOne(() => GameserverConfig, {onDelete: "SET NULL", nullable: true})
+  @JoinColumn()
+  @Field(() => GameserverConfig, {nullable: true})
+  @Expose()
+  gameserverConfig?: GameserverConfig;
 
   /**
    * Remove ms

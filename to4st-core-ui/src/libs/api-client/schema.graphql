@@ -114,6 +114,7 @@ scalar DateTime
 type Game {
   id: String!
   gameserver: Gameserver!
+  matchConfig: MatchConfig!
   startedAt: DateTime!
   endedAt: DateTime
   map: ServerMap!
@@ -137,7 +138,7 @@ type GameMode {
 
 input GameModeInput {
   name: String!
-  isTeamBased: Boolean!
+  isTeamBased: Boolean
 }
 
 input GameQuery {
@@ -158,6 +159,73 @@ type Gameserver {
   currentName: String!
   description: String
   lastContact: DateTime
+  gameserverConfig: GameserverConfig
+}
+
+type GameserverConfig {
+  gameserver: Gameserver!
+  currentMatchConfig: MatchConfig
+  currentName: String!
+  voteLength: Int!
+  gamePassword: String!
+  reservedSlots: Int!
+  balanceClans: Boolean!
+  allowSkipMapVote: Boolean!
+  tempKickBanTime: Int!
+  autoRecordReplay: Boolean!
+  playerGameControl: Boolean!
+  enableMapVote: Boolean!
+  serverAdmins: String!
+  serverDescription: String!
+  website: String!
+  contact: String!
+  mapNoReplay: Int!
+  enableVoicechat: Boolean!
+}
+
+enum GameserverConfigFilter {
+  none
+  withConfig
+  withoutConfig
+}
+
+input GameserverConfigInput {
+  gameserverId: String
+  currentMatchConfigId: Int
+  currentGameserverName: String
+  voteLength: Int
+  tempKickBanTime: Int
+  gamePassword: String
+  serverAdmins: String
+  serverDescription: String
+  website: String
+  contact: String
+  reservedSlots: Int
+  mapNoReplay: Int
+  balanceClans: Boolean
+  allowSkipMapVote: Boolean
+  autoRecordReplay: Boolean
+  playerGameControl: Boolean
+  enableMapVote: Boolean
+  enableVoicechat: Boolean
+}
+
+enum GameserverConfigOrder {
+  currentName
+  lastContact
+  hasConfig
+}
+
+input GameserverConfigQuery {
+  id: String
+}
+
+input GameserverConfigsQuery {
+  page: Int
+  pageSize: Int
+  search: String
+  orderDesc: Boolean
+  orderByGameserverName: Boolean
 }
 
 input GameserverInput {
@@ -176,8 +244,9 @@ input GameserversQuery {
   page: Int
   pageSize: Int
   orderDesc: Boolean
-  orderByCurrentName: Boolean
+  orderBy: GameserverConfigOrder
   search: String
+  configFilter: GameserverConfigFilter
 }
 
 input GameserverUpdateInput {
@@ -187,6 +256,73 @@ input GameserverUpdateInput {
 type LoginResponse {
   appConfig: AppConfig!
   jwt: String!
+}
+
+type MatchConfig {
+  id: Int!
+  configName: String!
+  gameMode: GameMode!
+  configHash: String!
+  matchEndLength: Int!
+  warmUpLength: Int!
+  friendlyFireScale: Float!
+  mapLength: Int!
+  roundLength: Int!
+  preRoundLength: Int!
+  roundEndLength: Int!
+  roundLimit: Int!
+  allowGhostcam: Boolean!
+  playerVoteThreshold: Float!
+  autoBalanceTeams: Boolean!
+  playerVoteTeamOnly: Boolean!
+  maxTeamDamage: Float!
+  enablePlayerVote: Boolean!
+  autoSwapTeams: Boolean!
+  midGameBreakLength: Int!
+  nadeRestriction: Boolean!
+  globalVoicechat: Boolean!
+  muteDeadToTeam: Boolean!
+  ranked: Boolean!
+  private: Boolean!
+}
+
+input MatchConfigInput {
+  id: Int
+  configName: String
+  gameMode: GameModeInput
+  matchEndLength: Int
+  warmUpLength: Int
+  mapLength: Int
+  roundLength: Int
+  preRoundLength: Int
+  roundEndLength: Int
+  roundLimit: Int
+  midGameBreakLength: Int
+  friendlyFireScale: Float
+  playerVoteThreshold: Float
+  maxTeamDamage: Float
+  allowGhostcam: Boolean
+  autoBalanceTeams: Boolean
+  playerVoteTeamOnly: Boolean
+  enablePlayerVote: Boolean
+  autoSwapTeams: Boolean
+  nadeRestriction: Boolean
+  globalVoicechat: Boolean
+  muteDeadToTeam: Boolean
+  ranked: Boolean
+  private: Boolean
+}
+
+input MatchConfigQuery {
+  id: Int
+  configName: Int
+}
+
+input MatchConfigsQuery {
+  page: Int
+  pageSize: Int
+  configName: String
+  orderDesc: Boolean
 }
 
 type Mutation {
@@ -224,6 +360,18 @@ type Mutation {
   """
   createUpdateBan(banInput: BanInput!): Ban!
   authPlayerToken(steamId64: String!): String!
+  deleteGameserverConfig(gameserverId: String!): Boolean!
+
+  """
+  X-Request-ID must be set in header
+  """
+  createUpdateGameserverConfig(gameserverConfig: GameserverConfigInput!): GameserverConfig!
+  deleteMatchConfig(options: MatchConfigQuery!): Boolean!
+
+  """
+  X-Request-ID must be set in header
+  """
+  createUpdateMatchConfig(matchConfig: MatchConfigInput!): MatchConfig!
   deleteAuthKey(authKey: String!): Boolean!
 
   """
@@ -274,6 +422,18 @@ type PaginatedGameMode {
 
 type PaginatedGameserver {
   content: [Gameserver!]
+  totalCount: Int!
+  pageCount: Int!
+}
+
+type PaginatedGameserverConfig {
+  content: [GameserverConfig!]
+  totalCount: Int!
+  pageCount: Int!
+}
+
+type PaginatedMatchConfig {
+  content: [MatchConfig!]
   totalCount: Int!
   pageCount: Int!
 }
@@ -440,6 +600,10 @@ type Query {
   registeredPlayer(options: RegisteredPlayerQuery!): RegisteredPlayer
   bans(options: BanQuery!): PaginatedBan!
   banCheck(banCheck: BanCheck!): Ban
+  gameserverConfigs(options: GameserverConfigsQuery!): PaginatedGameserverConfig!
+  gameserverConfig(options: GameserverConfigQuery!): GameserverConfig!
+  matchConfigs(options: MatchConfigsQuery!): PaginatedMatchConfig!
+  matchConfig(options: MatchConfigQuery!): MatchConfig!
   authKeys(options: AuthKeyQuery!): PaginatedAuthKey!
   authKey(authKey: String!): AuthKey
   authValid: Boolean!
@@ -524,7 +688,7 @@ input ServerMapInput {
 
 type SteamUser {
   steamId64: String!
-  name: String!
+  name: String
   avatarBigUrl: String!
   avatarMediumUrl: String!
 }

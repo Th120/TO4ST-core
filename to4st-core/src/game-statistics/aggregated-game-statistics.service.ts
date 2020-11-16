@@ -82,6 +82,11 @@ export interface IAggregatedPlayerStatisticsQuery {
      * Filter for only finished rounds
      */
     onlyFinishedRounds?: boolean, 
+    
+    /**
+     * Only games which use a ranked match config
+     */
+    ranked?: boolean;
 
     /**
      * Should be ordered descending?
@@ -134,6 +139,11 @@ export interface IAggregatedWeaponStatisticsQuery {
     gameMode?: GameMode, 
 
     /**
+     * Only games which use a ranked match config
+     */
+    ranked?: boolean;
+
+    /**
      * Filter for only finished rounds
      */
     onlyFinishedRounds?: boolean
@@ -177,6 +187,11 @@ export interface IPlayerCountQuery {
      * Filter matches of gameMode
      */
     gameMode?: GameMode, 
+
+    /**
+     * Only games which use a ranked match config
+     */
+    ranked?: boolean;
 
     /**
      * Filter for only finished rounds
@@ -230,6 +245,7 @@ export class AggregatedGameStatisticsService {
         queryBuilder = queryBuilder.leftJoin("prs.round", "round");
         queryBuilder = queryBuilder.leftJoin("round.game", "game");
         queryBuilder = queryBuilder.leftJoin("game.gameMode", "gameMode")
+        queryBuilder = queryBuilder.leftJoin("game.matchConfig", "matchConfig");
 
         // #ORM Hate.
         let greatest = "GREATEST"
@@ -241,6 +257,11 @@ export class AggregatedGameStatisticsService {
         queryBuilder = queryBuilder.select(`prs.steamId64 as steamid64, SUM(prs.kills) as sumkills, SUM(prs.deaths) as sumdeaths, (SUM(kills) / ${greatest}(1.0, (1.0 * SUM(deaths) + SUM(suicides)))) as killdeath, SUM(prs.suicides) as sumsuicides, SUM(prs.totalDamage) as sumdamage, SUM(prs.score) as sumscore, (SUM(prs.totalDamage) / ${greatest}(1.0, (1.0 * count(*)))) as averagedamageperround, (SUM(prs.score) / ${greatest}(1.0, (1.0 * count(*)))) as averagescoreperround, count(*) as roundsplayed, count(distinct round.game) as gamesplayed`);
        
         queryBuilder = queryBuilder.where("1=1"); 
+
+        if(options.ranked)
+        {
+            queryBuilder = queryBuilder.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
+        }
     
         if(options.onlyFinishedRounds)
         {
@@ -349,6 +370,7 @@ export class AggregatedGameStatisticsService {
             subq = subq.leftJoin("prws.round", "round");
             subq = subq.leftJoin("round.game", "game");
             subq = subq.leftJoin("game.gameMode", "gameMode")
+            subq = subq.leftJoin("game.matchConfig", "matchConfig");
 
             subq = subq.groupBy("prws.weapon");
 
@@ -367,6 +389,11 @@ export class AggregatedGameStatisticsService {
             if(options.game?.id)
             {
                 subq = subq.andWhere("game.id = :gameId" , { gameId: options.game.id });
+            }
+
+            if(options.ranked)
+            {
+                subq = subq.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
             }
 
             if(options.round?.id)
@@ -431,10 +458,8 @@ export class AggregatedGameStatisticsService {
 
         queryBuilder = queryBuilder.leftJoin("playerRoundStats.round", "round");
                 
-        if(options.game?.id || options.gameMode)
-        {
-            queryBuilder = queryBuilder.leftJoin("round.game", "game");
-        }
+        queryBuilder = queryBuilder.leftJoin("round.game", "game");
+        queryBuilder = queryBuilder.leftJoin("game.matchConfig", "matchConfig");
         
         if(options.gameMode)
         {
@@ -456,6 +481,11 @@ export class AggregatedGameStatisticsService {
         if(options.game?.id)
         {
             queryBuilder = queryBuilder.andWhere("game.id = :gameId" , { gameId: options.game.id });
+        }
+
+        if(options.ranked)
+        {
+            queryBuilder = queryBuilder.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
         }
 
         if(options.round?.id)

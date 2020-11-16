@@ -289,7 +289,8 @@ export class To4stPlayerStatistics implements ComponentInterface {
           loadingInputBlock={this.loadingData}
           onPagination={x => this.gotoPage(x.detail)}
           onChangedOrder={x => this.orderBy(x.detail.orderBy, x.detail.orderDesc)}
-          hasCreateUpdate={false}
+          hasCreate={false}
+          hasUpdate={false}
         ></to4st-list>
       </Host>
     );

@@ -16,6 +16,10 @@ export interface Query {
   registeredPlayer: RegisteredPlayer | null
   bans: PaginatedBan
   banCheck: Ban | null
+  gameserverConfigs: PaginatedGameserverConfig
+  gameserverConfig: GameserverConfig
+  matchConfigs: PaginatedMatchConfig
+  matchConfig: MatchConfig
   authKeys: PaginatedAuthKey
   authKey: AuthKey | null
   authValid: Boolean
@@ -45,6 +49,7 @@ export interface PaginatedGame {
 export interface Game {
   id: String
   gameserver: Gameserver
+  matchConfig: MatchConfig
   startedAt: DateTime
   endedAt: DateTime | null
   map: ServerMap
@@ -59,18 +64,73 @@ export interface Gameserver {
   currentName: String
   description: String | null
   lastContact: DateTime | null
+  gameserverConfig: GameserverConfig | null
   __typename: 'Gameserver'
 }
 
-export interface ServerMap {
-  name: String
-  __typename: 'ServerMap'
+export interface GameserverConfig {
+  gameserver: Gameserver
+  currentMatchConfig: MatchConfig | null
+  currentName: String
+  voteLength: Int
+  gamePassword: String
+  reservedSlots: Int
+  balanceClans: Boolean
+  allowSkipMapVote: Boolean
+  tempKickBanTime: Int
+  autoRecordReplay: Boolean
+  playerGameControl: Boolean
+  enableMapVote: Boolean
+  serverAdmins: String
+  serverDescription: String
+  website: String
+  contact: String
+  mapNoReplay: Int
+  enableVoicechat: Boolean
+  __typename: 'GameserverConfig'
+}
+
+export interface MatchConfig {
+  id: Int
+  configName: String
+  gameMode: GameMode
+  configHash: String
+  matchEndLength: Int
+  warmUpLength: Int
+  friendlyFireScale: Float
+  mapLength: Int
+  roundLength: Int
+  preRoundLength: Int
+  roundEndLength: Int
+  roundLimit: Int
+  allowGhostcam: Boolean
+  playerVoteThreshold: Float
+  autoBalanceTeams: Boolean
+  playerVoteTeamOnly: Boolean
+  maxTeamDamage: Float
+  enablePlayerVote: Boolean
+  autoSwapTeams: Boolean
+  midGameBreakLength: Int
+  nadeRestriction: Boolean
+  globalVoicechat: Boolean
+  muteDeadToTeam: Boolean
+  ranked: Boolean
+  private: Boolean
+  __typename: 'MatchConfig'
 }
 
 export interface GameMode {
   name: String
   isTeamBased: Boolean
   __typename: 'GameMode'
+}
+
+/** The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point). */
+export type Float = number
+
+export interface ServerMap {
+  name: String
+  __typename: 'ServerMap'
 }
 
 export interface Round {
@@ -89,9 +149,6 @@ export interface PaginatedRound {
   pageCount: Int
   __typename: 'PaginatedRound'
 }
-
-/** The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point). */
-export type Float = number
 
 export interface PaginatedGameMode {
   content: GameMode[] | null
@@ -128,7 +185,7 @@ export enum Team {
 
 export interface SteamUser {
   steamId64: String
-  name: String
+  name: String | null
   avatarBigUrl: String
   avatarMediumUrl: String
   __typename: 'SteamUser'
@@ -221,6 +278,18 @@ export interface PlayerWeaponStatistics {
   __typename: 'PlayerWeaponStatistics'
 }
 
+export enum GameserverConfigOrder {
+  currentName = 'currentName',
+  lastContact = 'lastContact',
+  hasConfig = 'hasConfig',
+}
+
+export enum GameserverConfigFilter {
+  none = 'none',
+  withConfig = 'withConfig',
+  withoutConfig = 'withoutConfig',
+}
+
 export interface PaginatedGameserver {
   content: Gameserver[] | null
   totalCount: Int
@@ -271,6 +340,20 @@ export interface Ban {
   bannedSteamUser: SteamUser | null
   bannedBySteamUser: SteamUser | null
   __typename: 'Ban'
+}
+
+export interface PaginatedGameserverConfig {
+  content: GameserverConfig[] | null
+  totalCount: Int
+  pageCount: Int
+  __typename: 'PaginatedGameserverConfig'
+}
+
+export interface PaginatedMatchConfig {
+  content: MatchConfig[] | null
+  totalCount: Int
+  pageCount: Int
+  __typename: 'PaginatedMatchConfig'
 }
 
 export interface PaginatedAuthKey {
@@ -328,6 +411,12 @@ export interface Mutation {
   /** X-Request-ID must be set in header */
   createUpdateBan: Ban
   authPlayerToken: String
+  deleteGameserverConfig: Boolean
+  /** X-Request-ID must be set in header */
+  createUpdateGameserverConfig: GameserverConfig
+  deleteMatchConfig: Boolean
+  /** X-Request-ID must be set in header */
+  createUpdateMatchConfig: MatchConfig
   deleteAuthKey: Boolean
   /** X-Request-ID must be set in header */
   createUpdateAuthKey: AuthKey
@@ -359,6 +448,10 @@ export interface QueryRequest {
   registeredPlayer?: [{ options: RegisteredPlayerQuery }, RegisteredPlayerRequest]
   bans?: [{ options: BanQuery }, PaginatedBanRequest]
   banCheck?: [{ banCheck: BanCheck }, BanRequest]
+  gameserverConfigs?: [{ options: GameserverConfigsQuery }, PaginatedGameserverConfigRequest]
+  gameserverConfig?: [{ options: GameserverConfigQuery }, GameserverConfigRequest]
+  matchConfigs?: [{ options: MatchConfigsQuery }, PaginatedMatchConfigRequest]
+  matchConfig?: [{ options: MatchConfigQuery }, MatchConfigRequest]
   authKeys?: [{ options: AuthKeyQuery }, PaginatedAuthKeyRequest]
   authKey?: [{ authKey: String }, AuthKeyRequest]
   authValid?: boolean | number
@@ -385,7 +478,7 @@ export interface ServerMapInput {
 
 export interface GameModeInput {
   name: String
-  isTeamBased: Boolean
+  isTeamBased?: Boolean | null
 }
 
 export interface PaginatedGameRequest {
@@ -399,6 +492,7 @@ export interface PaginatedGameRequest {
 export interface GameRequest {
   id?: boolean | number
   gameserver?: GameserverRequest
+  matchConfig?: MatchConfigRequest
   startedAt?: boolean | number
   endedAt?: boolean | number
   map?: ServerMapRequest
@@ -414,12 +508,60 @@ export interface GameserverRequest {
   currentName?: boolean | number
   description?: boolean | number
   lastContact?: boolean | number
+  gameserverConfig?: GameserverConfigRequest
   __typename?: boolean | number
   __scalar?: boolean | number
 }
 
-export interface ServerMapRequest {
-  name?: boolean | number
+export interface GameserverConfigRequest {
+  gameserver?: GameserverRequest
+  currentMatchConfig?: MatchConfigRequest
+  currentName?: boolean | number
+  voteLength?: boolean | number
+  gamePassword?: boolean | number
+  reservedSlots?: boolean | number
+  balanceClans?: boolean | number
+  allowSkipMapVote?: boolean | number
+  tempKickBanTime?: boolean | number
+  autoRecordReplay?: boolean | number
+  playerGameControl?: boolean | number
+  enableMapVote?: boolean | number
+  serverAdmins?: boolean | number
+  serverDescription?: boolean | number
+  website?: boolean | number
+  contact?: boolean | number
+  mapNoReplay?: boolean | number
+  enableVoicechat?: boolean | number
+  __typename?: boolean | number
+  __scalar?: boolean | number
+}
+
+export interface MatchConfigRequest {
+  id?: boolean | number
+  configName?: boolean | number
+  gameMode?: GameModeRequest
+  configHash?: boolean | number
+  matchEndLength?: boolean | number
+  warmUpLength?: boolean | number
+  friendlyFireScale?: boolean | number
+  mapLength?: boolean | number
+  roundLength?: boolean | number
+  preRoundLength?: boolean | number
+  roundEndLength?: boolean | number
+  roundLimit?: boolean | number
+  allowGhostcam?: boolean | number
+  playerVoteThreshold?: boolean | number
+  autoBalanceTeams?: boolean | number
+  playerVoteTeamOnly?: boolean | number
+  maxTeamDamage?: boolean | number
+  enablePlayerVote?: boolean | number
+  autoSwapTeams?: boolean | number
+  midGameBreakLength?: boolean | number
+  nadeRestriction?: boolean | number
+  globalVoicechat?: boolean | number
+  muteDeadToTeam?: boolean | number
+  ranked?: boolean | number
+  private?: boolean | number
   __typename?: boolean | number
   __scalar?: boolean | number
 }
@@ -427,6 +569,12 @@ export interface ServerMapRequest {
 export interface GameModeRequest {
   name?: boolean | number
   isTeamBased?: boolean | number
+  __typename?: boolean | number
+  __scalar?: boolean | number
+}
+
+export interface ServerMapRequest {
+  name?: boolean | number
   __typename?: boolean | number
   __scalar?: boolean | number
 }
@@ -613,8 +761,9 @@ export interface GameserversQuery {
   page?: Int | null
   pageSize?: Int | null
   orderDesc?: Boolean | null
-  orderByCurrentName?: Boolean | null
+  orderBy?: GameserverConfigOrder | null
   search?: String | null
+  configFilter?: GameserverConfigFilter | null
 }
 
 export interface PaginatedGameserverRequest {
@@ -712,6 +861,46 @@ export interface BanCheck {
   checkBanlistPartners?: Boolean | null
 }
 
+export interface GameserverConfigsQuery {
+  page?: Int | null
+  pageSize?: Int | null
+  search?: String | null
+  orderDesc?: Boolean | null
+  orderByGameserverName?: Boolean | null
+}
+
+export interface PaginatedGameserverConfigRequest {
+  content?: GameserverConfigRequest
+  totalCount?: boolean | number
+  pageCount?: boolean | number
+  __typename?: boolean | number
+  __scalar?: boolean | number
+}
+
+export interface GameserverConfigQuery {
+  id?: String | null
+}
+
+export interface MatchConfigsQuery {
+  page?: Int | null
+  pageSize?: Int | null
+  configName?: String | null
+  orderDesc?: Boolean | null
+}
+
+export interface PaginatedMatchConfigRequest {
+  content?: MatchConfigRequest
+  totalCount?: boolean | number
+  pageCount?: boolean | number
+  __typename?: boolean | number
+  __scalar?: boolean | number
+}
+
+export interface MatchConfigQuery {
+  id?: Int | null
+  configName?: Int | null
+}
+
 export interface AuthKeyQuery {
   page?: Int | null
   pageSize?: Int | null
@@ -778,6 +967,12 @@ export interface MutationRequest {
   /** X-Request-ID must be set in header */
   createUpdateBan?: [{ banInput: BanInput }, BanRequest]
   authPlayerToken?: [{ steamId64: String }]
+  deleteGameserverConfig?: [{ gameserverId: String }]
+  /** X-Request-ID must be set in header */
+  createUpdateGameserverConfig?: [{ gameserverConfig: GameserverConfigInput }, GameserverConfigRequest]
+  deleteMatchConfig?: [{ options: MatchConfigQuery }]
+  /** X-Request-ID must be set in header */
+  createUpdateMatchConfig?: [{ matchConfig: MatchConfigInput }, MatchConfigRequest]
   deleteAuthKey?: [{ authKey: String }]
   /** X-Request-ID must be set in header */
   createUpdateAuthKey?: [{ authKey: AuthKeyInput }, AuthKeyRequest]
@@ -870,6 +1065,54 @@ export interface BanInput {
   gameserverId?: String | null
 }
 
+export interface GameserverConfigInput {
+  gameserverId?: String | null
+  currentMatchConfigId?: Int | null
+  currentGameserverName?: String | null
+  voteLength?: Int | null
+  tempKickBanTime?: Int | null
+  gamePassword?: String | null
+  serverAdmins?: String | null
+  serverDescription?: String | null
+  website?: String | null
+  contact?: String | null
+  reservedSlots?: Int | null
+  mapNoReplay?: Int | null
+  balanceClans?: Boolean | null
+  allowSkipMapVote?: Boolean | null
+  autoRecordReplay?: Boolean | null
+  playerGameControl?: Boolean | null
+  enableMapVote?: Boolean | null
+  enableVoicechat?: Boolean | null
+}
+
+export interface MatchConfigInput {
+  id?: Int | null
+  configName?: String | null
+  gameMode?: GameModeInput | null
+  matchEndLength?: Int | null
+  warmUpLength?: Int | null
+  mapLength?: Int | null
+  roundLength?: Int | null
+  preRoundLength?: Int | null
+  roundEndLength?: Int | null
+  roundLimit?: Int | null
+  midGameBreakLength?: Int | null
+  friendlyFireScale?: Float | null
+  playerVoteThreshold?: Float | null
+  maxTeamDamage?: Float | null
+  allowGhostcam?: Boolean | null
+  autoBalanceTeams?: Boolean | null
+  playerVoteTeamOnly?: Boolean | null
+  enablePlayerVote?: Boolean | null
+  autoSwapTeams?: Boolean | null
+  nadeRestriction?: Boolean | null
+  globalVoicechat?: Boolean | null
+  muteDeadToTeam?: Boolean | null
+  ranked?: Boolean | null
+  private?: Boolean | null
+}
+
 export interface AuthKeyInput {
   id?: Int | null
   authKey?: String | null
@@ -917,16 +1160,28 @@ export const isGameserver = (obj: { __typename: String }): obj is Gameserver => 
   return Gameserver_possibleTypes.includes(obj.__typename)
 }
 
-const ServerMap_possibleTypes = ['ServerMap']
-export const isServerMap = (obj: { __typename: String }): obj is ServerMap => {
+const GameserverConfig_possibleTypes = ['GameserverConfig']
+export const isGameserverConfig = (obj: { __typename: String }): obj is GameserverConfig => {
   if (!obj.__typename) throw new Error('__typename is missing')
-  return ServerMap_possibleTypes.includes(obj.__typename)
+  return GameserverConfig_possibleTypes.includes(obj.__typename)
+}
+
+const MatchConfig_possibleTypes = ['MatchConfig']
+export const isMatchConfig = (obj: { __typename: String }): obj is MatchConfig => {
+  if (!obj.__typename) throw new Error('__typename is missing')
+  return MatchConfig_possibleTypes.includes(obj.__typename)
 }
 
 const GameMode_possibleTypes = ['GameMode']
 export const isGameMode = (obj: { __typename: String }): obj is GameMode => {
   if (!obj.__typename) throw new Error('__typename is missing')
   return GameMode_possibleTypes.includes(obj.__typename)
+}
+
+const ServerMap_possibleTypes = ['ServerMap']
+export const isServerMap = (obj: { __typename: String }): obj is ServerMap => {
+  if (!obj.__typename) throw new Error('__typename is missing')
+  return ServerMap_possibleTypes.includes(obj.__typename)
 }
 
 const Round_possibleTypes = ['Round']
@@ -1029,6 +1284,18 @@ const Ban_possibleTypes = ['Ban']
 export const isBan = (obj: { __typename: String }): obj is Ban => {
   if (!obj.__typename) throw new Error('__typename is missing')
   return Ban_possibleTypes.includes(obj.__typename)
+}
+
+const PaginatedGameserverConfig_possibleTypes = ['PaginatedGameserverConfig']
+export const isPaginatedGameserverConfig = (obj: { __typename: String }): obj is PaginatedGameserverConfig => {
+  if (!obj.__typename) throw new Error('__typename is missing')
+  return PaginatedGameserverConfig_possibleTypes.includes(obj.__typename)
+}
+
+const PaginatedMatchConfig_possibleTypes = ['PaginatedMatchConfig']
+export const isPaginatedMatchConfig = (obj: { __typename: String }): obj is PaginatedMatchConfig => {
+  if (!obj.__typename) throw new Error('__typename is missing')
+  return PaginatedMatchConfig_possibleTypes.includes(obj.__typename)
 }
 
 const PaginatedAuthKey_possibleTypes = ['PaginatedAuthKey']
@@ -1148,6 +1415,29 @@ export interface QueryPromiseChain {
   banCheck: (args: {
     banCheck: BanCheck
   }) => BanPromiseChain & { execute: (request: BanRequest, defaultValue?: Ban | null) => Promise<Ban | null> }
+  gameserverConfigs: (args: {
+    options: GameserverConfigsQuery
+  }) => PaginatedGameserverConfigPromiseChain & {
+    execute: (
+      request: PaginatedGameserverConfigRequest,
+      defaultValue?: PaginatedGameserverConfig,
+    ) => Promise<PaginatedGameserverConfig>
+  }
+  gameserverConfig: (args: {
+    options: GameserverConfigQuery
+  }) => GameserverConfigPromiseChain & {
+    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Promise<GameserverConfig>
+  }
+  matchConfigs: (args: {
+    options: MatchConfigsQuery
+  }) => PaginatedMatchConfigPromiseChain & {
+    execute: (request: PaginatedMatchConfigRequest, defaultValue?: PaginatedMatchConfig) => Promise<PaginatedMatchConfig>
+  }
+  matchConfig: (args: {
+    options: MatchConfigQuery
+  }) => MatchConfigPromiseChain & {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig) => Promise<MatchConfig>
+  }
   authKeys: (args: {
     options: AuthKeyQuery
   }) => PaginatedAuthKeyPromiseChain & {
@@ -1251,6 +1541,29 @@ export interface QueryObservableChain {
   banCheck: (args: {
     banCheck: BanCheck
   }) => BanObservableChain & { execute: (request: BanRequest, defaultValue?: Ban | null) => Observable<Ban | null> }
+  gameserverConfigs: (args: {
+    options: GameserverConfigsQuery
+  }) => PaginatedGameserverConfigObservableChain & {
+    execute: (
+      request: PaginatedGameserverConfigRequest,
+      defaultValue?: PaginatedGameserverConfig,
+    ) => Observable<PaginatedGameserverConfig>
+  }
+  gameserverConfig: (args: {
+    options: GameserverConfigQuery
+  }) => GameserverConfigObservableChain & {
+    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Observable<GameserverConfig>
+  }
+  matchConfigs: (args: {
+    options: MatchConfigsQuery
+  }) => PaginatedMatchConfigObservableChain & {
+    execute: (request: PaginatedMatchConfigRequest, defaultValue?: PaginatedMatchConfig) => Observable<PaginatedMatchConfig>
+  }
+  matchConfig: (args: {
+    options: MatchConfigQuery
+  }) => MatchConfigObservableChain & {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig) => Observable<MatchConfig>
+  }
   authKeys: (args: {
     options: AuthKeyQuery
   }) => PaginatedAuthKeyObservableChain & {
@@ -1287,6 +1600,9 @@ export interface GamePromiseChain {
   gameserver: GameserverPromiseChain & {
     execute: (request: GameserverRequest, defaultValue?: Gameserver) => Promise<Gameserver>
   }
+  matchConfig: MatchConfigPromiseChain & {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig) => Promise<MatchConfig>
+  }
   startedAt: { execute: (request?: boolean | number, defaultValue?: DateTime) => Promise<DateTime> }
   endedAt: { execute: (request?: boolean | number, defaultValue?: DateTime | null) => Promise<DateTime | null> }
   map: ServerMapPromiseChain & { execute: (request: ServerMapRequest, defaultValue?: ServerMap) => Promise<ServerMap> }
@@ -1298,6 +1614,9 @@ export interface GameObservableChain {
   id: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
   gameserver: GameserverObservableChain & {
     execute: (request: GameserverRequest, defaultValue?: Gameserver) => Observable<Gameserver>
+  }
+  matchConfig: MatchConfigObservableChain & {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig) => Observable<MatchConfig>
   }
   startedAt: { execute: (request?: boolean | number, defaultValue?: DateTime) => Observable<DateTime> }
   endedAt: { execute: (request?: boolean | number, defaultValue?: DateTime | null) => Observable<DateTime | null> }
@@ -1314,6 +1633,9 @@ export interface GameserverPromiseChain {
   currentName: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
   description: { execute: (request?: boolean | number, defaultValue?: String | null) => Promise<String | null> }
   lastContact: { execute: (request?: boolean | number, defaultValue?: DateTime | null) => Promise<DateTime | null> }
+  gameserverConfig: GameserverConfigPromiseChain & {
+    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig | null) => Promise<GameserverConfig | null>
+  }
 }
 
 export interface GameserverObservableChain {
@@ -1322,14 +1644,120 @@ export interface GameserverObservableChain {
   currentName: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
   description: { execute: (request?: boolean | number, defaultValue?: String | null) => Observable<String | null> }
   lastContact: { execute: (request?: boolean | number, defaultValue?: DateTime | null) => Observable<DateTime | null> }
+  gameserverConfig: GameserverConfigObservableChain & {
+    execute: (
+      request: GameserverConfigRequest,
+      defaultValue?: GameserverConfig | null,
+    ) => Observable<GameserverConfig | null>
+  }
 }
 
-export interface ServerMapPromiseChain {
-  name: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+export interface GameserverConfigPromiseChain {
+  gameserver: GameserverPromiseChain & {
+    execute: (request: GameserverRequest, defaultValue?: Gameserver) => Promise<Gameserver>
+  }
+  currentMatchConfig: MatchConfigPromiseChain & {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig | null) => Promise<MatchConfig | null>
+  }
+  currentName: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  voteLength: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  gamePassword: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  reservedSlots: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  balanceClans: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  allowSkipMapVote: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  tempKickBanTime: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  autoRecordReplay: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  playerGameControl: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  enableMapVote: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  serverAdmins: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  serverDescription: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  website: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  contact: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  mapNoReplay: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  enableVoicechat: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
 }
 
-export interface ServerMapObservableChain {
-  name: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+export interface GameserverConfigObservableChain {
+  gameserver: GameserverObservableChain & {
+    execute: (request: GameserverRequest, defaultValue?: Gameserver) => Observable<Gameserver>
+  }
+  currentMatchConfig: MatchConfigObservableChain & {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig | null) => Observable<MatchConfig | null>
+  }
+  currentName: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  voteLength: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  gamePassword: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  reservedSlots: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  balanceClans: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  allowSkipMapVote: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  tempKickBanTime: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  autoRecordReplay: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  playerGameControl: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  enableMapVote: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  serverAdmins: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  serverDescription: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  website: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  contact: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  mapNoReplay: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  enableVoicechat: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+}
+
+export interface MatchConfigPromiseChain {
+  id: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  configName: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  gameMode: GameModePromiseChain & { execute: (request: GameModeRequest, defaultValue?: GameMode) => Promise<GameMode> }
+  configHash: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  matchEndLength: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  warmUpLength: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  friendlyFireScale: { execute: (request?: boolean | number, defaultValue?: Float) => Promise<Float> }
+  mapLength: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  roundLength: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  preRoundLength: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  roundEndLength: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  roundLimit: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  allowGhostcam: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  playerVoteThreshold: { execute: (request?: boolean | number, defaultValue?: Float) => Promise<Float> }
+  autoBalanceTeams: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  playerVoteTeamOnly: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  maxTeamDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Promise<Float> }
+  enablePlayerVote: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  autoSwapTeams: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  midGameBreakLength: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  nadeRestriction: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  globalVoicechat: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  muteDeadToTeam: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  ranked: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  private: { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+}
+
+export interface MatchConfigObservableChain {
+  id: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  configName: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  gameMode: GameModeObservableChain & {
+    execute: (request: GameModeRequest, defaultValue?: GameMode) => Observable<GameMode>
+  }
+  configHash: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  matchEndLength: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  warmUpLength: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  friendlyFireScale: { execute: (request?: boolean | number, defaultValue?: Float) => Observable<Float> }
+  mapLength: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  roundLength: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  preRoundLength: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  roundEndLength: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  roundLimit: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  allowGhostcam: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  playerVoteThreshold: { execute: (request?: boolean | number, defaultValue?: Float) => Observable<Float> }
+  autoBalanceTeams: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  playerVoteTeamOnly: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  maxTeamDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Observable<Float> }
+  enablePlayerVote: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  autoSwapTeams: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  midGameBreakLength: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  nadeRestriction: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  globalVoicechat: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  muteDeadToTeam: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  ranked: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  private: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
 }
 
 export interface GameModePromiseChain {
@@ -1340,6 +1768,14 @@ export interface GameModePromiseChain {
 export interface GameModeObservableChain {
   name: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
   isTeamBased: { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+}
+
+export interface ServerMapPromiseChain {
+  name: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+}
+
+export interface ServerMapObservableChain {
+  name: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
 }
 
 export interface RoundPromiseChain {
@@ -1436,14 +1872,14 @@ export interface PlayerRoundStatsObservableChain {
 
 export interface SteamUserPromiseChain {
   steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
-  name: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  name: { execute: (request?: boolean | number, defaultValue?: String | null) => Promise<String | null> }
   avatarBigUrl: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
   avatarMediumUrl: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
 }
 
 export interface SteamUserObservableChain {
   steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
-  name: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  name: { execute: (request?: boolean | number, defaultValue?: String | null) => Observable<String | null> }
   avatarBigUrl: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
   avatarMediumUrl: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
 }
@@ -1716,6 +2152,42 @@ export interface BanObservableChain {
   }
 }
 
+export interface PaginatedGameserverConfigPromiseChain {
+  content: {
+    execute: (
+      request: GameserverConfigRequest,
+      defaultValue?: GameserverConfig[] | null,
+    ) => Promise<GameserverConfig[] | null>
+  }
+  totalCount: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  pageCount: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+}
+
+export interface PaginatedGameserverConfigObservableChain {
+  content: {
+    execute: (
+      request: GameserverConfigRequest,
+      defaultValue?: GameserverConfig[] | null,
+    ) => Observable<GameserverConfig[] | null>
+  }
+  totalCount: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  pageCount: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+}
+
+export interface PaginatedMatchConfigPromiseChain {
+  content: { execute: (request: MatchConfigRequest, defaultValue?: MatchConfig[] | null) => Promise<MatchConfig[] | null> }
+  totalCount: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  pageCount: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+}
+
+export interface PaginatedMatchConfigObservableChain {
+  content: {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig[] | null) => Observable<MatchConfig[] | null>
+  }
+  totalCount: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  pageCount: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+}
+
 export interface PaginatedAuthKeyPromiseChain {
   content: { execute: (request: AuthKeyRequest, defaultValue?: AuthKey[] | null) => Promise<AuthKey[] | null> }
   totalCount: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
@@ -1828,6 +2300,24 @@ export interface MutationPromiseChain {
   authPlayerToken: (args: {
     steamId64: String
   }) => { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  deleteGameserverConfig: (args: {
+    gameserverId: String
+  }) => { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  /** X-Request-ID must be set in header */
+  createUpdateGameserverConfig: (args: {
+    gameserverConfig: GameserverConfigInput
+  }) => GameserverConfigPromiseChain & {
+    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Promise<GameserverConfig>
+  }
+  deleteMatchConfig: (args: {
+    options: MatchConfigQuery
+  }) => { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
+  /** X-Request-ID must be set in header */
+  createUpdateMatchConfig: (args: {
+    matchConfig: MatchConfigInput
+  }) => MatchConfigPromiseChain & {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig) => Promise<MatchConfig>
+  }
   deleteAuthKey: (args: {
     authKey: String
   }) => { execute: (request?: boolean | number, defaultValue?: Boolean) => Promise<Boolean> }
@@ -1904,6 +2394,24 @@ export interface MutationObservableChain {
   authPlayerToken: (args: {
     steamId64: String
   }) => { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  deleteGameserverConfig: (args: {
+    gameserverId: String
+  }) => { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  /** X-Request-ID must be set in header */
+  createUpdateGameserverConfig: (args: {
+    gameserverConfig: GameserverConfigInput
+  }) => GameserverConfigObservableChain & {
+    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Observable<GameserverConfig>
+  }
+  deleteMatchConfig: (args: {
+    options: MatchConfigQuery
+  }) => { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }
+  /** X-Request-ID must be set in header */
+  createUpdateMatchConfig: (args: {
+    matchConfig: MatchConfigInput
+  }) => MatchConfigObservableChain & {
+    execute: (request: MatchConfigRequest, defaultValue?: MatchConfig) => Observable<MatchConfig>
+  }
   deleteAuthKey: (args: {
     authKey: String
   }) => { execute: (request?: boolean | number, defaultValue?: Boolean) => Observable<Boolean> }

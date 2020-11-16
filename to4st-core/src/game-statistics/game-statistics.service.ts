@@ -1,9 +1,9 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, OnApplicationBootstrap } from '@nestjs/common';
 import _, { delay } from 'lodash';
 import memoizee from 'memoizee';
 import { clamp } from 'lodash';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
-import { Repository, Connection, } from 'typeorm';
+import { Repository, Connection, EntityManager, } from 'typeorm';
 import pRetry from "p-retry";
 
 import { Round } from './round.entity';
@@ -13,11 +13,14 @@ import { SteamUserService } from '../core/steam-user.service';
 import { Gameserver } from '../gameserver/gameserver.entity';
 import { ServerMap } from './server-map.entity';
 import { GameMode } from './game-mode.entity';
-import { MAX_PAGE_SIZE, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, MIN_ID_LENGTH } from '../globals';
+import { MAX_PAGE_SIZE, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, MIN_ID_LENGTH, MAX_RETRIES } from '../globals';
 import { Game } from './game.entity';
 import { Weapon } from './weapon.entity';
-import { mapDateForQuery, isValidSteamId, TIMEOUT_PROMISE_FACTORY } from '../shared/utils';
+import { mapDateForQuery, isValidSteamId, TIMEOUT_PROMISE_FACTORY, asyncForEach } from '../shared/utils';
 import { customAlphabet } from 'nanoid/async';
+import { GameserverConfig } from '../gameserver/gameserver-config.entity';
+import { MatchConfig } from '../gameserver/match-config.entity';
+
 
 /**
  * Interface used to identify a round
@@ -102,6 +105,11 @@ export interface IRoundQuery {
      * Should be ordered descending?
      */
     orderDesc?: boolean
+
+    /**
+     * Only games which use a ranked match config
+     */
+    ranked?: boolean;
 }
 
 /**
@@ -152,6 +160,11 @@ export interface IGameQuery {
      * Should be ordered descending?
      */
     orderDesc?: boolean
+
+    /**
+     * Only games which use a ranked match config
+     */
+    ranked?: boolean;
 }
 
 /**
@@ -210,11 +223,21 @@ export interface IGameModeQuery {
     pageSize?: number,
 }
 
+
+
+export const DEFAULT_GAMEMODES = [
+    new GameMode({name: "Classic", isTeamBased: true}),
+    new GameMode({name: "Capture the Flag", isTeamBased: true}),
+    new GameMode({name: "Team Deathmatch", isTeamBased: true}),
+  ];
+
+
+
 /**
  * Service for basic game statistics
  */
 @Injectable()
-export class GameStatisticsService {
+export class GameStatisticsService implements OnApplicationBootstrap {
 
     constructor(
         @InjectRepository(Round) private readonly roundRepository: Repository<Round>, 
@@ -225,7 +248,6 @@ export class GameStatisticsService {
         @InjectRepository(Weapon) private readonly weaponRepository: Repository<Weapon>, 
         @InjectRepository(PlayerRoundWeaponStats) private readonly playerRoundWeaponStatsRepository: Repository<PlayerRoundWeaponStats>, 
         @InjectConnection() private readonly connection: Connection,
-        private readonly steamUserService: SteamUserService
         )
     {
     }
@@ -255,82 +277,209 @@ export class GameStatisticsService {
      */
     private _cachedNumberOfGamesPlayed = memoizee(async () => (await this.getGames({pageSize: 1, onlyFinishedGames: true}))[1], {promise: true, maxAge: TTL_CACHE_MS, preFetch: CACHE_PREFETCH });
 
+
+    /**
+     * Nestjs lifecycle event
+     */
+    async onApplicationBootstrap()
+    {
+        await asyncForEach(DEFAULT_GAMEMODES, async (elem) => {
+            await this.createUpdateGameMode(elem);
+        });
+    }
+
+    /**
+     * Create or update a gameMode
+     * @param gameMode 
+     * @param manager which is used only (!) for transactions (optional, must use SERIALIZABLE due to name being a unique index)
+     */
+    async createUpdateGameMode(gameMode: GameMode, manager?: EntityManager): Promise<GameMode>
+    {
+        let ret: GameMode  = null;
+
+        gameMode = {...gameMode};
+
+        if(!gameMode.id)
+        {
+            gameMode.id = this.gameModeIdCache.get(gameMode.name);
+        }
+        
+        // actual saving function that is used; no need for a private function
+        const saveGameMode = async (man) => {
+            
+            if(!gameMode.id)
+            {
+                const found = await man.findOne(GameMode, {where: {name: gameMode.name.trim()}});
+                if(found)
+                {
+                    gameMode.id = found.id;
+                }
+            }
+            
+            const saved = await man.save(GameMode, new GameMode(
+                {
+                    id: gameMode.id || undefined, //get rid of null if it exists for whatever reason
+                    name: gameMode.name.trim(), 
+                    isTeamBased: gameMode.isTeamBased
+                }
+            ));
+
+            return await man.findOne(GameMode, {id: saved.id});
+        };
+        
+        //No need for a transaction in that case; ensure that manager is not overwritten when this method is used within a transaction
+        //Maybe it was kinda stupid not not use the gamemode's name as primary key, but whatever, maybe it saves a few kb of db space :D
+        if(gameMode.id && !manager)
+        {
+            manager = this.connection.createEntityManager();
+        }
+
+        if(manager)
+        {
+            ret = await saveGameMode(manager);
+        }
+        else // only executed if manager is not set when the method is called AND if the gamemode has no id field
+        {
+            await pRetry(async () => {
+                    await this.connection.transaction("SERIALIZABLE", async manager => 
+                    {
+                        ret = await saveGameMode(manager);
+                    });
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+            );
+        }
+
+        this.gameModeIdCache.set(ret.name, ret.id);
+
+        return ret;
+    }    
+
+    /**
+     * Create or update a serverMap entity
+     * @param map 
+     * @param manager which is used only (!) for transactions (optional, must use SERIALIZABLE due to name being a unique index)
+     */
+    async createUpdateServerMap(map: ServerMap, manager?: EntityManager): Promise<ServerMap>
+    {
+        let ret: ServerMap  = null;
+
+        map = {...map};
+
+        if(!map.id)
+        {
+            map.id = this.mapIdCache.get(map.name);
+        }
+        
+        // actual saving function that is used; no need for a private function
+        const saveServerMap = async (man: EntityManager) => {
+            
+            if(!map.id)
+            {
+                const found = await man.findOne(ServerMap, {where: {name: map.name.trim()}});
+                if(found)
+                {
+                    map.id = found.id;
+                }
+            }
+            
+            const saved = await man.save(ServerMap, new ServerMap(
+                {
+                    id: map.id || undefined, //get rid of null if it exists for whatever reason
+                    name: map.name.trim(), 
+                }
+            ));
+
+            return await man.findOne(ServerMap, {id: saved.id});
+        };
+        
+        //No need for a transaction in that case; ensure that manager is not overwritten when this method is used within a transaction
+        //Maybe it was kinda stupid not not use the map's name as primary key, but whatever, maybe it saves a few kb of db space :D
+        if(map.id && !manager)
+        {
+            manager = this.connection.createEntityManager();
+        }
+
+        if(manager)
+        {
+            ret = await saveServerMap(manager);
+        }
+        else // only executed if manager is not set when the method is called AND if the gamemode has no id field
+        {
+            await pRetry(async () => {
+                    await this.connection.transaction("SERIALIZABLE", async manager => 
+                    {
+                        ret = await saveServerMap(manager);
+                    });
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+            );
+        }
+
+        this.mapIdCache.set(ret.name, ret.id);
+
+        return ret;
+    }    
+
     /**
      * Create or update game
      * Cascades included gameMode and map
      * @param game 
+     * @param manager which is used only (!) for transactions (optional)
      */
-    async createUpdateGame(game: Game): Promise<Game | null>
+    async createUpdateGame(game: Game, manager?: EntityManager): Promise<Game>
     {
         game = new Game({...game});
+
+        if(game.map)
+        {
+            game.map = new ServerMap({...game.map});
+        }
+        if(game.gameMode)
+        {
+            game.gameMode = new GameMode({...game.gameMode});
+        }
+        if(game.gameserver)
+        {
+            game.gameserver = new Gameserver({id: game.gameserver.id});
+        }
+
+
+        if(!manager)
+        {
+            manager = this.connection.createEntityManager();
+        }
 
         if(!game.id)
         {
             game.id = await customAlphabet(PASSWORD_ALPHABET, MIN_ID_LENGTH)();
         }
 
-        game.gameserver = new Gameserver({id: game.gameserver.id});
-        
+        // need id for insert
+        // try to get ids from cache first
         if(game.gameMode && !game.gameMode.id)
         {
             game.gameMode.id = this.gameModeIdCache.get(game.gameMode.name);
         }
-
         if(game.map && !game.map.id)
         {
             game.map.id = this.mapIdCache.get(game.map.name);
         }
 
+
+        // get id from db, create entity if it does not exist right now
         if(game.gameMode && !game.gameMode.id)
         {
-            await pRetry(async () => {
-                    await this.connection.transaction("SERIALIZABLE", async manager => 
-                    {
-                        const found = await manager.findOne(GameMode, {name: game.gameMode.name});
-                        if(found)
-                        {
-                            game.gameMode.id = found.id;
-                            this.gameModeIdCache.set(game.gameMode.name, found.id);
-                        }
-                        else
-                        {
-                            const inserted = await manager.save(GameMode, new GameMode({name: game.gameMode.name, isTeamBased: game.gameMode.isTeamBased}));
-                            this.gameModeIdCache.set(game.gameMode.name, inserted.id);
-                            game.gameMode.id = inserted.id;
-                        }
-                    });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.12)[0]}
-            );
+            const inserted = await this.createUpdateGameMode(game.gameMode, manager);
+            game.gameMode.id = inserted.id;
         }
-
         if(game.map && !game.map.id)
         { 
-            await pRetry(async () => {
-                await this.connection.transaction("SERIALIZABLE", async manager => 
-                {
-                    if(!game.map.id)
-                    {
-                        const found = await manager.findOne(ServerMap, {name: game.map.name});
-                        if(found)
-                        {
-                            game.map.id = found.id;
-                            this.mapIdCache.set(game.map.name, found.id);
-                        }
-                        else
-                        {
-                            const inserted = await manager.save(ServerMap, new ServerMap({name: game.map.name}));
-                            this.mapIdCache.set(game.map.name, inserted.id);
-                            game.map.id = inserted.id;
-                        }
-                    }
-                });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.12)[0]}
-            );
+            const inserted = await this.createUpdateServerMap(game.map, manager);
+            game.map.id = inserted.id;
         }
 
-        const inserted = await this.gameRepository.save(game);
+        const inserted = await manager.save(Game, game);
 
-        return inserted ? await this.getGame(inserted.id): null;
+        return await manager.findOne(Game, {where: {id: inserted.id}, relations: ["gameserver", "map", "gameMode", "matchConfig", "matchConfig.gameMode"]});
     }
 
     /**
@@ -348,7 +497,7 @@ export class GameStatisticsService {
      */
     async getGameMode(options: IGameModeIdentifier): Promise<GameMode | undefined>
     {
-        return await this.gameModeRepository.findOne({where: !!options.id  ? {id: options.id} : {name: options.name}});
+        return await this.gameModeRepository.findOne({where: !!options.id  ? {id: options.id} : {name: options.name.trim()}});
     }
 
     /**
@@ -375,7 +524,7 @@ export class GameStatisticsService {
      */
     async getGame(id: string): Promise<Game | undefined>
     {
-        return await this.gameRepository.findOne({where: {id: id}, relations: ["gameserver", "map", "gameMode"]});
+        return await this.gameRepository.findOne({where: {id: id}, relations: ["gameserver", "map", "gameMode", "matchConfig", "matchConfig.gameMode"]});
     }
 
     /**
@@ -401,14 +550,20 @@ export class GameStatisticsService {
     /**
      * Create or update round
      * @param round 
+     * @param manager which is used only (!) for transactions (optional)
      */
-    async createUpdateRound(round: Round)
+    async createUpdateRound(round: Round, manager?: EntityManager)
     {
+        if(!manager)
+        {
+            manager = this.connection.createEntityManager();
+        }
+
         const clone = new Round({...round});
 
         clone.game = new Game({id: round.game.id});
-        const inserted = await this.roundRepository.save(clone);
-        return await this.getRound(inserted.id);
+        const inserted = await manager.save(Round, clone);
+        return await manager.findOne(Round, {where: {id: inserted.id}, relations: ["game", "game.map", "game.gameMode", "game.gameserver", "game.matchConfig"]});
     }
 
     /**
@@ -417,15 +572,16 @@ export class GameStatisticsService {
      */
     async getRound(id: number): Promise<Round | undefined>
     {
-        return await this.roundRepository.findOne({where: {id: id}, relations: ["game", "game.map", "game.gameMode", "game.gameserver"]});
+        return await this.roundRepository.findOne({where: {id: id}, relations: ["game", "game.map", "game.gameMode", "game.gameserver", "game.matchConfig"]});
     }
 
     /**
      * Create or update playerRoundStats
      * @param stats 
+     * @param manager which is used only (!) for transactions (optional)
      * @throws if any steamId64 is not valid
      */
-    async createUpdatePlayerRoundStats(stats: PlayerRoundStats[])
+    async createUpdatePlayerRoundStats(stats: PlayerRoundStats[], manager?: EntityManager)
     {
         const toInsert = stats.map(x => {
             const cloned = new PlayerRoundStats({...x});
@@ -437,7 +593,6 @@ export class GameStatisticsService {
             cloned.score = Math.max(cloned.score, 0);
             cloned.totalDamage = Math.max(cloned.totalDamage, 0);
 
-            cloned.round = new Round({id: x.round.id});
             return cloned;
         });
 
@@ -448,20 +603,39 @@ export class GameStatisticsService {
             }        
         });
 
-        await this.steamUserService.updateSteamUsers(toInsert.map(x => x.steamId64)); // Don't update when weapon stats are set, this should be enough since update round / weapon stats are usually used at the same time
+        if(manager)
+        {
+            const chunked = _.chunk(toInsert, 175).map(chunk => manager.save(PlayerRoundStats, chunk)); //chunk to avoid sqlite issues
+            await Promise.all(chunked);
+        }
+        else
+        {
+            await pRetry(async () => {
+                    await this.connection.transaction("READ UNCOMMITTED", async manager => 
+                    {
+                        const chunked = _.chunk(toInsert, 175).map(chunk => manager.save(PlayerRoundStats, chunk)); //chunk to avoid sqlite issues
+                        await Promise.all(chunked);
+                    });
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+            );
+        }
 
-        const chunked = _.chunk(toInsert, 175).map(chunk => this.playerRoundStatsRepository.save(chunk));
-        await Promise.all(chunked);
+        
     }
 
     /**
      * Create or update playerRoundWeaponStats
      * Cascades weapon
      * @param weaponStats 
+     * @param manager which is used only (!) for transactions (optional)
      * @throws if any steamId64 is not valid
      */
-    async createUpdatePlayerRoundWeaponStats(weaponStats: PlayerRoundWeaponStats[])
+    async createUpdatePlayerRoundWeaponStats(weaponStats: PlayerRoundWeaponStats[], manager?: EntityManager)
     {
+        const weapons = weaponStats.map(x => x.weapon);
+
+        await this.insertWeaponsSetCachedId(weapons, manager);
+
         const toInsert = weaponStats.map(x => {
             const cloned = new PlayerRoundWeaponStats({...x});
 
@@ -472,6 +646,7 @@ export class GameStatisticsService {
             cloned.shotsLegs = Math.max(cloned.shotsLegs, 0);
             cloned.shotsFired = Math.max(cloned.shotsFired, 0);
 
+            cloned.weapon = new Weapon({id: this.weaponIdCache.get(cloned.weapon.name)});
             cloned.round = new Round({id: x.round.id})
             return cloned;
         });
@@ -480,57 +655,81 @@ export class GameStatisticsService {
             if(!isValidSteamId(x.steamId64))    
             {
                 throw new HttpException(`Invalid SteamId64: ${x.steamId64}`, HttpStatus.BAD_REQUEST);
-            }        
+            }
+            else if(!x.weapon?.id)    
+            {
+                throw new HttpException(`Could not retrieve id for weapon: <${x.weapon}>`, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         });
-        
-        const uniqWeapons = _.uniqBy(toInsert.map(x => x.weapon).filter(x => !x.id && !this.weaponIdCache.has(x.name)), "name");
+
+
+        if(manager)
+        {
+            const chunked = _.chunk(toInsert, 150).map(chunk => manager.save(PlayerRoundWeaponStats, chunk)); //chunk to avoid sqlite issues
+            await Promise.all(chunked);
+        }
+        else
+        {
+            await pRetry(async () => {
+                    await this.connection.transaction("READ UNCOMMITTED", async manager => 
+                    {
+                        const chunked = _.chunk(toInsert, 150).map(chunk => manager.save(PlayerRoundWeaponStats, chunk)); //chunk to avoid sqlite issues
+                        await Promise.all(chunked);
+                    });
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+            );
+        }
+           
+    }
+
+    /**
+     * Inserts weapon into database and set ids in cache (needed for player round weapon stats)
+     * Does not deal with updating entity (if needed it has to be done later, but not while inserting player weapon stats)
+     * @param weapons
+     * @param manager which is used only (!) for transactions (optional, must use SERIALIZABLE due to name being a unique index)
+     */
+    async insertWeaponsSetCachedId(weapons: Weapon[], manager?: EntityManager)
+    {
+        // Only consider weapons which don't have an id set or id set inside cache to further processed
+        const uniqWeapons = _.uniqBy(weapons.filter(x => !x.id && !this.weaponIdCache.has(x.name)), "name").map(x => ({...x}));
 
         if(uniqWeapons.length > 0)
         {
-            const weapons = await this.weaponRepository.find({where: uniqWeapons.map(x => ({name: x.name}))});
-            weapons.forEach(x => this.weaponIdCache.set(x.name, x.id));
-        }
-
-        const uniqWeaponsNew = _.uniqBy(toInsert.map(x => x.weapon).filter(x => !x.id && !this.weaponIdCache.has(x.name)), "name");
-
-        if(uniqWeaponsNew.length > 0)
-        {
-            await pRetry(async () => {
-                await this.connection.transaction("SERIALIZABLE", async manager => 
-                {      
-                    const weapons = await manager.find(Weapon, {where: uniqWeaponsNew.map(x => ({name: x.name}))});
-                
-                    weapons.forEach(x => {
-                    this.weaponIdCache.set(x.name, x.id);
-                    });
+            // Only save weapons which do not exist in database yet and set ids in cache for all weapons
+            const insertSetId = async (manager: EntityManager) => {
+                const foundWeapons = await manager.find(Weapon, {where: uniqWeapons.map(x => ({name: x.name}))});
                     
-                    const newWeapons = uniqWeaponsNew.filter(x => !this.weaponIdCache.has(x.name));
-                    if(newWeapons.length > 0)
-                    {
-                        const savedWeapons = await manager.save(Weapon, newWeapons);
-        
-                        savedWeapons.forEach(x => {
-                            this.weaponIdCache.set(x.name, x.id);
-                        });
-            
-                    }
+                foundWeapons.forEach(x => {
+                    this.weaponIdCache.set(x.name, x.id);
                 });
-                }, {retries: 6, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.12)[0]}
-            );
-        }
+                
+                const newWeapons = uniqWeapons.filter(x => !this.weaponIdCache.has(x.name));
+                if(newWeapons.length > 0)
+                {
+                    const savedWeapons = await manager.save(Weapon, newWeapons);
 
-        toInsert.forEach(x => {
-            if(!x.weapon.id)
+                    savedWeapons.forEach(x => {
+                        this.weaponIdCache.set(x.name, x.id);
+                    });
+        
+                }
+            };
+
+            if(manager)
             {
-                x.weapon.id = this.weaponIdCache.get(x.weapon.name);
+                await insertSetId(manager);
             }
-        });
-            
-        const chunked = _.chunk(toInsert, 150).map(chunk => this.playerRoundWeaponStatsRepository.save(chunk));
-
-        await Promise.all(chunked);
-
-       
+            else
+            {
+                await pRetry(async () => {
+                    await this.connection.transaction("SERIALIZABLE", async manager => 
+                    {      
+                        await insertSetId(manager);
+                    });
+                    }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                );
+            }
+        }
     }
 
     /**
@@ -558,12 +757,18 @@ export class GameStatisticsService {
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameMode", "gameMode");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.map", "map");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameserver", "gameserver");
+        queryBuilder = queryBuilder.leftJoinAndSelect("game.matchConfig", "matchConfig");
 
         queryBuilder = queryBuilder.where("1=1");  
 
         if(options.game)
         {
             queryBuilder = queryBuilder.andWhere("game.id = :gameId", { gameId: options.game.id });
+        }
+
+        if(options.ranked)
+        {
+            queryBuilder = queryBuilder.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
         }
 
         if(options.onlyFinishedRounds)
@@ -615,9 +820,16 @@ export class GameStatisticsService {
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameserver", "gameserver");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.map", "map");
         queryBuilder = queryBuilder.leftJoinAndSelect("game.gameMode", "gameMode");
+        queryBuilder = queryBuilder.leftJoinAndSelect("game.matchConfig", "matchConfig");
+        queryBuilder = queryBuilder.leftJoinAndSelect("matchConfig.gameMode", "matchConfigGameMode");
 
         queryBuilder = queryBuilder.where("1=1"); 
     
+        if(options.ranked)
+        {
+            queryBuilder = queryBuilder.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
+        }
+
         if(options.gameMode)
         {
             queryBuilder = queryBuilder.andWhere(options.gameMode.id ? "gameMode.id = :gameModeId" : "gameMode.name = :gameModeName" , options.gameMode.id ? { gameModeId: options.gameMode.id } : { gameModeName: options.gameMode.name });

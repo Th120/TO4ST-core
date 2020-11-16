@@ -7,7 +7,7 @@ import {
   State
 } from "@stencil/core";
 
-import { Gameserver, APIClient } from "../../libs/api";
+import { Gameserver, APIClient, GameserverConfigOrder } from "../../libs/api";
 import { ColumnProps, FilterProps } from "../general-ui-stuff/to4st-list/to4st-list";
 import { app } from "../../global/context";
 import { extractGraphQLErrors } from "../../libs/utils";
@@ -26,7 +26,7 @@ export class To4stGameserverList implements ComponentInterface {
   @State() currentPageCount = 1;
   @State() currentSearch = "";
   @State() orderDesc = true;
-  @State() currentOrderBy = "";
+  @State() currentOrderBy: GameserverConfigOrder;
 
   @app.Context("api") apiClient = {} as APIClient;
 
@@ -57,7 +57,7 @@ export class To4stGameserverList implements ComponentInterface {
       tableContent: server => <p>{server.lastContact}</p>,
       sortable: true
     }
-  ] as ColumnProps[];
+  ] as ColumnProps<Gameserver>[];
 
   filters = [] as FilterProps[];
 
@@ -70,7 +70,7 @@ export class To4stGameserverList implements ComponentInterface {
   {
     try 
     {
-      const res = await this.apiClient.client.chain.query.gameservers({options: {pageSize: PAGE_SIZE, page: this.currentPage, search: this.currentSearch, orderDesc: this.orderDesc, orderByCurrentName: this.currentOrderBy === "Current Name"}}).execute({pageCount: true, content: {id: true, authKey: true, currentName: true, description: true, lastContact: true}});
+      const res = await this.apiClient.client.chain.query.gameservers({options: {pageSize: PAGE_SIZE, page: this.currentPage, search: this.currentSearch, orderDesc: this.orderDesc, orderBy: this.currentOrderBy}}).execute({pageCount: true, content: {id: true, authKey: true, currentName: true, description: true, lastContact: true}});
       this.servers = res.content;
       this.currentPageCount = res.pageCount;
     }
@@ -118,10 +118,19 @@ export class To4stGameserverList implements ComponentInterface {
     }
   }
 
-  async orderBy(orderByKey: string, orderDesc: boolean)
+  orderBy(orderByKey: string, orderDesc: boolean)
   {
     this.orderDesc = orderDesc;
-    this.currentOrderBy = orderByKey;
+
+    if(orderByKey === "Last Contact")
+    {
+      this.currentOrderBy = GameserverConfigOrder.lastContact;
+    }
+    else 
+    {
+      this.currentOrderBy = GameserverConfigOrder.currentName;
+    }
+
     this.updateContent();
   }
 

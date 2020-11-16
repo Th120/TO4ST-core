@@ -29,4 +29,4 @@ export class ServerMap {
         Object.assign(this, partial);
     }
 }
-// TODO extend with author, ideal playercount, images
+// TODO extend with author, ideal playercount, images later on

@@ -18,6 +18,7 @@ export enum Role {
 export enum AuthPlayerRole {
     rootAdmin = "rootAdmin",
     ban = "ban",
+    gameControl = "gameControl"
   }
 
 /**

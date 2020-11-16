@@ -42,6 +42,10 @@ export class PlayerAuthService {
       authPlayerRoles.push(AuthPlayerRole.rootAdmin);
     }
 
+    if(player.gameControl) {
+      authPlayerRoles.push(AuthPlayerRole.gameControl);
+    }
+
     const appcfg = await this.appConfigService.getAppConfig(true);
 
     const token = jwt.sign(

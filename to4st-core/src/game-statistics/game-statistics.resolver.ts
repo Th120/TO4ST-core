@@ -40,7 +40,7 @@ class ServerMapInput
  * Input type used for gameMode
  */
 @InputType()
-class GameModeInput
+export class GameModeInput
 {
     /**
      * Name of gameMode
@@ -52,8 +52,9 @@ class GameModeInput
     /**
      * Is this gameMode based on teams?
      */
+    @ValidateIf(x => x.isTeamBased !== undefined)
     @IsBoolean()
-    @Field(() => Boolean)
+    @Field(() => Boolean, {nullable: true})
     isTeamBased!: boolean;
 }
 
@@ -827,6 +828,8 @@ export class PlayerRoundStatsResolver {
                 score: x.score,
                 team: x.team
             })));
+
+        await this.steamUserService.updateSteamUsers(stats.map(x => x.steamId64)); // Don't update when weapon stats are set, this should be enough since update round / weapon stats are usually used at the same time
 
         await this.statsService.createUpdatePlayerRoundStats(stats);
 

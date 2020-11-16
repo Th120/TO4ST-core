@@ -34,8 +34,7 @@ export interface IRegisteredPlayerQuery {
 export class RegisteredPlayerService {
     constructor(
         @InjectRepository(RegisteredPlayer) private readonly registeredPlayerRepository: Repository<RegisteredPlayer>, 
-        @InjectConnection() private readonly connection: Connection,
-        private readonly steamUserService: SteamUserService,
+        @InjectConnection() private readonly connection: Connection
         )
     {
     }
@@ -64,8 +63,6 @@ export class RegisteredPlayerService {
         }
 
         const inserted = await this.registeredPlayerRepository.save(toInsert);
-
-        await this.steamUserService.updateSteamUsers([toInsert.steamId64]);
 
         return await this.getRegisteredPlayer({id: inserted.id});
     }
