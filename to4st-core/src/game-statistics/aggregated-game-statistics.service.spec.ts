@@ -346,7 +346,7 @@ describe('AggregatedGameStatisticsService', () => {
     playerVoteThreshold: chance.floating({min: 0, max: 100}),
     autoBalanceTeams: chance.bool(),
     playerVoteTeamOnly: chance.bool(),
-    maxTeamDamage: chance.floating({min: 0}),
+    maxTeamDamage: chance.floating({min: 0, max: 5000}),
     enablePlayerVote: chance.bool(),
     autoSwapTeams: chance.bool(),
     midGameBreakLength: chance.integer({min: 0, max: 30000}),

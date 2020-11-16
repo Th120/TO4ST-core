@@ -110,7 +110,7 @@ describe('GameserverConfigService', () => {
     playerVoteThreshold: chance.floating({min: 0, max: 100}),
     autoBalanceTeams: chance.bool(),
     playerVoteTeamOnly: chance.bool(),
-    maxTeamDamage: chance.floating({min: 0}),
+    maxTeamDamage: chance.integer({min: 0, max: 5000}), //24 bit float of mysql might be slightly off with floating values
     enablePlayerVote: chance.bool(),
     autoSwapTeams: chance.bool(),
     midGameBreakLength: chance.integer({min: 0, max: 30000}),

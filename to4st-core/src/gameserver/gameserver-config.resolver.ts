@@ -294,8 +294,8 @@ class MatchConfigInput
      * Team damage before temp kickban
      */
     @ValidateIf(x => x.maxTeamDamage !== undefined)
-    @IsNumber()
-    @Field(() => Float, {nullable: true})
+    @IsInt()
+    @Field(() => Int, {nullable: true})
     maxTeamDamage: number;
 
     /**
