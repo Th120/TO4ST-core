@@ -10,7 +10,7 @@ A backend can have a list of partner backends which are also queried when a game
 
 ## Developing
 Using Visual Studio Code on Linux / Windows with WSL is recommended.  
-Node 12 LTS is required. Using [nvm to install](https://github.com/nvm-sh/nvm) is recommended.  
+Node 14 LTS is required. Using [nvm to install](https://github.com/nvm-sh/nvm) is recommended.  
 You also need to [install the package manager yarn](https://yarnpkg.com/getting-started/install).  
 
 ## Deploying
@@ -42,7 +42,7 @@ Password for MySQL / Postgres database
 The path to the SQLite database if used
 
 ## Getting started
-When an instance, which ist using an unused instance id, is started for the first time it is initialized with a random password that is logged.  
+When an instance, which is using an unused instance id, is started for the first time it is initialized with a random password that is logged.  
 The software will use a different random password on every start until a new password is assigned in the UI.        
 
 In order to use the software with your gameservers you need to generate an auth key for each server which has to be done using the "Gameservers" settings page. The auth key and the address of the backend has to be added to the TO4cfg.ini which is located in the root dir of the gameserver package.
