@@ -2,11 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { hashPassword, TIMEOUT_PROMISE_FACTORY } from '../src/shared/utils';
+import { hashPassword } from '../src/shared/utils';
 import { chance } from 'jest-chance';
 
-import * as jwt from 'jsonwebtoken';
-import { Role } from '../src/shared/auth.utils';
 import { randomSteamId64 } from '../src/testUtils';
 
 describe('public stats interceptor(e2e)', () => {
