@@ -90,6 +90,14 @@ class GameQuery
     orderDesc?: boolean;
 
     /**
+     * Should be ordered descending?
+     */
+    @ValidateIf(x => x.orderByEndedAt !== undefined)
+    @IsBoolean()
+    @Field(() => Boolean, {nullable: true})
+    orderByEndedAt?: boolean;
+
+    /**
      * Only retrieve games of gameServer
      */
     @ValidateIf(x => x.gameserverId !== undefined)
@@ -112,6 +120,22 @@ class GameQuery
     @Field({nullable: true})
     @IsDate()
     startedBefore?: Date;
+
+      /**
+     * Filter for games eneded after date
+     */
+    @ValidateIf(x => x.endedAfter !== undefined)
+    @Field({nullable: true})
+    @IsDate()
+    endedAfter?: Date;
+
+    /**
+     * Filter for games ended before date
+     */
+    @ValidateIf(x => x.endedBefore !== undefined)
+    @Field({nullable: true})
+    @IsDate()
+    endedBefore?: Date;
 
     /**
      * Filter for games on map
@@ -136,6 +160,14 @@ class GameQuery
     @IsBoolean()
     @Field(() => Boolean, {nullable: true})
     onlyFinishedGames?: boolean;
+
+    /**
+     * Only include matches which use a ranked matchConfig
+     */
+    @ValidateIf(x => x.rankedOnly !== undefined)
+    @IsBoolean()
+    @Field(() => Boolean, {nullable: true})
+    rankedOnly?: boolean;
 }
 
 /**
@@ -584,9 +616,11 @@ export class GameResolver {
             startedBefore: options.startedAfter,
             startedAfter: options.startedAfter,
             gameserver: options.gameserverId ? new Gameserver({id: options.gameserverId}) : undefined,
+            orderByEndedAt: options.orderByEndedAt,
             orderDesc: options.orderDesc,
             page: options.page,
             pageSize: options.pageSize,
+            ranked: options.rankedOnly,
             onlyFinishedGames: options.onlyFinishedGames
         });
         
@@ -717,6 +751,28 @@ export class RoundResolver {
     async round(@Args("roundId") roundId: number)
     {
         return await this.statsService.getRound(roundId);
+    }
+
+    /**
+     * Resolve playerRoundStats of round
+     * @param round 
+     */
+    @ResolveField("playerRoundStats", returns => [PlayerRoundStats], {nullable: true})
+    @AllowTacByteAccess()
+    async playerRoundStats(@Parent() round: Round,) 
+    {
+        return await this.statsService.getRoundStatistics({round: round, overridePageSize: true})
+    }
+
+    /**
+     * Resolve playerRoundWeaponStats of round
+     * @param round 
+     */
+    @ResolveField("playerRoundWeaponStats", returns => [PlayerRoundWeaponStats], {nullable: true})
+    @AllowTacByteAccess()
+    async playerRoundWeaponStats(@Parent() round: Round,) 
+    {
+        return await this.statsService.getRoundWeaponStatistics({round: round, overridePageSize: true})
     }
 
     /**

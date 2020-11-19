@@ -127,14 +127,24 @@ export interface IGameQuery {
     page?: number, 
 
     /**
-     * Rounds should be started after
+     * Rounds should have started after
      */
     startedAfter?: Date, 
 
     /**
-     * Rounds should be started before
+     * Rounds should have ended after
+     */
+    endedAfter?: Date, 
+
+    /**
+     * Rounds should have started before
      */
     startedBefore?: Date, 
+
+    /**
+     * Rounds should have ended before
+     */
+    endedBefore?: Date,
 
     /**
      * Only retrieve games of gameServer
@@ -159,7 +169,12 @@ export interface IGameQuery {
     /**
      * Should be ordered descending?
      */
-    orderDesc?: boolean
+    orderDesc?: boolean,
+
+    /**
+     * Should be ordered by end date?
+     */
+    orderByEndedAt?: boolean,
 
     /**
      * Only games which use a ranked match config
@@ -186,6 +201,12 @@ export interface IRoundWeaponStatisticsQuery
      * Desired page size
      */
     pageSize?: number, 
+
+    /**
+     * Allows easy query via field resolver
+     * Should not be exposed to all auth levels
+     */
+    overridePageSize?: boolean;
 }
 
 /**
@@ -206,6 +227,12 @@ export interface IRoundStatisticsQuery {
      * Desired page size
      */
     pageSize?: number, 
+
+    /**
+     * Allows easy query via field resolver
+     * Should not be exposed to all auth levels
+     */
+    overridePageSize?: boolean;
 }
 
 /**
@@ -441,7 +468,6 @@ export class GameStatisticsService implements OnApplicationBootstrap {
         {
             game.gameserver = new Gameserver({id: game.gameserver.id});
         }
-
 
         if(!manager)
         {
@@ -852,18 +878,28 @@ export class GameStatisticsService implements OnApplicationBootstrap {
 
         if(options.startedBefore)
         {
-            queryBuilder = queryBuilder.andWhere("game.startedAt <= :bef", {bef: mapDateForQuery(options.startedBefore)});
+            queryBuilder = queryBuilder.andWhere("game.startedAt <= :sbef", {sbef: mapDateForQuery(options.startedBefore)});
         }
 
         if(options.startedAfter) 
         {
-            queryBuilder = queryBuilder.andWhere("game.startedAt >= :af", {af: mapDateForQuery(options.startedAfter)});
+            queryBuilder = queryBuilder.andWhere("game.startedAt >= :saf", {saf: mapDateForQuery(options.startedAfter)});
+        }
+
+        if(options.endedAfter) 
+        {
+            queryBuilder = queryBuilder.andWhere("game.endedAt >= :eaf", {eaf: mapDateForQuery(options.endedAfter)});
+        }
+
+        if(options.endedBefore)
+        {
+            queryBuilder = queryBuilder.andWhere("game.endeddAt <= :ebef", {ebef: mapDateForQuery(options.endedBefore)});
         }
 
         
         queryBuilder = queryBuilder.skip(options.pageSize * (options.page - 1)).take(options.pageSize);
 
-        queryBuilder = queryBuilder.orderBy("game.startedAt", options.orderDesc ? "DESC" : "ASC");
+        queryBuilder = queryBuilder.orderBy(!options.orderByEndedAt ? "game.startedAt" : "game.endedAt", options.orderDesc ? "DESC" : "ASC");
 
         const ret = await queryBuilder.getManyAndCount();
 
@@ -886,8 +922,8 @@ export class GameStatisticsService implements OnApplicationBootstrap {
                 where: options.round ? {
                     round: options.round
                 } : undefined, 
-                take: options.pageSize, 
-                skip: options.pageSize * (options.page - 1),
+                take: !options.overridePageSize ? options.pageSize : undefined, 
+                skip: !options.overridePageSize ? options.pageSize * (options.page - 1) : undefined,
                 order: {round: "DESC"},
                 relations: ["weapon"]
             });
@@ -912,9 +948,9 @@ export class GameStatisticsService implements OnApplicationBootstrap {
                 where: options.round ? {
                     round: options.round
                 } : undefined, 
-                take: options.pageSize, 
+                take: !options.overridePageSize ? options.pageSize : undefined, 
                 order: {round: "DESC"},
-                skip: options.pageSize * (options.page - 1),
+                skip: !options.overridePageSize ? options.pageSize * (options.page - 1) : undefined,
             });
                 
 
