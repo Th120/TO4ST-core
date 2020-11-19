@@ -80,7 +80,6 @@
     "@nestjs/testing": "^7.4.2",
     "@types/bcrypt": "^3.0.0",
     "@types/chance": "^1.1.0",
-    "@types/clamp": "^1.0.0",
     "@types/express": "^4.17.7",
     "@types/jest": "26.0.15",
     "@types/joi": "^14.3.4",

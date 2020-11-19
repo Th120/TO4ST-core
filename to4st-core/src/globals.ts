@@ -11,7 +11,7 @@ export const DEFAULT_PW_LENGTH = 24;
 /**
  * Min id length
  */
-export const MIN_ID_LENGTH = 24;
+export const MIN_ID_LENGTH = 26;
 
 /**
  * Min password length

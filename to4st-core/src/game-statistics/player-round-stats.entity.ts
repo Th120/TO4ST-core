@@ -25,7 +25,7 @@ export class PlayerRoundStats {
     /**
      * SteamId of player
      */
-    @Field(() => Int)
+    @Field(() => String)
     @Expose()
     @Index("idx_steamId")
     @PrimaryColumn({type: "int", unsigned: true, transformer: transformSteamId64AccountId, comment: "Save SteamAccountId to avoid bigint weirdness"})
