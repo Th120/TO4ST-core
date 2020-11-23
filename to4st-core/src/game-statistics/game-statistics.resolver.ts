@@ -121,7 +121,7 @@ class GameQuery
     @IsDate()
     startedBefore?: Date;
 
-      /**
+    /**
      * Filter for games eneded after date
      */
     @ValidateIf(x => x.endedAfter !== undefined)
@@ -615,6 +615,8 @@ export class GameResolver {
             gameMode: options.gameMode ? new GameMode({name: options.gameMode.name}) : undefined,
             startedBefore: options.startedAfter,
             startedAfter: options.startedAfter,
+            endedBefore: options.endedBefore,
+            endedAfter: options.endedAfter,
             gameserver: options.gameserverId ? new Gameserver({id: options.gameserverId}) : undefined,
             orderByEndedAt: options.orderByEndedAt,
             orderDesc: options.orderDesc,

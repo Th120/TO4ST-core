@@ -127,22 +127,22 @@ export interface IGameQuery {
     page?: number, 
 
     /**
-     * Rounds should have started after
+     * Games should have started after
      */
     startedAfter?: Date, 
 
     /**
-     * Rounds should have ended after
+     * Games should have ended after
      */
     endedAfter?: Date, 
 
     /**
-     * Rounds should have started before
+     * Games should have started before
      */
     startedBefore?: Date, 
 
     /**
-     * Rounds should have ended before
+     * Games should have ended before
      */
     endedBefore?: Date,
 

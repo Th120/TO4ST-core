@@ -1,7 +1,7 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor, ClassSerializerInterceptor, PlainLiteralObject, Logger } from '@nestjs/common';
 import { Observable, } from 'rxjs';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Role } from './auth.utils';
 import { TransactionIdService } from '../core/transaction-id.service';
 import { Reflector } from '@nestjs/core';
