@@ -68,7 +68,7 @@ export class To4stPlayerStatistics implements ComponentInterface {
   /**
    * API client
    */
-  @app.Context("api") apiClient = {} as APIClient;
+  @app.Context("api") apiClient!: APIClient;
 
   /**
    * Is admin
@@ -164,11 +164,19 @@ export class To4stPlayerStatistics implements ComponentInterface {
   }
 
   /**
+   * Update when client updated
+   */
+  @app.Observe("api")
+  async onClientUpdated() {
+    await this.updateContent();
+  }
+
+  /**
    * Update list
    */
   async updateContent()
   {
-    if(this.isAdmin || this.appConfig?.publicStats)
+    if((this.isAdmin || this.appConfig?.publicStats) && !!this.apiClient)
     {
       this.loadingData = true;
       try 

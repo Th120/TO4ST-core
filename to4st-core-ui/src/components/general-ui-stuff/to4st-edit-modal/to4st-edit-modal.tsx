@@ -200,7 +200,7 @@ export class To4stEditModal implements ComponentInterface {
                             data-tooltip={
                               this.deleteActive
                                 ? undefined
-                                : "Toggle switch \n to unlock"
+                                : "Toggle switch \nto unlock"
                             }
                           >
                             <button

@@ -291,7 +291,7 @@ export class To4stGeneralSettings implements ComponentInterface {
                   <div class="control">
                     <span
                       class="has-tooltip-arrow"
-                      data-tooltip="Enter the tld-address the master \n should use to contact your backend, e.g. 'https://abc.de'"
+                      data-tooltip={"Enter the tld-address the master \nshould use to contact your backend, e.g. 'https://abc.de'"}
                     >
                       <input
                         class="input"
