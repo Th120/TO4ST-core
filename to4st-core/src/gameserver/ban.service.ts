@@ -326,6 +326,7 @@ export class BanService {
      */
     async getBans(params: IBanQuery): Promise<[Ban[], number, number]>
     {
+        params.search = params.search?.trim().toLowerCase();
         params.page = Math.max(1, params.page ?? 1);
         params.pageSize = _.clamp(params.pageSize ?? MAX_PAGE_SIZE_WITH_STEAMID, 1, MAX_PAGE_SIZE_WITH_STEAMID)
 
@@ -376,11 +377,11 @@ export class BanService {
                     qb = qb.orWhere("ban.bannedById64 = :steamIdBanned", { steamIdBanned: steamId });
                 }
 
-                qb.orWhere("ban.id like :search", {search: `%${params.search}%`})
-                .orWhere("id1 like :search", {search: `%${params.search}%`})
-                .orWhere("id2 like :search", {search: `%${params.search}%`})
-                .orWhere("ban.reason like :search", {search: `%${params.search}%`})
-                .orWhere("gameserver.id like :search", {search: `%${params.search}%`})
+                qb.orWhere("LOWER(ban.id) like :search", {search: `%${params.search}%`})
+                .orWhere("LOWER(id1) like :search", {search: `%${params.search}%`})
+                .orWhere("LOWER(id2) like :search", {search: `%${params.search}%`})
+                .orWhere("LOWER(ban.reason) like :search", {search: `%${params.search}%`})
+                .orWhere("LOWER(gameserver.id) like :search", {search: `%${params.search}%`})
 
             }));
         }

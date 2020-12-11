@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository,  LessThan, IsNull, Like } from 'typeorm';
+import { Repository,  LessThan, IsNull, ILike } from 'typeorm';
 import _ from "lodash"
 import LRUCache from "lru-cache"
 
@@ -223,7 +223,7 @@ export class SteamUserService implements OnApplicationBootstrap
      */
     async getSteamUsersByName(name: string): Promise<SteamUser[]>
     {
-        const find = await this.steamUserRepo.find({where: {name: Like(`%${name}%`)}});
+        const find = await this.steamUserRepo.find({where: {name: ILike(`%${name}%`)}});
         return find;
     }
 

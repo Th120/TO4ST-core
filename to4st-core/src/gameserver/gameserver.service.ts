@@ -128,7 +128,7 @@ export class GameserverService {
     {
         options.page = options.page ?? 1;
         options.pageSize = _.clamp(options.pageSize ?? MAX_PAGE_SIZE, 1, MAX_PAGE_SIZE);
-        options.search = options.search ?? "";
+        options.search = options.search?.trim().toLowerCase();
         options.orderBy = options.orderBy ?? GameserverConfigOrder.currentName;
         options.orderDesc = options.orderDesc ?? true;
         options.configFilter = options.configFilter ?? GameserverConfigFilter.none;        	
@@ -144,10 +144,10 @@ export class GameserverService {
         if(options.search)
         {
             queryBuilder = queryBuilder.andWhere(new Brackets(qb => {
-                qb.orWhere("gameserver.description like :search", {search: `%${options.search}%`})
-                .orWhere("gameserver.authKey like :search", {search: `%${options.search}%`})
-                .orWhere("gameserver.currentName like :search", {search: `%${options.search}%`})
-                .orWhere("gameserver.id like :search", {search: `%${options.search}%`})
+                qb.orWhere("LOWER(gameserver.description) like :search", {search: `%${options.search}%`})
+                .orWhere("LOWER(gameserver.authKey) like :search", {search: `%${options.search}%`})
+                .orWhere("LOWER(gameserver.currentName) like :search", {search: `%${options.search}%`})
+                .orWhere("LOWER(gameserver.id) like :search", {search: `%${options.search}%`})
             }));
         }
 

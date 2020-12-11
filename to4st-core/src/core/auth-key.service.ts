@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
-import { Repository, Connection, Like } from 'typeorm';
+import { Repository, Connection, ILike } from 'typeorm';
 import {nanoid} from 'nanoid/async';
 import _ from 'lodash'
 
@@ -134,7 +134,7 @@ export class AuthKeyService {
         const ret = await this.authKeyRepository.findAndCount({
             take: params.pageSize,
             skip: params.pageSize * (params.page - 1),
-            where: params.search.length >= MIN_SEARCH_LEN? [{description: Like(`%${params.search}%`)}, {authKey: Like(`%${params.search}%`)}] : undefined,
+            where: params.search.length >= MIN_SEARCH_LEN? [{description: ILike(`%${params.search}%`)}, {authKey: ILike(`%${params.search}%`)}] : undefined,
             order: {
                 lastUse: params.orderDesc ? "DESC" : "ASC"   
             } 

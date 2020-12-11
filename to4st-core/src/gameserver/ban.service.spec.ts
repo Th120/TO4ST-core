@@ -289,7 +289,7 @@ describe('BanService', () => {
     const toInsert = randomBan(gameServer);
     const added = await service.createUpdateBan(toInsert, );
 
-    const [found, count, pages] = await service.getBans({search: toInsert.steamId64});
+    const [found, count, pages] = await service.getBans({search: toInsert.steamId64.toLowerCase()});
 
     expect(count).toEqual(1);
 
@@ -302,7 +302,7 @@ describe('BanService', () => {
     const toInsert = randomBan(gameServer);
     const added = await service.createUpdateBan(toInsert,);
 
-    const [found, count, pages] = await service.getBans({search: gameServer.id});
+    const [found, count, pages] = await service.getBans({search: gameServer.id.toLowerCase()});
 
     expect(count).toEqual(1);
 

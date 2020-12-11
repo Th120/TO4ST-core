@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus, OnApplicationBootstrap } from '@nestjs/common';
 import _ from "lodash"
-import { Repository, Connection, Like, Brackets } from 'typeorm';
+import { Repository, Connection, Like, Brackets, ILike } from 'typeorm';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import jsSHA from "jssha";
 import hash from "string-hash";
@@ -182,7 +182,7 @@ export class GameserverConfigService implements OnApplicationBootstrap{
     options.pageSize = options.pageSize ?? MAX_PAGE_SIZE;
     options.page = options.page ?? 1;
     options.orderByGameserverName = options.orderByGameserverName ?? false;
-    options.search = options.search?.trim() ?? "";
+    options.search = options.search?.trim().toLowerCase();
 
     let queryBuilder = this.connection.createQueryBuilder().select("gameserverConfig").from(GameserverConfig, "gameserverConfig");
 
@@ -195,10 +195,10 @@ export class GameserverConfigService implements OnApplicationBootstrap{
     if(options.search)
     {
       queryBuilder = queryBuilder.andWhere(new Brackets(qb => {
-        qb.orWhere("gameserver.id like :search", {search: `%${options.search}%`})
-          .orWhere("gameserver.currentName like :search", {search: `%${options.search}%`})
-          .orWhere("matchConfig.configName like :search", {search: `%${options.search}%`})
-          .orWhere("gameMode.name like :search", {search: `%${options.search}%`})
+        qb.orWhere("LOWER(gameserver.id) like :search", {search: `%${options.search}%`})
+          .orWhere("LOWER(gameserver.currentName) like :search", {search: `%${options.search}%`})
+          .orWhere("LOWER(matchConfig.configName) like :search", {search: `%${options.search}%`})
+          .orWhere("LOWER(gameMode.name) like :search", {search: `%${options.search}%`})
       }));
     }
     
@@ -363,7 +363,7 @@ export class GameserverConfigService implements OnApplicationBootstrap{
         take: options.pageSize, 
         skip: options.pageSize * (options.page - 1), 
         order: {configName: options.orderDesc ? "DESC" : "ASC"},
-        where: options.configName ? {configName: Like(`%${options.configName.trim()}%`)} : undefined
+        where: options.configName ? {configName: ILike(`%${options.configName.trim()}%`)} : undefined
       });
 
     return [ret[0], ret[1], Math.ceil(ret[1] / options.pageSize)];

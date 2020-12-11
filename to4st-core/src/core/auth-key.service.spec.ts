@@ -272,7 +272,7 @@ describe('AuthKeyService', () => {
     
     const searchFor = arr[chance.integer({min: 0}) % arr.length];
 
-    const [found] = await service.getAuthKeys({search: searchFor.description.slice(Math.ceil(searchFor.description.length / 1.5))});
+    const [found] = await service.getAuthKeys({search: searchFor.description.slice(Math.ceil(searchFor.description.length / 1.5)).toLowerCase()});
 
     expect(found.length).toBeGreaterThanOrEqual(1);
 
@@ -292,7 +292,7 @@ describe('AuthKeyService', () => {
     
     const searchFor = arr[chance.integer({min: 0}) % arr.length];
 
-    const [found] = await service.getAuthKeys({search: searchFor.authKey.slice(Math.ceil(searchFor.authKey.length / 1.5))});
+    const [found] = await service.getAuthKeys({search: searchFor.authKey.slice(Math.ceil(searchFor.authKey.length / 1.5)).toLowerCase()});
 
     expect(found.length).toBeGreaterThanOrEqual(1);
 

@@ -204,7 +204,7 @@ describe('GameserverService', () => {
     
     const searchFor = arr[chance.integer({min: 0}) % arr.length];
 
-    const [found] = await service.getGameservers({search: searchFor.description.slice(Math.ceil(searchFor.description.length / 1.5))});
+    const [found] = await service.getGameservers({search: searchFor.description.slice(Math.ceil(searchFor.description.length / 1.5)).toLowerCase()});
 
     expect(found.length).toBeGreaterThanOrEqual(1);
 
@@ -221,7 +221,7 @@ describe('GameserverService', () => {
     
     const searchFor = arr[chance.integer({min: 0}) % arr.length];
 
-    const [found] = await service.getGameservers({search: searchFor.authKey.slice(Math.ceil(searchFor.authKey.length / 1.5))});
+    const [found] = await service.getGameservers({search: searchFor.authKey.slice(Math.ceil(searchFor.authKey.length / 1.5)).toLowerCase()});
 
     expect(found.length).toBeGreaterThanOrEqual(1);
 
@@ -238,7 +238,7 @@ describe('GameserverService', () => {
     
     const searchFor = arr[chance.integer({min: 0}) % arr.length];
 
-    const [found] = await service.getGameservers({search: searchFor.currentName.slice(Math.ceil(searchFor.currentName.length / 1.5))});
+    const [found] = await service.getGameservers({search: searchFor.currentName.slice(Math.ceil(searchFor.currentName.length / 1.5)).toLowerCase()});
 
     expect(found.length).toBeGreaterThanOrEqual(1);
 
