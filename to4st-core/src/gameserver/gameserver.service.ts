@@ -7,7 +7,7 @@ import { registerEnumType } from '@nestjs/graphql';
 
 
 import { Gameserver } from './gameserver.entity';
-import { MIN_AUTH_KEY_LENGTH, MIN_ID_LENGTH, PASSWORD_ALPHABET, MIN_SEARCH_LEN, MAX_PAGE_SIZE } from '../globals';
+import { MIN_AUTH_KEY_LENGTH, MIN_ID_LENGTH, PASSWORD_ALPHABET, MIN_SEARCH_LEN, MAX_PAGE_SIZE, DEFAULT_ID_LENGTH } from '../globals';
 
 
 /**
@@ -214,7 +214,7 @@ export class GameserverService {
         if(!server.id)
         {   
             server.lastContact = new Date();
-            server.id = await customAlphabet(PASSWORD_ALPHABET, MIN_ID_LENGTH)();
+            server.id = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_ID_LENGTH)();
 
             if(!server.authKey)
             {

@@ -8,7 +8,6 @@ import { chance } from 'jest-chance';
 import { forN, N, genTypeORMTestCFG, MIN_N, randomDateInRange  } from '../testUtils';
 
 import _ from 'lodash'
-import { MIN_AUTH_KEY_LENGTH, MIN_ID_LENGTH } from '../globals';
 import { GameserverConfig } from './gameserver-config.entity';
 import { MatchConfig } from './match-config.entity';
 import { GameserverConfigService } from './gameserver-config.service';

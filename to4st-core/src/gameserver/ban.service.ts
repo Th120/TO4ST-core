@@ -8,7 +8,7 @@ import { customAlphabet } from 'nanoid/async';
 
 import { Gameserver } from './gameserver.entity';
 import { Ban } from './ban.entity';
-import {  MIN_SEARCH_LEN, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, MIN_ID_LENGTH } from '../globals';
+import {  MIN_SEARCH_LEN, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, DEFAULT_ID_LENGTH } from '../globals';
 import { createGraphqlClientTo4stCore} from "../libs/client/graphql-client-to4st-core"
 import { steamId64ToAccountId, mapDateForQuery, isValidSteamId } from '../shared/utils';
 import { SteamUserService } from '../core/steam-user.service';
@@ -243,7 +243,7 @@ export class BanService {
         }
         else
         {          
-            ban.id = await customAlphabet(PASSWORD_ALPHABET, MIN_ID_LENGTH)();
+            ban.id = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_ID_LENGTH)();
 
             if(!ban.bannedById64)
             {

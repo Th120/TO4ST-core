@@ -13,12 +13,11 @@ import { SteamUserService } from '../core/steam-user.service';
 import { Gameserver } from '../gameserver/gameserver.entity';
 import { ServerMap } from './server-map.entity';
 import { GameMode } from './game-mode.entity';
-import { MAX_PAGE_SIZE, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, MIN_ID_LENGTH, MAX_RETRIES } from '../globals';
+import { MAX_PAGE_SIZE, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, MAX_RETRIES, DEFAULT_ID_LENGTH } from '../globals';
 import { Game } from './game.entity';
 import { Weapon } from './weapon.entity';
 import { mapDateForQuery, isValidSteamId, TIMEOUT_PROMISE_FACTORY, asyncForEach } from '../shared/utils';
 import { customAlphabet } from 'nanoid/async';
-import { GameserverConfig } from '../gameserver/gameserver-config.entity';
 import { MatchConfig } from '../gameserver/match-config.entity';
 
 
@@ -476,7 +475,7 @@ export class GameStatisticsService implements OnApplicationBootstrap {
 
         if(!game.id)
         {
-            game.id = await customAlphabet(PASSWORD_ALPHABET, MIN_ID_LENGTH)();
+            game.id = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_ID_LENGTH)();
         }
 
         // need id for insert
