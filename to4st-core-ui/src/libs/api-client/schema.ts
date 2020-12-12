@@ -140,33 +140,14 @@ export interface Round {
   endedAt: DateTime | null
   scoreSpecialForces: Int
   scoreTerrorists: Int
+  playerRoundStats: PlayerRoundStats[] | null
+  playerRoundWeaponStats: PlayerRoundWeaponStats[] | null
   __typename: 'Round'
-}
-
-export interface PaginatedRound {
-  content: Round[] | null
-  totalCount: Int
-  pageCount: Int
-  __typename: 'PaginatedRound'
-}
-
-export interface PaginatedGameMode {
-  content: GameMode[] | null
-  totalCount: Int
-  pageCount: Int
-  __typename: 'PaginatedGameMode'
-}
-
-export interface PaginatedPlayerRoundStats {
-  content: PlayerRoundStats[] | null
-  totalCount: Int
-  pageCount: Int
-  __typename: 'PaginatedPlayerRoundStats'
 }
 
 export interface PlayerRoundStats {
   round: Round
-  steamId64: Int
+  steamId64: String
   kills: Int
   deaths: Int
   suicides: Int
@@ -189,13 +170,6 @@ export interface SteamUser {
   avatarBigUrl: String
   avatarMediumUrl: String
   __typename: 'SteamUser'
-}
-
-export interface PaginatedPlayerRoundWeaponStats {
-  content: PlayerRoundWeaponStats[] | null
-  totalCount: Int
-  pageCount: Int
-  __typename: 'PaginatedPlayerRoundWeaponStats'
 }
 
 export interface PlayerRoundWeaponStats {
@@ -226,6 +200,34 @@ export enum WeaponType {
   RIFLE = 'RIFLE',
   NADE = 'NADE',
   BOMB = 'BOMB',
+}
+
+export interface PaginatedRound {
+  content: Round[] | null
+  totalCount: Int
+  pageCount: Int
+  __typename: 'PaginatedRound'
+}
+
+export interface PaginatedGameMode {
+  content: GameMode[] | null
+  totalCount: Int
+  pageCount: Int
+  __typename: 'PaginatedGameMode'
+}
+
+export interface PaginatedPlayerRoundStats {
+  content: PlayerRoundStats[] | null
+  totalCount: Int
+  pageCount: Int
+  __typename: 'PaginatedPlayerRoundStats'
+}
+
+export interface PaginatedPlayerRoundWeaponStats {
+  content: PlayerRoundWeaponStats[] | null
+  totalCount: Int
+  pageCount: Int
+  __typename: 'PaginatedPlayerRoundWeaponStats'
 }
 
 export enum OrderPlayerBaseStats {
@@ -379,6 +381,8 @@ export interface AppConfig {
   masterserverKey: String | null
   steamWebApiKey: String | null
   ownAddress: String | null
+  playerStatsCacheAge: Int | null
+  minScoreStats: Int | null
   appInfo: AppInfo
   __typename: 'AppConfig'
 }
@@ -465,12 +469,16 @@ export interface GameQuery {
   page?: Int | null
   pageSize?: Int | null
   orderDesc?: Boolean | null
+  orderByEndedAt?: Boolean | null
   gameserverId?: String | null
   startedAfter?: DateTime | null
   startedBefore?: DateTime | null
+  endedAfter?: DateTime | null
+  endedBefore?: DateTime | null
   map?: ServerMapInput | null
   gameMode?: GameModeInput | null
   onlyFinishedGames?: Boolean | null
+  rankedOnly?: Boolean | null
 }
 
 export interface ServerMapInput {
@@ -587,6 +595,53 @@ export interface RoundRequest {
   endedAt?: boolean | number
   scoreSpecialForces?: boolean | number
   scoreTerrorists?: boolean | number
+  playerRoundStats?: PlayerRoundStatsRequest
+  playerRoundWeaponStats?: PlayerRoundWeaponStatsRequest
+  __typename?: boolean | number
+  __scalar?: boolean | number
+}
+
+export interface PlayerRoundStatsRequest {
+  round?: RoundRequest
+  steamId64?: boolean | number
+  kills?: boolean | number
+  deaths?: boolean | number
+  suicides?: boolean | number
+  totalDamage?: boolean | number
+  score?: boolean | number
+  team?: boolean | number
+  steamUser?: SteamUserRequest
+  __typename?: boolean | number
+  __scalar?: boolean | number
+}
+
+export interface SteamUserRequest {
+  steamId64?: boolean | number
+  name?: boolean | number
+  avatarBigUrl?: boolean | number
+  avatarMediumUrl?: boolean | number
+  __typename?: boolean | number
+  __scalar?: boolean | number
+}
+
+export interface PlayerRoundWeaponStatsRequest {
+  steamId64?: boolean | number
+  round?: RoundRequest
+  weapon?: WeaponRequest
+  totalDamage?: boolean | number
+  shotsHead?: boolean | number
+  shotsChest?: boolean | number
+  shotsLegs?: boolean | number
+  shotsArms?: boolean | number
+  shotsFired?: boolean | number
+  steamUser?: SteamUserRequest
+  __typename?: boolean | number
+  __scalar?: boolean | number
+}
+
+export interface WeaponRequest {
+  name?: boolean | number
+  weaponType?: boolean | number
   __typename?: boolean | number
   __scalar?: boolean | number
 }
@@ -631,29 +686,6 @@ export interface PaginatedPlayerRoundStatsRequest {
   __scalar?: boolean | number
 }
 
-export interface PlayerRoundStatsRequest {
-  round?: RoundRequest
-  steamId64?: boolean | number
-  kills?: boolean | number
-  deaths?: boolean | number
-  suicides?: boolean | number
-  totalDamage?: boolean | number
-  score?: boolean | number
-  team?: boolean | number
-  steamUser?: SteamUserRequest
-  __typename?: boolean | number
-  __scalar?: boolean | number
-}
-
-export interface SteamUserRequest {
-  steamId64?: boolean | number
-  name?: boolean | number
-  avatarBigUrl?: boolean | number
-  avatarMediumUrl?: boolean | number
-  __typename?: boolean | number
-  __scalar?: boolean | number
-}
-
 export interface PlayerRoundWeaponStatsQuery {
   page?: Int | null
   pageSize?: Int | null
@@ -664,28 +696,6 @@ export interface PaginatedPlayerRoundWeaponStatsRequest {
   content?: PlayerRoundWeaponStatsRequest
   totalCount?: boolean | number
   pageCount?: boolean | number
-  __typename?: boolean | number
-  __scalar?: boolean | number
-}
-
-export interface PlayerRoundWeaponStatsRequest {
-  steamId64?: boolean | number
-  round?: RoundRequest
-  weapon?: WeaponRequest
-  totalDamage?: boolean | number
-  shotsHead?: boolean | number
-  shotsChest?: boolean | number
-  shotsLegs?: boolean | number
-  shotsArms?: boolean | number
-  shotsFired?: boolean | number
-  steamUser?: SteamUserRequest
-  __typename?: boolean | number
-  __scalar?: boolean | number
-}
-
-export interface WeaponRequest {
-  name?: boolean | number
-  weaponType?: boolean | number
   __typename?: boolean | number
   __scalar?: boolean | number
 }
@@ -704,6 +714,8 @@ export interface PlayerStatisticsQuery {
   endedAfter?: DateTime | null
   endedBefore?: DateTime | null
   onlyFinishedRounds?: Boolean | null
+  /** Only possible if only using sorts */
+  cachedIfPossible?: Boolean | null
 }
 
 export interface PaginatedPlayerStatisticsRequest {
@@ -935,6 +947,8 @@ export interface AppConfigRequest {
   masterserverKey?: boolean | number
   steamWebApiKey?: boolean | number
   ownAddress?: boolean | number
+  playerStatsCacheAge?: boolean | number
+  minScoreStats?: boolean | number
   appInfo?: AppInfoRequest
   __typename?: boolean | number
   __scalar?: boolean | number
@@ -1135,6 +1149,9 @@ export interface AppConfigInput {
   publicBanQuery?: Boolean | null
   masterserverKey?: String | null
   steamWebApiKey?: String | null
+  /** How often is the playerStats cache recalculated (in min), 0 to disable */
+  playerStatsCacheAge?: Int | null
+  minScoreStats?: Int | null
   ownAddress?: String | null
   password?: String | null
 }
@@ -1193,6 +1210,30 @@ export const isRound = (obj: { __typename: String }): obj is Round => {
   return Round_possibleTypes.includes(obj.__typename)
 }
 
+const PlayerRoundStats_possibleTypes = ['PlayerRoundStats']
+export const isPlayerRoundStats = (obj: { __typename: String }): obj is PlayerRoundStats => {
+  if (!obj.__typename) throw new Error('__typename is missing')
+  return PlayerRoundStats_possibleTypes.includes(obj.__typename)
+}
+
+const SteamUser_possibleTypes = ['SteamUser']
+export const isSteamUser = (obj: { __typename: String }): obj is SteamUser => {
+  if (!obj.__typename) throw new Error('__typename is missing')
+  return SteamUser_possibleTypes.includes(obj.__typename)
+}
+
+const PlayerRoundWeaponStats_possibleTypes = ['PlayerRoundWeaponStats']
+export const isPlayerRoundWeaponStats = (obj: { __typename: String }): obj is PlayerRoundWeaponStats => {
+  if (!obj.__typename) throw new Error('__typename is missing')
+  return PlayerRoundWeaponStats_possibleTypes.includes(obj.__typename)
+}
+
+const Weapon_possibleTypes = ['Weapon']
+export const isWeapon = (obj: { __typename: String }): obj is Weapon => {
+  if (!obj.__typename) throw new Error('__typename is missing')
+  return Weapon_possibleTypes.includes(obj.__typename)
+}
+
 const PaginatedRound_possibleTypes = ['PaginatedRound']
 export const isPaginatedRound = (obj: { __typename: String }): obj is PaginatedRound => {
   if (!obj.__typename) throw new Error('__typename is missing')
@@ -1211,34 +1252,10 @@ export const isPaginatedPlayerRoundStats = (obj: { __typename: String }): obj is
   return PaginatedPlayerRoundStats_possibleTypes.includes(obj.__typename)
 }
 
-const PlayerRoundStats_possibleTypes = ['PlayerRoundStats']
-export const isPlayerRoundStats = (obj: { __typename: String }): obj is PlayerRoundStats => {
-  if (!obj.__typename) throw new Error('__typename is missing')
-  return PlayerRoundStats_possibleTypes.includes(obj.__typename)
-}
-
-const SteamUser_possibleTypes = ['SteamUser']
-export const isSteamUser = (obj: { __typename: String }): obj is SteamUser => {
-  if (!obj.__typename) throw new Error('__typename is missing')
-  return SteamUser_possibleTypes.includes(obj.__typename)
-}
-
 const PaginatedPlayerRoundWeaponStats_possibleTypes = ['PaginatedPlayerRoundWeaponStats']
 export const isPaginatedPlayerRoundWeaponStats = (obj: { __typename: String }): obj is PaginatedPlayerRoundWeaponStats => {
   if (!obj.__typename) throw new Error('__typename is missing')
   return PaginatedPlayerRoundWeaponStats_possibleTypes.includes(obj.__typename)
-}
-
-const PlayerRoundWeaponStats_possibleTypes = ['PlayerRoundWeaponStats']
-export const isPlayerRoundWeaponStats = (obj: { __typename: String }): obj is PlayerRoundWeaponStats => {
-  if (!obj.__typename) throw new Error('__typename is missing')
-  return PlayerRoundWeaponStats_possibleTypes.includes(obj.__typename)
-}
-
-const Weapon_possibleTypes = ['Weapon']
-export const isWeapon = (obj: { __typename: String }): obj is Weapon => {
-  if (!obj.__typename) throw new Error('__typename is missing')
-  return Weapon_possibleTypes.includes(obj.__typename)
 }
 
 const PaginatedPlayerStatistics_possibleTypes = ['PaginatedPlayerStatistics']
@@ -1788,6 +1805,18 @@ export interface RoundPromiseChain {
   endedAt: { execute: (request?: boolean | number, defaultValue?: DateTime | null) => Promise<DateTime | null> }
   scoreSpecialForces: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
   scoreTerrorists: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  playerRoundStats: {
+    execute: (
+      request: PlayerRoundStatsRequest,
+      defaultValue?: PlayerRoundStats[] | null,
+    ) => Promise<PlayerRoundStats[] | null>
+  }
+  playerRoundWeaponStats: {
+    execute: (
+      request: PlayerRoundWeaponStatsRequest,
+      defaultValue?: PlayerRoundWeaponStats[] | null,
+    ) => Promise<PlayerRoundWeaponStats[] | null>
+  }
 }
 
 export interface RoundObservableChain {
@@ -1797,6 +1826,100 @@ export interface RoundObservableChain {
   endedAt: { execute: (request?: boolean | number, defaultValue?: DateTime | null) => Observable<DateTime | null> }
   scoreSpecialForces: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
   scoreTerrorists: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  playerRoundStats: {
+    execute: (
+      request: PlayerRoundStatsRequest,
+      defaultValue?: PlayerRoundStats[] | null,
+    ) => Observable<PlayerRoundStats[] | null>
+  }
+  playerRoundWeaponStats: {
+    execute: (
+      request: PlayerRoundWeaponStatsRequest,
+      defaultValue?: PlayerRoundWeaponStats[] | null,
+    ) => Observable<PlayerRoundWeaponStats[] | null>
+  }
+}
+
+export interface PlayerRoundStatsPromiseChain {
+  round: RoundPromiseChain & { execute: (request: RoundRequest, defaultValue?: Round) => Promise<Round> }
+  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  kills: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  deaths: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  suicides: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  totalDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Promise<Float> }
+  score: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  team: { execute: (request?: boolean | number, defaultValue?: Team) => Promise<Team> }
+  steamUser: SteamUserPromiseChain & {
+    execute: (request: SteamUserRequest, defaultValue?: SteamUser | null) => Promise<SteamUser | null>
+  }
+}
+
+export interface PlayerRoundStatsObservableChain {
+  round: RoundObservableChain & { execute: (request: RoundRequest, defaultValue?: Round) => Observable<Round> }
+  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  kills: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  deaths: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  suicides: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  totalDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Observable<Float> }
+  score: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  team: { execute: (request?: boolean | number, defaultValue?: Team) => Observable<Team> }
+  steamUser: SteamUserObservableChain & {
+    execute: (request: SteamUserRequest, defaultValue?: SteamUser | null) => Observable<SteamUser | null>
+  }
+}
+
+export interface SteamUserPromiseChain {
+  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  name: { execute: (request?: boolean | number, defaultValue?: String | null) => Promise<String | null> }
+  avatarBigUrl: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  avatarMediumUrl: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+}
+
+export interface SteamUserObservableChain {
+  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  name: { execute: (request?: boolean | number, defaultValue?: String | null) => Observable<String | null> }
+  avatarBigUrl: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  avatarMediumUrl: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+}
+
+export interface PlayerRoundWeaponStatsPromiseChain {
+  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  round: RoundPromiseChain & { execute: (request: RoundRequest, defaultValue?: Round) => Promise<Round> }
+  weapon: WeaponPromiseChain & { execute: (request: WeaponRequest, defaultValue?: Weapon) => Promise<Weapon> }
+  totalDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Promise<Float> }
+  shotsHead: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  shotsChest: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  shotsLegs: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  shotsArms: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  shotsFired: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
+  steamUser: SteamUserPromiseChain & {
+    execute: (request: SteamUserRequest, defaultValue?: SteamUser | null) => Promise<SteamUser | null>
+  }
+}
+
+export interface PlayerRoundWeaponStatsObservableChain {
+  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  round: RoundObservableChain & { execute: (request: RoundRequest, defaultValue?: Round) => Observable<Round> }
+  weapon: WeaponObservableChain & { execute: (request: WeaponRequest, defaultValue?: Weapon) => Observable<Weapon> }
+  totalDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Observable<Float> }
+  shotsHead: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  shotsChest: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  shotsLegs: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  shotsArms: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  shotsFired: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
+  steamUser: SteamUserObservableChain & {
+    execute: (request: SteamUserRequest, defaultValue?: SteamUser | null) => Observable<SteamUser | null>
+  }
+}
+
+export interface WeaponPromiseChain {
+  name: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
+  weaponType: { execute: (request?: boolean | number, defaultValue?: WeaponType) => Promise<WeaponType> }
+}
+
+export interface WeaponObservableChain {
+  name: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
+  weaponType: { execute: (request?: boolean | number, defaultValue?: WeaponType) => Observable<WeaponType> }
 }
 
 export interface PaginatedRoundPromiseChain {
@@ -1845,48 +1968,6 @@ export interface PaginatedPlayerRoundStatsObservableChain {
   pageCount: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
 }
 
-export interface PlayerRoundStatsPromiseChain {
-  round: RoundPromiseChain & { execute: (request: RoundRequest, defaultValue?: Round) => Promise<Round> }
-  steamId64: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  kills: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  deaths: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  suicides: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  totalDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Promise<Float> }
-  score: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  team: { execute: (request?: boolean | number, defaultValue?: Team) => Promise<Team> }
-  steamUser: SteamUserPromiseChain & {
-    execute: (request: SteamUserRequest, defaultValue?: SteamUser | null) => Promise<SteamUser | null>
-  }
-}
-
-export interface PlayerRoundStatsObservableChain {
-  round: RoundObservableChain & { execute: (request: RoundRequest, defaultValue?: Round) => Observable<Round> }
-  steamId64: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  kills: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  deaths: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  suicides: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  totalDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Observable<Float> }
-  score: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  team: { execute: (request?: boolean | number, defaultValue?: Team) => Observable<Team> }
-  steamUser: SteamUserObservableChain & {
-    execute: (request: SteamUserRequest, defaultValue?: SteamUser | null) => Observable<SteamUser | null>
-  }
-}
-
-export interface SteamUserPromiseChain {
-  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
-  name: { execute: (request?: boolean | number, defaultValue?: String | null) => Promise<String | null> }
-  avatarBigUrl: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
-  avatarMediumUrl: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
-}
-
-export interface SteamUserObservableChain {
-  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
-  name: { execute: (request?: boolean | number, defaultValue?: String | null) => Observable<String | null> }
-  avatarBigUrl: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
-  avatarMediumUrl: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
-}
-
 export interface PaginatedPlayerRoundWeaponStatsPromiseChain {
   content: {
     execute: (
@@ -1907,46 +1988,6 @@ export interface PaginatedPlayerRoundWeaponStatsObservableChain {
   }
   totalCount: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
   pageCount: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-}
-
-export interface PlayerRoundWeaponStatsPromiseChain {
-  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
-  round: RoundPromiseChain & { execute: (request: RoundRequest, defaultValue?: Round) => Promise<Round> }
-  weapon: WeaponPromiseChain & { execute: (request: WeaponRequest, defaultValue?: Weapon) => Promise<Weapon> }
-  totalDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Promise<Float> }
-  shotsHead: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  shotsChest: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  shotsLegs: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  shotsArms: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  shotsFired: { execute: (request?: boolean | number, defaultValue?: Int) => Promise<Int> }
-  steamUser: SteamUserPromiseChain & {
-    execute: (request: SteamUserRequest, defaultValue?: SteamUser | null) => Promise<SteamUser | null>
-  }
-}
-
-export interface PlayerRoundWeaponStatsObservableChain {
-  steamId64: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
-  round: RoundObservableChain & { execute: (request: RoundRequest, defaultValue?: Round) => Observable<Round> }
-  weapon: WeaponObservableChain & { execute: (request: WeaponRequest, defaultValue?: Weapon) => Observable<Weapon> }
-  totalDamage: { execute: (request?: boolean | number, defaultValue?: Float) => Observable<Float> }
-  shotsHead: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  shotsChest: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  shotsLegs: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  shotsArms: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  shotsFired: { execute: (request?: boolean | number, defaultValue?: Int) => Observable<Int> }
-  steamUser: SteamUserObservableChain & {
-    execute: (request: SteamUserRequest, defaultValue?: SteamUser | null) => Observable<SteamUser | null>
-  }
-}
-
-export interface WeaponPromiseChain {
-  name: { execute: (request?: boolean | number, defaultValue?: String) => Promise<String> }
-  weaponType: { execute: (request?: boolean | number, defaultValue?: WeaponType) => Promise<WeaponType> }
-}
-
-export interface WeaponObservableChain {
-  name: { execute: (request?: boolean | number, defaultValue?: String) => Observable<String> }
-  weaponType: { execute: (request?: boolean | number, defaultValue?: WeaponType) => Observable<WeaponType> }
 }
 
 export interface PaginatedPlayerStatisticsPromiseChain {
@@ -2225,6 +2266,8 @@ export interface AppConfigPromiseChain {
   masterserverKey: { execute: (request?: boolean | number, defaultValue?: String | null) => Promise<String | null> }
   steamWebApiKey: { execute: (request?: boolean | number, defaultValue?: String | null) => Promise<String | null> }
   ownAddress: { execute: (request?: boolean | number, defaultValue?: String | null) => Promise<String | null> }
+  playerStatsCacheAge: { execute: (request?: boolean | number, defaultValue?: Int | null) => Promise<Int | null> }
+  minScoreStats: { execute: (request?: boolean | number, defaultValue?: Int | null) => Promise<Int | null> }
   appInfo: AppInfoPromiseChain & { execute: (request: AppInfoRequest, defaultValue?: AppInfo) => Promise<AppInfo> }
 }
 
@@ -2236,6 +2279,8 @@ export interface AppConfigObservableChain {
   masterserverKey: { execute: (request?: boolean | number, defaultValue?: String | null) => Observable<String | null> }
   steamWebApiKey: { execute: (request?: boolean | number, defaultValue?: String | null) => Observable<String | null> }
   ownAddress: { execute: (request?: boolean | number, defaultValue?: String | null) => Observable<String | null> }
+  playerStatsCacheAge: { execute: (request?: boolean | number, defaultValue?: Int | null) => Observable<Int | null> }
+  minScoreStats: { execute: (request?: boolean | number, defaultValue?: Int | null) => Observable<Int | null> }
   appInfo: AppInfoObservableChain & { execute: (request: AppInfoRequest, defaultValue?: AppInfo) => Observable<AppInfo> }
 }
 

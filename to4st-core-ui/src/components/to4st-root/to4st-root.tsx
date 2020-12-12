@@ -55,6 +55,8 @@ export class To4stRoot implements ComponentInterface {
             masterserverKey: true,
             steamWebApiKey: true,
             ownAddress: true,
+            minScoreStats: true,
+            playerStatsCacheAge: true,
             appInfo: {
               uniquePlayers: true,
               gamesPlayed: true,

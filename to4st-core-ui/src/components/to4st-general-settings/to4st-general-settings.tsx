@@ -64,6 +64,18 @@ export class To4stGeneralSettings implements ComponentInterface {
   @State() publicStats = false;
 
   /**
+   * Min score needed for players to be visible in aggregated player stats
+   */
+  @State() minScoreStats = 100;
+
+  /**
+   * PlayerStats cache max age
+   */
+  @State() playerStatsCacheAge = 5;
+  
+  
+
+  /**
    * Current error
    */
   @State() currentError = "";
@@ -78,6 +90,8 @@ export class To4stGeneralSettings implements ComponentInterface {
     this.publicStats = this.appConfig?.publicStats;
     this.steamWebApiKey = this.appConfig?.steamWebApiKey;
     this.addressOverride = this.appConfig?.ownAddress;
+    this.minScoreStats = this.appConfig?.minScoreStats;
+    this.playerStatsCacheAge = this.appConfig?.playerStatsCacheAge;
   }
 
   /**
@@ -88,6 +102,8 @@ export class To4stGeneralSettings implements ComponentInterface {
       ? this.currentPassword?.length > 0 ||
           this.publicBanQuery !== this.appConfig.publicBanQuery ||
           this.publicStats !== this.appConfig.publicStats ||
+          this.minScoreStats !== this.appConfig.minScoreStats ||
+          this.playerStatsCacheAge!== this.appConfig.playerStatsCacheAge ||
           this.to4stMasterKey?.trim() !==
             this.appConfig.masterserverKey?.trim() ||
           this.addressOverride?.trim() !== this.appConfig.ownAddress?.trim() ||
@@ -120,6 +136,8 @@ export class To4stGeneralSettings implements ComponentInterface {
     input.publicStats = this.publicStats;
     input.steamWebApiKey = this.steamWebApiKey;
     input.ownAddress = this.addressOverride || undefined;
+    input.playerStatsCacheAge = this.playerStatsCacheAge;
+    input.minScoreStats = this.minScoreStats;
 
     if (this.currentError) {
       return;
@@ -136,6 +154,8 @@ export class To4stGeneralSettings implements ComponentInterface {
           masterserverKey: true,
           steamWebApiKey: true,
           ownAddress: true,
+          minScoreStats: true,
+          playerStatsCacheAge: true,
           appInfo: {
             uniquePlayers: true,
             gamesPlayed: true,
@@ -305,6 +325,46 @@ export class To4stGeneralSettings implements ComponentInterface {
                           (this.addressOverride = (e.target as HTMLInputElement).value.trim())
                         }
                       />
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label">Min score for aggregated player statistics</label>
+                </div>
+                <div class="field-body">
+                  <div class="control">
+                    <span
+                      class="has-tooltip-arrow"
+                      data-tooltip={"Min score needed for players to be visible in aggregated player stats"}
+                    >
+                    <input type="number" placeholder="Min Score" min="0" value={this.minScoreStats ?? 0} class="input" onChange={e =>
+                          (this.minScoreStats = parseInt((e.target as HTMLInputElement).value.trim()))
+                        }
+                        onKeyUp={e =>
+                          (this.minScoreStats = parseInt((e.target as HTMLInputElement).value.trim()))
+                        } />
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="field is-horizontal">
+                <div class="field-label is-normal">
+                  <label class="label">Player statistics Cache MaxAge</label>
+                </div>
+                <div class="field-body">
+                  <div class="control">
+                    <span
+                      class="has-tooltip-arrow"
+                      data-tooltip={"In minutes, 0 to disable Cache"}
+                    >
+                    <input type="number" placeholder="minutes" min="0" value={this.playerStatsCacheAge ?? 0} class="input" onChange={e =>
+                          (this.playerStatsCacheAge = parseInt((e.target as HTMLInputElement).value.trim()))
+                        }
+                        onKeyUp={e =>
+                          (this.playerStatsCacheAge = parseInt((e.target as HTMLInputElement).value.trim()))
+                        } />
                     </span>
                   </div>
                 </div>

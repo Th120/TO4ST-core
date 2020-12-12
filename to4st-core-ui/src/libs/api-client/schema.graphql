@@ -16,6 +16,8 @@ type AppConfig {
   masterserverKey: String
   steamWebApiKey: String
   ownAddress: String
+  playerStatsCacheAge: Int
+  minScoreStats: Int
   appInfo: AppInfo!
 }
 
@@ -25,6 +27,12 @@ input AppConfigInput {
   publicBanQuery: Boolean
   masterserverKey: String
   steamWebApiKey: String
+
+  """
+  How often is the playerStats cache recalculated (in min), 0 to disable
+  """
+  playerStatsCacheAge: Int
+  minScoreStats: Int
   ownAddress: String
   password: String
 }
@@ -145,12 +153,16 @@ input GameQuery {
   page: Int
   pageSize: Int
   orderDesc: Boolean
+  orderByEndedAt: Boolean
   gameserverId: String
   startedAfter: DateTime
   startedBefore: DateTime
+  endedAfter: DateTime
+  endedBefore: DateTime
   map: ServerMapInput
   gameMode: GameModeInput
   onlyFinishedGames: Boolean
+  rankedOnly: Boolean
 }
 
 type Gameserver {
@@ -472,7 +484,7 @@ type PaginatedRound {
 
 type PlayerRoundStats {
   round: Round!
-  steamId64: Int!
+  steamId64: String!
   kills: Int!
   deaths: Int!
   suicides: Int!
@@ -560,6 +572,11 @@ input PlayerStatisticsQuery {
   endedAfter: DateTime
   endedBefore: DateTime
   onlyFinishedRounds: Boolean
+
+  """
+  Only possible if only using sorts
+  """
+  cachedIfPossible: Boolean
 }
 
 type PlayerWeaponStatistics {
@@ -659,6 +676,8 @@ type Round {
   endedAt: DateTime
   scoreSpecialForces: Int!
   scoreTerrorists: Int!
+  playerRoundStats: [PlayerRoundStats!]
+  playerRoundWeaponStats: [PlayerRoundWeaponStats!]
 }
 
 input RoundInput {
