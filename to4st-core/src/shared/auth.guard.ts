@@ -14,6 +14,7 @@ import { AppConfigService } from '../core/app-config.service';
 import { GameserverService } from '../gameserver/gameserver.service';
 import { AuthKeyService } from '../core/auth-key.service';
 import { hashPassword } from './utils';
+import { inspect } from 'util';
 
 /**
  * Guard used to auth requests
@@ -225,7 +226,7 @@ import { hashPassword } from './utils';
             if(gameserver)
             {
                 gameserver.lastContact = new Date();
-                this.gameserverService.createUpdateGameserver(gameserver).catch(e => Logger.error("Update last contact gameserver failed"));
+                this.gameserverService.createUpdateGameserver(gameserver).catch(e => Logger.error("Update last contact gameserver failed: " + inspect(e, undefined, 3)));
                 ctx.gameserver = gameserver;
                 ctx.role = Role.authKey;
             }
