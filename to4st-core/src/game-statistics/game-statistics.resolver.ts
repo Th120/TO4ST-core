@@ -20,6 +20,7 @@ import { PlayerRoundWeaponStats } from './player-round-weapon-stats.entity';
 import { SteamUser } from '../core/steam-user.entity';
 import { SteamUserService } from '../core/steam-user.service';
 import { TransactionInterceptor } from '../shared/transaction.interceptor';
+import { MatchConfig } from '../gameserver/match-config.entity';
 
 
 /**
@@ -191,6 +192,14 @@ class GameInput
     @IsString()
     @Field(() => String, {nullable: true})
     gameserverId?: string;
+
+    /**
+     * mastchConfig id the game uses
+     */
+    @ValidateIf(x => x.matchConfigId !== undefined)
+    @IsInt()
+    @Field(() => Int, {nullable: true})
+    matchConfigId?: number;
 
     /**
      * Date game started at
@@ -689,7 +698,8 @@ export class GameResolver {
                 gameMode: gameInput.gameMode ? new GameMode({name: gameInput.gameMode.name, isTeamBased: gameInput.gameMode.isTeamBased}) : undefined,
                 startedAt: gameInput.startedAt,
                 endedAt: gameInput.endedAt,
-                gameserver: gameserver
+                gameserver: gameserver,
+                matchConfig: gameInput.matchConfigId !== undefined ? new MatchConfig({id: gameInput.matchConfigId}) : undefined
             });
 
         const ret = await this.statsService.createUpdateGame(nuGame);

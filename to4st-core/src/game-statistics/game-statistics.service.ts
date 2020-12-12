@@ -490,6 +490,14 @@ export class GameStatisticsService implements OnApplicationBootstrap {
             game.map.id = this.mapIdCache.get(game.map.name);
         }
 
+        if(game.matchConfig?.id)
+        {
+            game.matchConfig = new MatchConfig({id: game.matchConfig.id});
+        }
+        else
+        {
+            game.matchConfig = undefined;
+        }
 
         // get id from db, create entity if it does not exist right now
         if(game.gameMode && !game.gameMode.id)
