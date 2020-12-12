@@ -493,6 +493,8 @@ describe('AggregatedGameStatisticsService', () => {
     const matchConfigRepo: Repository<MatchConfig> = module.get("MatchConfigRepository");
     const gameserverRepo: Repository<Gameserver> = module.get("GameserverRepository");
 
+
+    
     jest.spyOn(gameserverService, "createUpdateGameserver").mockImplementation(async (server: Gameserver) => {
       const cloned = new Gameserver({...server});
       
@@ -532,6 +534,10 @@ describe('AggregatedGameStatisticsService', () => {
 
   afterAll( async () => {
     await module.close();
+  });
+
+  beforeEach( () => {
+    jest.spyOn(cfgService, "getAppConfig").mockImplementation(async (cached: boolean) =>  new AppConfig({minScoreStats: 0}));
   });
 
   it('should be defined', () => {
@@ -854,6 +860,41 @@ describe('AggregatedGameStatisticsService', () => {
       }
     }
 
+    testLog("Service found result", 'Get Playerstats For Game Sort By Kills', true);
+    
+    expect(res.length).toBe(sorted.length);
+    
+    res.forEach((x, idx) => expect(x.steamId64).toBe(sorted[idx].steamId64));
+
+   }, );
+
+   it('Get Playerstats, Sort By Kills, min score', async() => { 
+   
+    testLog("Calculate expected result ...", 'Get Playerstats For Game Sort By Kills, min score', true);
+ 
+    const rawSorted = aggregatedPlayerRoundStats(playerRoundStats, () => true, (x, y) => y.kills - x.kills, true);   
+    const min = _.min(rawSorted.map(x => x.totalScore));
+
+    jest.spyOn(cfgService, "getAppConfig").mockImplementation(async (cached: boolean) =>  new AppConfig({minScoreStats: min + 1}));
+    const sorted = rawSorted.filter(x => x.totalScore > min + 1)
+
+    testLog("Calculated expected result ...", 'Get Playerstats For Game Sort By Kills, min score', true);
+ 
+    testLog("Run service", 'Get Playerstats For Game Sort By Kills, min score', true);
+ 
+    let [res, total, pages] = await service.getPlayerStatistics({orderBy: OrderPlayerBaseStats.sumKills, orderDesc: true});
+ 
+    expect(total).toBe(sorted.length);
+
+    //Get all pages and merge them into result archive
+    if(res.length != total) 
+    {
+      for(let i = 2; i <= pages; i++)
+      {
+        res = [...res, ...(await service.getPlayerStatistics({page: i, orderBy: OrderPlayerBaseStats.sumKills, orderDesc: true}))[0]];
+      }
+    }
+   
     testLog("Service found result", 'Get Playerstats For Game Sort By Kills', true);
     
     expect(res.length).toBe(sorted.length);
@@ -1237,6 +1278,15 @@ describe('AggregatedGameStatisticsService', () => {
     const inDb = await service.getCountUniquePlayers({endedBefore: new Date(skip)});
 
     expect(inDb).toBe(uniquePlayers.length);
+  });
+
+  it("Get playercount 0", async () => {
+    
+    const minStartedAtValue = _.minBy(rounds, x => x.startedAt.valueOf()).startedAt.valueOf();
+       
+    const inDb = await service.getCountUniquePlayers({endedBefore: new Date(minStartedAtValue - 1000)});
+
+    expect(inDb).toBe(0);
   });
   
 });

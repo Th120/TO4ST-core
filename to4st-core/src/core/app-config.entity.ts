@@ -1,6 +1,6 @@
 
 import { Entity, Column, PrimaryColumn } from 'typeorm';
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import {Expose, Exclude} from "class-transformer";
 
 
@@ -70,6 +70,22 @@ export class AppConfig {
   @Expose({groups: [Role.admin]})
   @Column({default: ""})
   ownAddress?: string;
+
+  /**
+   * How often is the playerStats cache recalculated (in min), 0 to disable
+   */
+  @Field(() => Int, {nullable: true})
+  @Expose()
+  @Column({default: 5, type: "smallint", unsigned: true})
+  playerStatsCacheAge?: number;
+
+  /**
+   * How much total score points required to be visible in player stats
+   */
+  @Field(() => Int, {nullable: true})
+  @Expose()
+  @Column({default: 100, type: "int", unsigned: true})
+  minScoreStats?: number;
   
   /**
    * Hashed and salted admin password

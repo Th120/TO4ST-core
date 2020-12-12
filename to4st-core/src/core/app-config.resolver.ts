@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, InputType, Field, Int, ObjectType, Parent, ResolveField } from '@nestjs/graphql';
 import { UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
-import { ValidateIf, IsString, IsBoolean, IsUrl, } from 'class-validator';
+import { ValidateIf, IsString, IsBoolean, IsUrl, IsInt, } from 'class-validator';
 import { Expose } from 'class-transformer';
 
 
@@ -57,6 +57,22 @@ export class AppConfigInput {
     @Field(() => String, {nullable: true})
     @IsString()
     steamWebApiKey?: string;
+
+    /**
+     * How often is the playerStats cache recalculated (in min), 0 to disable
+     */
+    @ValidateIf(x => x.playerStatsCacheAge !== undefined)
+    @Field(() => Int, {nullable: true, description: "How often is the playerStats cache recalculated (in min), 0 to disable"})
+    @IsInt()
+    playerStatsCacheAge: number;
+
+    /**
+     * How much total score points required to be visible in player stats
+     */
+    @ValidateIf(x => x.minScoreStats !== undefined)
+    @Field(() => Int, {nullable: true})
+    @IsInt()
+    minScoreStats: number;
 
     /**
      * Address sent to the masterserver in order to contact this backend (use it if you are behind a reverse proxy and / or use https)
@@ -176,6 +192,8 @@ export class AppConfigResolver {
                 publicBanQuery: appConfig.publicBanQuery, 
                 masterserverKey: appConfig.masterserverKey, 
                 steamWebApiKey: appConfig.steamWebApiKey,
+                playerStatsCacheAge: appConfig.playerStatsCacheAge,
+                minScoreStats: appConfig.minScoreStats,
                 password: appConfig.password,
                 ownAddress: appConfig.ownAddress
             });

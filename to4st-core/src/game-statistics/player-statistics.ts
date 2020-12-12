@@ -18,6 +18,33 @@ export enum OrderPlayerBaseStats {
     gamesPlayed = "gamesplayed"
 }
 
+export const escapeOrderBy = (orderBy: OrderPlayerBaseStats | string) =>
+{
+    switch (orderBy)
+    {
+        case OrderPlayerBaseStats.sumDeaths:
+            return OrderPlayerBaseStats.sumDeaths;
+        case OrderPlayerBaseStats.sumScore:
+            return OrderPlayerBaseStats.sumScore;
+        case OrderPlayerBaseStats.sumDamage:
+            return OrderPlayerBaseStats.sumDamage;
+        case OrderPlayerBaseStats.killDeath:
+            return OrderPlayerBaseStats.killDeath;
+        case OrderPlayerBaseStats.sumSuicides:
+            return OrderPlayerBaseStats.sumSuicides;
+        case OrderPlayerBaseStats.averageDamagePerRound:
+            return OrderPlayerBaseStats.averageDamagePerRound;
+        case OrderPlayerBaseStats.averageScorePerRound:
+            return OrderPlayerBaseStats.averageScorePerRound;
+        case OrderPlayerBaseStats.roundsPlayed:
+            return OrderPlayerBaseStats.roundsPlayed;
+        case OrderPlayerBaseStats.gamesPlayed:
+            return OrderPlayerBaseStats.gamesPlayed;
+    }
+
+    return OrderPlayerBaseStats.sumKills;
+}
+
 /**
  * Register enum type in graphQL
  */

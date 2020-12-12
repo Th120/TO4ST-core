@@ -1,7 +1,7 @@
-import { Injectable, } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap, } from '@nestjs/common';
 import { InjectRepository, InjectConnection, } from '@nestjs/typeorm';
 import { Repository, Connection, } from 'typeorm';
-import _ from 'lodash';
+import _, { orderBy } from 'lodash';
 import { clamp } from 'lodash';
 import memoizee from 'memoizee';
 import { ConfigService } from '@nestjs/config';
@@ -14,9 +14,11 @@ import { PlayerRoundWeaponStats } from './player-round-weapon-stats.entity';
 import { GameMode } from './game-mode.entity';
 import { MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH } from '../globals';
 import { Weapon } from './weapon.entity';
-import { accountIdToSteamId64, steamId64ToAccountId, mapDateForQuery } from '../shared/utils';
-import { PlayerStatistics, OrderPlayerBaseStats } from './player-statistics';
+import { accountIdToSteamId64, steamId64ToAccountId, mapDateForQuery, TIMEOUT_PROMISE_FACTORY } from '../shared/utils';
+import { PlayerStatistics, OrderPlayerBaseStats, escapeOrderBy } from './player-statistics';
 import { PlayerWeaponStatistics } from './player-weapon-statistics';
+import moment from 'moment';
+import { AppConfigService } from '../core/app-config.service';
 
 
 /**
@@ -92,6 +94,11 @@ export interface IAggregatedPlayerStatisticsQuery {
      * Should be ordered descending?
      */
     orderDesc?: boolean
+
+    /**
+     * Get simple cached if possible
+     */
+    cached?: boolean
 }
 
 /**
@@ -197,22 +204,47 @@ export interface IPlayerCountQuery {
      * Filter for only finished rounds
      */
     onlyFinishedRounds?: boolean
+
+    /**
+     * Min total score required to be counted
+     */
+    minTotalScore?: number;
 }
+
+/**
+ * Delay to attempt cache update if caching is disabled, will only update if setting is enabled
+ */
+const NO_CACHE_RETRY = 60 * 1000;
 
 /**
  * Service used to get aggregated player statistics
  */
 @Injectable()
-export class AggregatedGameStatisticsService {
+export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
 
     constructor(
         @InjectRepository(PlayerRoundStats) private readonly playerRoundStatsRepository: Repository<PlayerRoundStats>,
         @InjectRepository(PlayerRoundWeaponStats) private readonly playerRoundWeaponStatsRepository: Repository<PlayerRoundWeaponStats>, 
         @InjectConnection() private readonly connection: Connection,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly appConfigService: AppConfigService,
         )
     {
     }
+
+    
+
+
+    /**
+     * Cache used for player stats 
+     */
+    private playerStatsCache: Map<OrderPlayerBaseStats, {asc: PlayerStatistics[], desc: PlayerStatistics[]}> = null;
+
+
+    /**
+     * Interval of cache update
+     */
+    private cacheInterval: NodeJS.Timeout;
 
     /**
      * Cache used for unique player count
@@ -227,6 +259,154 @@ export class AggregatedGameStatisticsService {
         return await this._cachedCountUniquePlayers();
     }
 
+    /* istanbul ignore next */
+    public onApplicationBootstrap()
+    {
+        if(process.env.NODE_ENV !== "test") // makes no sense during tests
+        {
+            this.updateCacheLoop();
+        }
+    }
+
+    /**
+     * Sets up infinite cache update cycle
+     * Starts next interval after update is finished 
+     */
+    /* istanbul ignore next */
+    private async updateCacheLoop()
+    {
+        let delay = 0;
+        try
+        {
+            const appCfg = await this.appConfigService.getAppConfig(true);
+            delay = appCfg.playerStatsCacheAge * 60 * 1000;
+        }
+        catch(e)
+        {
+
+        }
+
+        if(delay > 0)
+        {
+            try
+            {
+                await this.updateCachedStats();
+            }
+            catch (e)
+            {
+                this.playerStatsCache = null;
+                Logger.error(e);
+            }
+        }
+        else
+        {
+            this.playerStatsCache = null;
+        }
+      
+    
+        this.cacheInterval = setTimeout(async () => {
+            this.updateCacheLoop();
+        }, !!this.playerStatsCache ? delay : NO_CACHE_RETRY);
+    }
+        
+    /**
+     * Update player stats cache
+     */
+    async updateCachedStats()
+    {
+        const before = moment.utc().subtract(5, "seconds").toDate();
+
+        Logger.log("Generating PlayerStats cache for games before: " + before.toString(), "PlayerStats cache", true);
+
+        let [res, total, pages] = await this.getPlayerStatistics({orderBy: OrderPlayerBaseStats.sumKills, ranked: true, orderDesc: true, endedBefore: before});
+    
+        //Get all pages and merge them into result archive
+        if(res.length != total) 
+        {
+          for(let i = 2; i <= pages; i++)
+          {
+            res = [...res, ...(await this.getPlayerStatistics({page: i, orderBy: OrderPlayerBaseStats.sumKills, ranked: true, orderDesc: true, endedBefore: before,}))[0]];
+            await TIMEOUT_PROMISE_FACTORY(0.1, 0.2)[0]; // lazy
+          }
+        }
+
+        Logger.log("Finished database queries", "PlayerStats cache", true);
+
+        const orderByMap = new Map<OrderPlayerBaseStats, {asc: PlayerStatistics[], desc: PlayerStatistics[]}>([
+            [OrderPlayerBaseStats.sumKills, { asc: res.reverse(), desc: res} ],
+            [OrderPlayerBaseStats.sumDeaths, null],
+            [OrderPlayerBaseStats.sumScore, null],
+            [OrderPlayerBaseStats.sumDamage, null],
+            [OrderPlayerBaseStats.killDeath, null],
+            [OrderPlayerBaseStats.sumSuicides, null],
+            [OrderPlayerBaseStats.averageDamagePerRound, null],
+            [OrderPlayerBaseStats.averageScorePerRound, null ],
+            [OrderPlayerBaseStats.roundsPlayed, null],
+            [OrderPlayerBaseStats.gamesPlayed, null],
+        ]);
+
+        Logger.log(`Begin sorting`, "PlayerStats cache", true);
+    
+        for (let stats of orderByMap)
+        {
+            if(stats[0] === OrderPlayerBaseStats.sumKills)
+            {
+                continue;
+            }
+
+            const sorted = res.sort((x, y) => {
+                switch (stats[0])
+                {
+                    case OrderPlayerBaseStats.sumDeaths:
+                        return y.deaths - x.deaths;
+                    case OrderPlayerBaseStats.sumScore:
+                        return y.totalScore - x.totalScore;
+                    case OrderPlayerBaseStats.sumDamage:
+                        return y.totalDamage - x.totalDamage;
+                    case OrderPlayerBaseStats.killDeath:
+                        return y.killDeathRatio - x.killDeathRatio;
+                    case OrderPlayerBaseStats.sumSuicides:
+                        return y.suicides - x.suicides;
+                    case OrderPlayerBaseStats.averageDamagePerRound:
+                        return y.avgDamagePerRound - x.avgDamagePerRound;
+                    case OrderPlayerBaseStats.averageScorePerRound:
+                        return y.avgScorePerRound - x.avgScorePerRound;
+                    case OrderPlayerBaseStats.roundsPlayed:
+                        return y.numberRoundsPlayed - x.numberRoundsPlayed;
+                    case OrderPlayerBaseStats.gamesPlayed:
+                        return y.numberGamesPlayed - x.numberGamesPlayed;
+                }
+                    
+               return y.avgDamagePerRound - x.avgDamagePerRound
+            });
+
+            orderByMap.set(stats[0], {
+                asc: sorted.reverse(), 
+                desc: sorted
+            });
+            await TIMEOUT_PROMISE_FACTORY(0.2, 0.3)[0]; // still lazy
+        }
+
+        this.playerStatsCache = orderByMap;
+
+        Logger.log(`Done, Cache has ${orderByMap.size * total * 2} entries.`, "PlayerStats cache", true);
+    }
+    
+    /**
+     * Get cached player stats
+     * @param page 
+     * @param pageSize 
+     * @param orderBy 
+     * @param orderDesc 
+     */
+    private getCachedPlayerStatistics(page: number, pageSize: number, orderBy: OrderPlayerBaseStats, orderDesc: boolean): [PlayerStatistics[], number, number]
+    {
+        const stats = this.playerStatsCache.get(orderBy);
+        const res = orderDesc ? stats.desc: stats.asc;
+        const paginated = _.take(_.drop(res, (page - 1) * pageSize), pageSize);
+        return [paginated, res.length, Math.ceil(res.length / pageSize)];
+    }
+
     /**
      * Get player statistics
      * @param options 
@@ -239,6 +419,24 @@ export class AggregatedGameStatisticsService {
         options.page = Math.max(1, options.page ?? 1);
         options.pageSize = clamp(options.pageSize ?? MAX_PAGE_SIZE_WITH_STEAMID, 1, MAX_PAGE_SIZE_WITH_STEAMID)
         options.orderDesc = options.orderDesc ?? true;
+        options.orderBy = options.orderBy ? escapeOrderBy(options.orderBy) : OrderPlayerBaseStats.sumKills;
+
+        if(!!options.cached 
+            && !!this.playerStatsCache 
+            && !options.steamId64 
+            && !options.endedAfter 
+            && !options.endedBefore
+            && !options.startedAfter 
+            && !options.startedBefore
+            && !options.round
+            && !options.gameMode
+            && !options.game
+            && !options.ranked
+            && options.onlyFinishedRounds
+            )
+        {
+            return this.getCachedPlayerStatistics(options.page, options.pageSize, options.orderBy, options.orderDesc);
+        }
         
         let queryBuilder = this.playerRoundStatsRepository.createQueryBuilder("prs");
 
@@ -305,11 +503,19 @@ export class AggregatedGameStatisticsService {
 
         queryBuilder = queryBuilder.groupBy("prs.steamId64");
 
+        const appCfg = await this.appConfigService.getAppConfig(true);
+
+        if(appCfg.minScoreStats > 0)
+        {
+            queryBuilder = queryBuilder.having("SUM(prs.score) > :scoreHigher", {scoreHigher: appCfg.minScoreStats})
+        }
+
         const [query, params] = queryBuilder.getQueryAndParameters();
 
         const rank = `ROW_NUMBER() OVER (ORDER BY groupedraw.${options.orderBy ?? "sumkills"} ${options.orderDesc ? "DESC" : "ASC"}, groupedraw.sumscore ${options.orderDesc ? "DESC" : "ASC"}, groupedraw.sumdamage ${options.orderDesc ? "DESC" : "ASC"}) as playerrank`;
         const pagination = `ranked.playerrank > ${(options.page - 1) * options.pageSize} AND ranked.playerrank <= ${(options.page) * options.pageSize}`;
-        const where = `${pagination} ${options.steamId64 ? ` AND ranked.steamid64 = ${steamId64ToAccountId(options.steamId64)}` : ""}`
+
+        const where = `${pagination} ${options.steamId64 ? ` AND ranked.steamid64 = ${steamId64ToAccountId(options.steamId64)}` : ""}`;
         const withRanks = `SELECT * FROM (SELECT groupedraw.steamid64, ${rank}, groupedraw.sumkills, groupedraw.sumdeaths, groupedraw.sumsuicides, groupedraw.sumdamage, groupedraw.sumscore, groupedraw.roundsplayed, groupedraw.gamesplayed, groupedraw.killdeath, groupedraw.averagedamageperround, groupedraw.averagescoreperround FROM (${query}) as groupedraw) as ranked WHERE ${where}`;
 
         const em = this.connection.createEntityManager();
@@ -323,7 +529,7 @@ export class AggregatedGameStatisticsService {
         }
         else
         {
-           const [result, numPlayers] = await Promise.all([em.query(withRanks, params), this.getCountUniquePlayers(options)]);
+           const [result, numPlayers] = await Promise.all([em.query(withRanks, params), this.getCountUniquePlayers({...options, minTotalScore: appCfg.minScoreStats})]);
            ret = result;
            count = numPlayers;
         }
@@ -453,39 +659,37 @@ export class AggregatedGameStatisticsService {
     async getCountUniquePlayers(options: IPlayerCountQuery): Promise<number>
     {
         options.onlyFinishedRounds = options.onlyFinishedRounds ?? true;
+        options.minTotalScore = options.minTotalScore ?? 0;
+        
+        let queryBuilder = this.playerRoundStatsRepository.createQueryBuilder("prs");
 
-        let queryBuilder = this.playerRoundStatsRepository.createQueryBuilder("playerRoundStats");
-
-        queryBuilder = queryBuilder.leftJoin("playerRoundStats.round", "round");
-                
+        queryBuilder = queryBuilder.leftJoin("prs.round", "round");
         queryBuilder = queryBuilder.leftJoin("round.game", "game");
+        queryBuilder = queryBuilder.leftJoin("game.gameMode", "gameMode")
         queryBuilder = queryBuilder.leftJoin("game.matchConfig", "matchConfig");
-        
-        if(options.gameMode)
-        {
-            queryBuilder = queryBuilder.leftJoin("game.gameMode", "gameMode")
-        }
-        
-        queryBuilder = queryBuilder.select("count(distinct playerRoundStats.steamId64) as total");
 
+        queryBuilder = queryBuilder.select(`SUM(prs.score) as sumscore`);
+       
+        queryBuilder = queryBuilder.where("1=1"); 
+
+        if(options.ranked)
+        {
+            queryBuilder = queryBuilder.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
+        }
+    
         if(options.onlyFinishedRounds)
         {
             queryBuilder = queryBuilder.andWhere("round.endedAt IS NOT NULL");
         }
 
         if(options.gameMode)
-        {   
+        {
             queryBuilder = queryBuilder.andWhere(options.gameMode.id ? "gameMode.id = :gameModeId" : "gameMode.name = :gameModeName" , options.gameMode.id ? { gameModeId: options.gameMode.id } : { gameModeName: options.gameMode.name });
         }
 
         if(options.game?.id)
         {
             queryBuilder = queryBuilder.andWhere("game.id = :gameId" , { gameId: options.game.id });
-        }
-
-        if(options.ranked)
-        {
-            queryBuilder = queryBuilder.andWhere("matchConfig.ranked = :isranked", { isranked: options.ranked });
         }
 
         if(options.round?.id)
@@ -495,28 +699,41 @@ export class AggregatedGameStatisticsService {
 
         if(options.startedBefore)
         {
-            queryBuilder = queryBuilder.andWhere("round.startedAt <= :bef", {bef: mapDateForQuery(options.startedBefore)});
+            queryBuilder = queryBuilder.andWhere("round.startedAt <= :stabef", {stabef: mapDateForQuery(options.startedBefore)});
         }
 
         if(options.startedAfter) 
         {
-            queryBuilder = queryBuilder.andWhere("round.startedAt >= :af", {af: mapDateForQuery(options.startedAfter)});
+            queryBuilder = queryBuilder.andWhere("round.startedAt >= :staaf", {staaf: mapDateForQuery(options.startedAfter)});
         }
 
         if(options.endedBefore)
         {
-            queryBuilder = queryBuilder.andWhere("round.endedAt <= :bef", {bef: mapDateForQuery(options.endedBefore)});
+            queryBuilder = queryBuilder.andWhere("round.endedAt <= :endbef", {endbef: mapDateForQuery(options.endedBefore)});
         }
 
         if(options.endedAfter) 
         {
-            queryBuilder = queryBuilder.andWhere("round.endedAt >= :af", {af: mapDateForQuery(options.endedAfter)});
+            queryBuilder = queryBuilder.andWhere("round.endedAt >= :endaf", {endaf: mapDateForQuery(options.endedAfter)});
         }
 
+        queryBuilder = queryBuilder.groupBy("prs.steamId64");
 
-        const ret = await queryBuilder.getRawOne();
 
-        return parseInt(ret?.total ?? 0);
+        if(options.minTotalScore > 0)
+        {
+            queryBuilder = queryBuilder.having("SUM(prs.score) > :scoreHigher", {scoreHigher: options.minTotalScore})
+        }
+
+        const [query, params] = queryBuilder.getQueryAndParameters();
+
+        const em = this.connection.createEntityManager();
+
+        const countQuery = `select count(*) as total from (${query}) as groupedraw`;
+
+        const ret = await em.query(countQuery, params);
+
+        return parseInt(ret[0]?.total ?? 0);
     }
     
 }

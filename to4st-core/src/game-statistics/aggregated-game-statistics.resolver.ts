@@ -125,6 +125,14 @@ class PlayerStatisticsQuery
     @IsBoolean()
     @Field(() => Boolean, {nullable: true})
     onlyFinishedRounds?: boolean;
+
+    /**
+     * Should return from cached stats, only sortBy possible params
+     */
+    @ValidateIf(x => x.cachedIfPossible !== undefined)
+    @IsBoolean()
+    @Field(() => Boolean, {nullable: true, description: "Only possible if only using sorts"})
+    cachedIfPossible?: boolean;
 }
 
 /**
@@ -250,7 +258,8 @@ export class PlayerStatisticsResolver {
             endedAfter: options.endedAfter,
             endedBefore: options.endedBefore,
             orderDesc: options.orderDesc,
-            onlyFinishedRounds: options.onlyFinishedRounds
+            onlyFinishedRounds: options.onlyFinishedRounds,
+            cached: options.cachedIfPossible
         });
         
         return { content: playerStats, totalCount: count, pageCount: pageCount};
