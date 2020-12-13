@@ -133,6 +133,14 @@ class PlayerStatisticsQuery
     @IsBoolean()
     @Field(() => Boolean, {nullable: true, description: "Only possible if only using sorts"})
     cachedIfPossible?: boolean;
+
+    /**
+     * Should only generate stats for games that enabled ranked in their match config
+     */
+    @ValidateIf(x => x.ranked !== undefined)
+    @IsBoolean()
+    @Field(() => Boolean, {nullable: true})
+    ranked?: boolean;
 }
 
 /**
@@ -259,7 +267,8 @@ export class PlayerStatisticsResolver {
             endedBefore: options.endedBefore,
             orderDesc: options.orderDesc,
             onlyFinishedRounds: options.onlyFinishedRounds,
-            cached: options.cachedIfPossible
+            cached: options.cachedIfPossible,
+            ranked: options.ranked
         });
         
         return { content: playerStats, totalCount: count, pageCount: pageCount};
