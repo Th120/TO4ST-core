@@ -133,6 +133,7 @@ type Game {
 input GameInput {
   id: String
   gameserverId: String
+  matchConfigId: Int
   startedAt: DateTime
   endedAt: DateTime
   map: ServerMapInput
@@ -577,6 +578,7 @@ input PlayerStatisticsQuery {
   Only possible if only using sorts
   """
   cachedIfPossible: Boolean
+  ranked: Boolean
 }
 
 type PlayerWeaponStatistics {

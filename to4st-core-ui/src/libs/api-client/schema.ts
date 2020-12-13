@@ -716,6 +716,7 @@ export interface PlayerStatisticsQuery {
   onlyFinishedRounds?: Boolean | null
   /** Only possible if only using sorts */
   cachedIfPossible?: Boolean | null
+  ranked?: Boolean | null
 }
 
 export interface PaginatedPlayerStatisticsRequest {
@@ -1003,6 +1004,7 @@ export interface MutationRequest {
 export interface GameInput {
   id?: String | null
   gameserverId?: String | null
+  matchConfigId?: Int | null
   startedAt?: DateTime | null
   endedAt?: DateTime | null
   map?: ServerMapInput | null
