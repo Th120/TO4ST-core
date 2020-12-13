@@ -181,7 +181,7 @@ export class To4stPlayerStatistics implements ComponentInterface {
       this.loadingData = true;
       try 
       {
-        const res = await this.apiClient.client.chain.query.playerStatistics({options: {pageSize: 25, page: this.currentPage, orderDesc: this.orderDesc, orderBy: this.currentOrderBy}}).execute(
+        const res = await this.apiClient.client.chain.query.playerStatistics({options: {pageSize: 25, page: this.currentPage, orderDesc: this.orderDesc, orderBy: this.currentOrderBy, cachedIfPossible: true}}).execute(
           {
             pageCount: true, 
             content: 
