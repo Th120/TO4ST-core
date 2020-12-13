@@ -99,6 +99,11 @@ export interface IAggregatedPlayerStatisticsQuery {
      * Get simple cached if possible
      */
     cached?: boolean
+
+    /**
+     * Override pagiation, never use within a resolver!
+     */
+    overridePagination?: boolean
 }
 
 /**
@@ -318,19 +323,9 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
 
         Logger.log("Generating PlayerStats cache for games before: " + before.toString(), "PlayerStats cache", true);
 
-        let [res, total, pages] = await this.getPlayerStatistics({orderBy: OrderPlayerBaseStats.sumKills, ranked: true, orderDesc: true, endedBefore: before});
-    
-        //Get all pages and merge them into result archive
-        if(res.length != total) 
-        {
-          for(let i = 2; i <= pages; i++)
-          {
-            res = [...res, ...(await this.getPlayerStatistics({page: i, orderBy: OrderPlayerBaseStats.sumKills, ranked: true, orderDesc: true, endedBefore: before,}))[0]];
-            await TIMEOUT_PROMISE_FACTORY(0.1, 0.2)[0]; // lazy
-          }
-        }
+        const [res, total] = await this.getPlayerStatistics({orderBy: OrderPlayerBaseStats.sumKills, ranked: true, orderDesc: true, endedBefore: before, overridePagination: true});
 
-        Logger.log("Finished database queries", "PlayerStats cache", true);
+        Logger.log("Finished database query", "PlayerStats cache", true);
 
         const orderByMap = new Map<OrderPlayerBaseStats, {asc: PlayerStatistics[], desc: PlayerStatistics[]}>([
             [OrderPlayerBaseStats.sumKills, { asc: res.reverse(), desc: res} ],
@@ -384,7 +379,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
                 asc: sorted.reverse(), 
                 desc: sorted
             });
-            await TIMEOUT_PROMISE_FACTORY(0.2, 0.3)[0]; // still lazy
+            await TIMEOUT_PROMISE_FACTORY(0.2, 0.3)[0]; // lazy
         }
 
         this.playerStatsCache = orderByMap;
@@ -399,12 +394,11 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
      * @param orderBy 
      * @param orderDesc 
      */
-    private getCachedPlayerStatistics(page: number, pageSize: number, orderBy: OrderPlayerBaseStats, orderDesc: boolean): [PlayerStatistics[], number, number]
+    private getCachedPlayerStatistics(page: number, pageSize: number, orderBy: OrderPlayerBaseStats, orderDesc: boolean, overridePagination: boolean): [PlayerStatistics[], number, number]
     {
         const stats = this.playerStatsCache.get(orderBy);
         const res = orderDesc ? stats.desc: stats.asc;
-        const paginated = _.take(_.drop(res, (page - 1) * pageSize), pageSize);
-        return [paginated, res.length, Math.ceil(res.length / pageSize)];
+        return [overridePagination ? res : res.slice((page - 1) * pageSize, page * pageSize), res.length, Math.ceil(res.length / pageSize)];
     }
 
     /**
@@ -420,6 +414,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
         options.pageSize = clamp(options.pageSize ?? MAX_PAGE_SIZE_WITH_STEAMID, 1, MAX_PAGE_SIZE_WITH_STEAMID)
         options.orderDesc = options.orderDesc ?? true;
         options.orderBy = options.orderBy ? escapeOrderBy(options.orderBy) : OrderPlayerBaseStats.sumKills;
+        options.ranked = options.ranked ?? false;
 
         if(!!options.cached 
             && !!this.playerStatsCache 
@@ -431,11 +426,11 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
             && !options.round
             && !options.gameMode
             && !options.game
-            && !options.ranked
+            && options.ranked
             && options.onlyFinishedRounds
             )
         {
-            return this.getCachedPlayerStatistics(options.page, options.pageSize, options.orderBy, options.orderDesc);
+            return this.getCachedPlayerStatistics(options.page, options.pageSize, options.orderBy, options.orderDesc, options.overridePagination);
         }
         
         let queryBuilder = this.playerRoundStatsRepository.createQueryBuilder("prs");
@@ -515,7 +510,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
         const rank = `ROW_NUMBER() OVER (ORDER BY groupedraw.${options.orderBy ?? "sumkills"} ${options.orderDesc ? "DESC" : "ASC"}, groupedraw.sumscore ${options.orderDesc ? "DESC" : "ASC"}, groupedraw.sumdamage ${options.orderDesc ? "DESC" : "ASC"}) as playerrank`;
         const pagination = `ranked.playerrank > ${(options.page - 1) * options.pageSize} AND ranked.playerrank <= ${(options.page) * options.pageSize}`;
 
-        const where = `${pagination} ${options.steamId64 ? ` AND ranked.steamid64 = ${steamId64ToAccountId(options.steamId64)}` : ""}`;
+        const where = `${!options.overridePagination ? pagination : "1=1"} ${options.steamId64 ? `AND ranked.steamid64 = ${steamId64ToAccountId(options.steamId64)}` : ""}`;
         const withRanks = `SELECT * FROM (SELECT groupedraw.steamid64, ${rank}, groupedraw.sumkills, groupedraw.sumdeaths, groupedraw.sumsuicides, groupedraw.sumdamage, groupedraw.sumscore, groupedraw.roundsplayed, groupedraw.gamesplayed, groupedraw.killdeath, groupedraw.averagedamageperround, groupedraw.averagescoreperround FROM (${query}) as groupedraw) as ranked WHERE ${where}`;
 
         const em = this.connection.createEntityManager();
