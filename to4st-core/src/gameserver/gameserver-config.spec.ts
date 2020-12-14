@@ -323,8 +323,8 @@ describe('GameserverConfigService', () => {
     const deletePromises = toDelete.map(x => service.deleteGameserverConfig(x.gameserver));
     await Promise.all(deletePromises);
 
-    await asyncForEach(keep, async x => await expect(await service.getGameserverConfig(x.gameserver)).toMatchObject(x));
-    await asyncForEach(toDelete, async x => await expect(await service.getGameserverConfig(x.gameserver)).toBeFalsy());
+    await asyncForEach(keep, async x => await expect(await service.getGameserverConfig(x.gameserver.id)).toMatchObject(x));
+    await asyncForEach(toDelete, async x => await expect(await service.getGameserverConfig(x.gameserver.id)).toBeFalsy());
 
   });
 

@@ -13,6 +13,7 @@ import { MatchConfig } from './match-config.entity';
 import { TIMEOUT_PROMISE_FACTORY } from '../shared/utils';
 import { Game } from '../game-statistics/game.entity';
 import { DEFAULT_GAMEMODES, GameStatisticsService } from '../game-statistics/game-statistics.service';
+import { GameserverService } from './gameserver.service';
 
 
 
@@ -138,6 +139,7 @@ const DEFAULT_MATCH_CONFIG = {
 export class GameserverConfigService implements OnApplicationBootstrap{
     constructor(
         private readonly gameStatisticsService: GameStatisticsService,
+        private readonly gameserverService: GameserverService,
         @InjectRepository(MatchConfig) private readonly matchConfigRepository: Repository<MatchConfig>, 
         @InjectRepository(GameserverConfig) private readonly gameserverConfigRepository: Repository<GameserverConfig>, 
         @InjectConnection() private readonly connection: Connection,
@@ -167,9 +169,9 @@ export class GameserverConfigService implements OnApplicationBootstrap{
    * Get gameserver config for gameserver
    * @param gameserver 
    */
-  async getGameserverConfig(gameserver: Partial<Gameserver>)
+  async getGameserverConfig(gameserverId: string)
   {
-    return await this.gameserverConfigRepository.findOne({relations: ["gameserver", "currentMatchConfig", "currentMatchConfig.gameMode"], where: {gameserver: gameserver.id ? {id: gameserver.id} : {authKey: gameserver.authKey}}});
+    return await this.gameserverConfigRepository.findOne({relations: ["gameserver", "currentMatchConfig", "currentMatchConfig.gameMode"], where: {gameserver: {id: gameserverId}}});
   }
 
   /**
@@ -234,7 +236,7 @@ export class GameserverConfigService implements OnApplicationBootstrap{
     gameserverConfig = {...gameserverConfig};
     gameserverConfig.gameserver = new Gameserver({id: gameserverConfig.gameserver.id});
 
-    if(!gameserverConfig.currentMatchConfig?.id && !(await this.getGameserverConfig(gameserverConfig.gameserver)))
+    if(!gameserverConfig.currentMatchConfig?.id && !(await this.getGameserverConfig(gameserverConfig.gameserver.id)))
     {
       throw new HttpException("Gameserver config must be initialized with default match config.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -242,7 +244,6 @@ export class GameserverConfigService implements OnApplicationBootstrap{
     {
       gameserverConfig.currentMatchConfig = new MatchConfig({id: gameserverConfig.currentMatchConfig.id});
     }
-
 
     let ret: GameserverConfig = null;
 

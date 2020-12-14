@@ -380,30 +380,6 @@ class MatchConfigInput
 }
 
 /**
- * Input type for gameserver query
- */
-@InputType()
-class GameserverConfigQuery
-{
-    /**
-     * Id of gameserver, is uuid should be unique globally
-     */
-    @ValidateIf(x => x.id !== undefined)
-    @IsString()
-    @Field(() => String, {nullable: true})
-    id?: string;
-
-    /**
-     * AuthKey of gameserver
-     */
-    @ValidateIf(x => x.authKey !== undefined)
-    @IsString()
-    @Field(() => String, {nullable: true})
-    authKey?: string;
-
-}
-
-/**
  * Input type for match config query
  */
 @InputType()
@@ -545,11 +521,11 @@ export class GameserverConfigResolver {
      * Get gameserver config
      * @param options 
      */
-    @Query(() => GameserverConfig)
+    @Query(() => GameserverConfig, {nullable: true})
     @AllowTacByteAccess()
-    async gameserverConfig(@Args({name: "options", type: () => GameserverConfigQuery}) options: GameserverConfigQuery)
+    async gameserverConfig(@RequestingGameserver() gameserver: Gameserver, @Args("gameserverId", {nullable: true}) gameserverId?: string)
     {
-        return await this.gameserverConfigService.getGameserverConfig(options.id ? {id: options.id} : {authKey: options.authKey});
+        return await this.gameserverConfigService.getGameserverConfig(gameserver?.id || gameserverId);
     }
 
     /**
@@ -600,7 +576,7 @@ export class GameserverConfigResolver {
     @RequiredAuthPlayerRoles([AuthPlayerRole.gameControl])
     async assignMatchConfig(@Args({name: "gameserverConfig", type: () => GameserverConfigInput}) gameserverConfig: GameserverConfigInput)
     {
-        const existingConfig = await this.gameserverConfigService.getGameserverConfig(new Gameserver({id: gameserverConfig.gameserverId}));
+        const existingConfig = await this.gameserverConfigService.getGameserverConfig(gameserverConfig.gameserverId);
         if(!existingConfig)
         {
             throw new HttpException("Gameserver must have an existing gameserver config", HttpStatus.INTERNAL_SERVER_ERROR);
