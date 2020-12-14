@@ -564,7 +564,7 @@ export class To4stDetailEdit implements ComponentInterface {
                           <div class="field">
                             <div class="control">
                               <to4st-switch
-                                disabled={!this.currentItemClone || !this.canItemBeDeleted?.(this.currentItemClone)}
+                                disabled={!this.currentItemClone || (this.canItemBeDeleted && !this.canItemBeDeleted(this.currentItemClone))}
                                 value={this.deleteActive}
                                 onToggle={e => (this.deleteActive = e.detail)}
                               ></to4st-switch>
@@ -584,7 +584,7 @@ export class To4stDetailEdit implements ComponentInterface {
                               >
                                 <button
                                   class="button is-danger"
-                                  disabled={!this.deleteActive || !this.currentItemClone || !this.canItemBeDeleted?.(this.currentItemClone)}
+                                  disabled={!this.deleteActive || !this.currentItemClone || (this.canItemBeDeleted && !this.canItemBeDeleted(this.currentItemClone))}
                                   onClick={() => this.removeEntity(this.currentItemClone)}
                                 >
                                   <i class="fas fa-trash-alt"></i>
