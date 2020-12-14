@@ -17,7 +17,7 @@ export interface Query {
   bans: PaginatedBan
   banCheck: Ban | null
   gameserverConfigs: PaginatedGameserverConfig
-  gameserverConfig: GameserverConfig
+  gameserverConfig: GameserverConfig | null
   matchConfigs: PaginatedMatchConfig
   matchConfig: MatchConfig
   authKeys: PaginatedAuthKey
@@ -454,7 +454,7 @@ export interface QueryRequest {
   bans?: [{ options: BanQuery }, PaginatedBanRequest]
   banCheck?: [{ banCheck: BanCheck }, BanRequest]
   gameserverConfigs?: [{ options: GameserverConfigsQuery }, PaginatedGameserverConfigRequest]
-  gameserverConfig?: [{ options: GameserverConfigQuery }, GameserverConfigRequest]
+  gameserverConfig?: [{ gameserverId?: String | null }, GameserverConfigRequest] | GameserverConfigRequest
   matchConfigs?: [{ options: MatchConfigsQuery }, PaginatedMatchConfigRequest]
   matchConfig?: [{ options: MatchConfigQuery }, MatchConfigRequest]
   authKeys?: [{ options: AuthKeyQuery }, PaginatedAuthKeyRequest]
@@ -889,11 +889,6 @@ export interface PaginatedGameserverConfigRequest {
   pageCount?: boolean | number
   __typename?: boolean | number
   __scalar?: boolean | number
-}
-
-export interface GameserverConfigQuery {
-  id?: String | null
-  authKey?: String | null
 }
 
 export interface MatchConfigsQuery {
@@ -1445,11 +1440,14 @@ export interface QueryPromiseChain {
       defaultValue?: PaginatedGameserverConfig,
     ) => Promise<PaginatedGameserverConfig>
   }
-  gameserverConfig: (args: {
-    options: GameserverConfigQuery
+  gameserverConfig: ((args?: {
+    gameserverId?: String | null
   }) => GameserverConfigPromiseChain & {
-    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Promise<GameserverConfig>
-  }
+    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig | null) => Promise<GameserverConfig | null>
+  }) &
+    (GameserverConfigPromiseChain & {
+      execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig | null) => Promise<GameserverConfig | null>
+    })
   matchConfigs: (args: {
     options: MatchConfigsQuery
   }) => PaginatedMatchConfigPromiseChain & {
@@ -1571,11 +1569,20 @@ export interface QueryObservableChain {
       defaultValue?: PaginatedGameserverConfig,
     ) => Observable<PaginatedGameserverConfig>
   }
-  gameserverConfig: (args: {
-    options: GameserverConfigQuery
+  gameserverConfig: ((args?: {
+    gameserverId?: String | null
   }) => GameserverConfigObservableChain & {
-    execute: (request: GameserverConfigRequest, defaultValue?: GameserverConfig) => Observable<GameserverConfig>
-  }
+    execute: (
+      request: GameserverConfigRequest,
+      defaultValue?: GameserverConfig | null,
+    ) => Observable<GameserverConfig | null>
+  }) &
+    (GameserverConfigObservableChain & {
+      execute: (
+        request: GameserverConfigRequest,
+        defaultValue?: GameserverConfig | null,
+      ) => Observable<GameserverConfig | null>
+    })
   matchConfigs: (args: {
     options: MatchConfigsQuery
   }) => PaginatedMatchConfigObservableChain & {

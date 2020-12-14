@@ -229,11 +229,6 @@ enum GameserverConfigOrder {
   hasConfig
 }
 
-input GameserverConfigQuery {
-  id: String
-  authKey: String
-}
-
 input GameserverConfigsQuery {
   page: Int
   pageSize: Int
@@ -622,7 +617,7 @@ type Query {
   bans(options: BanQuery!): PaginatedBan!
   banCheck(banCheck: BanCheck!): Ban
   gameserverConfigs(options: GameserverConfigsQuery!): PaginatedGameserverConfig!
-  gameserverConfig(options: GameserverConfigQuery!): GameserverConfig!
+  gameserverConfig(gameserverId: String): GameserverConfig
   matchConfigs(options: MatchConfigsQuery!): PaginatedMatchConfig!
   matchConfig(options: MatchConfigQuery!): MatchConfig!
   authKeys(options: AuthKeyQuery!): PaginatedAuthKey!
