@@ -716,7 +716,7 @@ export class MatchConfigResolver {
             globalVoicechat: matchConfig.globalVoicechat,
             muteDeadToTeam: matchConfig.muteDeadToTeam,
             ranked: matchConfig.ranked,
-            private: matchConfig.ranked
+            private: matchConfig.private
         });
         const ret = await this.gameserverConfigService.createUpdateMatchConfig(nuMatchConfig);
         return ret;
