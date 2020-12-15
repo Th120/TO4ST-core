@@ -4,6 +4,7 @@ import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { Repository, Connection, Brackets, } from 'typeorm';
 import memoizee from 'memoizee';
 import { customAlphabet } from 'nanoid/async';
+import moment from 'moment';
 
 
 import { Gameserver } from './gameserver.entity';
@@ -143,8 +144,8 @@ export class BanService {
                     {
                         id: ban.id, 
                         steamId64: ban.steamId64, 
-                        createdAt: new Date(ban.createdAt),
-                        expiredAt: new Date(ban.expiredAt), 
+                        createdAt: moment.utc(ban.createdAt).toDate(),
+                        expiredAt: moment.utc(ban.expiredAt).toDate(), 
                         reason: ban.reason, 
                         gameserver: new Gameserver({id: ban.gameserver.id, currentName: ban.gameserver.currentName})
                     });
@@ -251,7 +252,7 @@ export class BanService {
             }
             if(!ban.createdAt)
             {
-                ban.createdAt = new Date();
+                ban.createdAt = moment.utc().toDate();
             }
             if(!ban.gameserver?.id)
             {
@@ -358,7 +359,7 @@ export class BanService {
 
         if(params.noExpiredBans)
         {
-            queryBuilder = queryBuilder.andWhere("ban.expiredAt > :ex", {ex: mapDateForQuery(new Date())});
+            queryBuilder = queryBuilder.andWhere("ban.expiredAt > :ex", {ex: mapDateForQuery(moment.utc().toDate())});
         }
 
         if(params.search && params.search.length >= MIN_SEARCH_LEN)

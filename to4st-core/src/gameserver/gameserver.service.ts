@@ -4,6 +4,7 @@ import { Repository, Connection, Like, Brackets } from 'typeorm';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { nanoid, customAlphabet } from 'nanoid/async';
 import { registerEnumType } from '@nestjs/graphql';
+import moment from 'moment';
 
 
 import { Gameserver } from './gameserver.entity';
@@ -213,7 +214,7 @@ export class GameserverService {
 
         if(!server.id)
         {   
-            server.lastContact = new Date();
+            server.lastContact = moment.utc().toDate();
             server.id = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_ID_LENGTH)();
 
             if(!server.authKey)

@@ -3,6 +3,7 @@ import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { Repository, Connection, ILike } from 'typeorm';
 import {nanoid} from 'nanoid/async';
 import _ from 'lodash'
+import moment from 'moment';
 
 
 import { AuthKey } from './auth-key.entity';
@@ -88,7 +89,7 @@ export class AuthKeyService {
 
         if(!authKey.lastUse)
         {
-            authKey.lastUse = new Date();
+            authKey.lastUse = moment.utc().toDate();
         }
 
         const insert = await this.authKeyRepository.save(authKey);

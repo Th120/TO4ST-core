@@ -319,7 +319,7 @@ export class SteamUserService implements OnApplicationBootstrap
 
         const mappedPlayers = players.map(x => {
             const foundSteamUser = flatUsers.find(y => y.steamId64 === x.steamId64);
-            const now = new Date();
+            const now = moment.utc().toDate();
 
             if(foundSteamUser)
             {

@@ -3,6 +3,8 @@ import _ from "lodash"
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { Repository,  Connection } from 'typeorm';
 import iso8601 from "iso8601-validator"
+import moment from 'moment';
+
 
 import { mapDateForQuery, roundDate, } from '../shared/utils';
 import { TransactionId } from './transaction-id.entity';
@@ -63,7 +65,7 @@ export class TransactionIdService implements OnApplicationBootstrap
         
         try
         {
-            await this.transactionIdRepo.insert(new TransactionId({transactionId: id, insertedAt: new Date()}));
+            await this.transactionIdRepo.insert(new TransactionId({transactionId: id, insertedAt: moment.utc().toDate()}));
             return [true, null]
         }
         catch(e)
@@ -78,7 +80,7 @@ export class TransactionIdService implements OnApplicationBootstrap
             throw new HttpException(`Did not find transaction <${id}>`, HttpStatus.INTERNAL_SERVER_ERROR);
         }
  
-        return [false, found.resultJSON ? JSON.parse(found.resultJSON, (key, value) => typeof value === "string" && iso8601.test(value) ? new Date(value) : value).res : null];
+        return [false, found.resultJSON ? JSON.parse(found.resultJSON, (key, value) => typeof value === "string" && iso8601.test(value) ? moment.utc(value).toDate() : value).res : null];
     }   
 
     /**
@@ -102,7 +104,7 @@ export class TransactionIdService implements OnApplicationBootstrap
         TransactionIdService.initialized = true;
         try 
         {
-            await this.purgeTransactionIds(new Date(Date.now() - MAX_AGE_TRANSACTIONID));
+            await this.purgeTransactionIds(moment.utc().subtract(MAX_AGE_TRANSACTIONID, "milliseconds").toDate());
         }
         catch (e)
         {

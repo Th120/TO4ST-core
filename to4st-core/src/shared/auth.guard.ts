@@ -6,15 +6,20 @@ import {
     HttpStatus,
     Logger,
   } from '@nestjs/common';
-  import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
-  import * as jwt from 'jsonwebtoken';
-  import { Reflector } from '@nestjs/core';
+import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
+import * as jwt from 'jsonwebtoken';
+import { Reflector } from '@nestjs/core';
+import moment from 'moment';
+
 import { Role, roleToAuthLevel, AuthPlayerRole } from './auth.utils';
 import { AppConfigService } from '../core/app-config.service';
 import { GameserverService } from '../gameserver/gameserver.service';
 import { AuthKeyService } from '../core/auth-key.service';
 import { hashPassword } from './utils';
 import { inspect } from 'util';
+import { Gameserver } from '../gameserver/gameserver.entity';
+import { AuthKey } from '../core/auth-key.entity';
+
 
 /**
  * Guard used to auth requests
@@ -213,8 +218,8 @@ import { inspect } from 'util';
 
             if(authKey)
             {
-                authKey.lastUse = new Date();
-                this.authKeyService.createUpdateAuthKey(authKey).catch(e => Logger.error("Update last use authKey failed"));
+                authKey.lastUse = moment.utc().toDate();
+                this.authKeyService.createUpdateAuthKey(new AuthKey({id: authKey.id, lastUse: authKey.lastUse})).catch(e => Logger.error("Update last use authKey failed: " + inspect(e, undefined, 3)));
                 ctx.authKey = authKey;
                 ctx.role = Role.authKey;
             }
@@ -225,8 +230,8 @@ import { inspect } from 'util';
 
             if(gameserver)
             {
-                gameserver.lastContact = new Date();
-                this.gameserverService.createUpdateGameserver(gameserver).catch(e => Logger.error("Update last contact gameserver failed: " + inspect(e, undefined, 3)));
+                gameserver.lastContact = moment.utc().toDate();
+                this.gameserverService.createUpdateGameserver(new Gameserver({id: gameserver.id, lastContact: gameserver.lastContact})).catch(e => Logger.error("Update last contact gameserver failed: " + inspect(e, undefined, 3)));
                 ctx.gameserver = gameserver;
                 ctx.role = Role.authKey;
             }

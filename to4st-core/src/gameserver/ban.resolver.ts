@@ -334,7 +334,7 @@ export class BanResolver {
             gameserver = new Gameserver({id: banInput.gameserverId})
         }
 
-        const nuBan = new Ban({id: banInput.banId, steamId64: banInput.steamId64, bannedById64: banInput.bannedById64, expiredAt: new Date(banInput.expiredAt), reason: banInput.reason, gameserver: gameserver, id1: banInput.id1, id2: banInput.id2});
+        const nuBan = new Ban({id: banInput.banId, steamId64: banInput.steamId64, bannedById64: banInput.bannedById64, expiredAt: banInput.expiredAt, reason: banInput.reason, gameserver: gameserver, id1: banInput.id1, id2: banInput.id2});
 
         const ret = await this.banService.createUpdateBan(nuBan);
         return ret;
