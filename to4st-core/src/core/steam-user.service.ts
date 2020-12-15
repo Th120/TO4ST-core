@@ -7,14 +7,15 @@ import LRUCache from "lru-cache"
 
 
 import { SteamUser } from './steam-user.entity';
-import { isValidSteamId, } from '../shared/utils';
+import { isValidSteamId, TIMEOUT_PROMISE_FACTORY, } from '../shared/utils';
 import { AppConfigService } from './app-config.service';
+import moment from 'moment';
 
 
 /**
- * Duration steam user info stays in cache
+ * Duration steam user info stays in cache before updated
  */
-const TTL_STEAMUSER_CACHE = 4 * 60 * 60 * 1000;
+const TTL_STEAMUSER_CACHE = 60 * 60 * 1000;
 
 /**
  * Delay between updating outdated steam user info in database
@@ -29,12 +30,12 @@ const CACHESIZE = 7777;
 /**
  * Max age before user info must be updated
  */
-const MAX_AGE_STEAMUSER_DB = 1000 * 60 * 60 * 24 * 1;
+const MAX_AGE_STEAMUSER_DB = 2 * 60 * 60 * 1000;
 
 /**
  * Count of steam user info entries updated at once
  */
-const MAX_STEAMUSERS_UPDATED_AT_ONCE = 500;
+const MAX_STEAMUSERS_UPDATED_AT_ONCE = 300;
 
 
 /**
@@ -63,6 +64,10 @@ export class SteamUserService implements OnApplicationBootstrap
      */
     private static initialized = false;
 
+    /**
+     * List of outdated steamId that need to be refreshed in the cache
+     */
+    private outdatedSteamIds: string[] = [];
     
     /* istanbul ignore next */
     public async onApplicationBootstrap()
@@ -83,7 +88,7 @@ export class SteamUserService implements OnApplicationBootstrap
     {
         return axios.create({
             baseURL: 'https://api.steampowered.com/',
-            timeout: 5000
+            timeout: 12000
           });
     }
 
@@ -235,11 +240,36 @@ export class SteamUserService implements OnApplicationBootstrap
     {
         return await this.steamUserRepo.find({
             where: [
-                { lastUpdate: LessThan(new Date(Date.now() - MAX_AGE_STEAMUSER_DB)) },
+                { lastUpdate: LessThan(moment.utc().subtract(MAX_AGE_STEAMUSER_DB, "milliseconds").toDate())},
                 { lastUpdate: IsNull() },
             ],
             take: MAX_STEAMUSERS_UPDATED_AT_ONCE
         });
+    }
+
+    /**
+     * Start a delayed update of stale steamIds from the cache
+     * @param staleSteamIds 
+     */
+    private lazyUpdateStale(staleSteamIds: string[]): void
+    {        
+        this.outdatedSteamIds = [...this.outdatedSteamIds, ...staleSteamIds];
+        
+        // Add small delay to avoid making a request for just one steam user that was requested by a field resolver
+        if(staleSteamIds.length === this.outdatedSteamIds.length)
+        {
+            const lazy = async () =>  {
+                await TIMEOUT_PROMISE_FACTORY(2000)[0];
+
+                const toUpdate = [...this.outdatedSteamIds];
+                this.outdatedSteamIds = []; // steam ids could be added while database request is running
+
+                const found = await this.steamUserRepo.find( { where: toUpdate.map(x => ({steamId64: x})) } );
+                found.forEach(x => SteamUserService.steamUserCache.set(x.steamId64, x));
+            };
+
+            lazy().catch(e => Logger.warn(`Lazy update stale failed ${e}`));
+        }
     }
 
     /**
@@ -251,6 +281,19 @@ export class SteamUserService implements OnApplicationBootstrap
     {
         const mapped = steamIds.map(x => ({steamId64: x}));
     
+        if(cached)
+        {
+            const foundCached = mapped.map(x => SteamUserService.steamUserCache.get(x.steamId64)).filter(x => !!x);
+            const wasStale = foundCached.filter(x => !SteamUserService.steamUserCache.has(x.steamId64));
+    
+            if(wasStale.length > 0)
+            {
+                //Insert into cache again, but run lazy cache update
+                wasStale.forEach(x => SteamUserService.steamUserCache.set(x.steamId64, x));
+                this.lazyUpdateStale(wasStale.map(x => x.steamId64));
+            }
+        }
+        
         const filteredByCache = cached ? mapped.filter(x => !SteamUserService.steamUserCache.has(x.steamId64)) : mapped;
         if(filteredByCache.length > 0)
         {
