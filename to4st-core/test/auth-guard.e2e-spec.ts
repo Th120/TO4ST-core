@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { hashPassword, } from '../src/shared/utils';
+import { hashPassword, TIMEOUT_PROMISE_FACTORY, } from '../src/shared/utils';
 import { chance } from 'jest-chance';
 
 import { randomSteamId64 } from '../src/testUtils';
@@ -167,7 +167,7 @@ describe('Auth guard (e2e)', () => {
 
     const authKey = await getAuthKey();
 
-    return request(app.getHttpServer())
+    const result = await request(app.getHttpServer())
       .post('/graphql')
       .send({
         operationName: null,
@@ -182,6 +182,10 @@ describe('Auth guard (e2e)', () => {
         const result = res.body?.data?.deleteRegisteredPlayer;
         expect(result).toBeTruthy();
       });
+
+    await TIMEOUT_PROMISE_FACTORY(2500)[0];
+
+    return result;
   });
 
   it('default auth restriction at least AuthKey/Gameserver role, delete registered player, no auth', async  () => {
@@ -207,7 +211,7 @@ describe('Auth guard (e2e)', () => {
 
     const authKey = await getGameserverAuthKey();
 
-    return request(app.getHttpServer())
+    const result = await request(app.getHttpServer())
       .post('/graphql')
       .send({
         operationName: null,
@@ -222,6 +226,10 @@ describe('Auth guard (e2e)', () => {
         const result = res.body?.data?.deleteRegisteredPlayer;
         expect(result).toBeTruthy();
       });
+
+      await TIMEOUT_PROMISE_FACTORY(1000)[0];
+
+      return result;
   });
 
   it('minRole decorator, none role check for admin auth', async  () => {
