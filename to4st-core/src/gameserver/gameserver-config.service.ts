@@ -420,7 +420,7 @@ export class GameserverConfigService implements OnApplicationBootstrap{
 
     // Make sure object always serialises to the same string
     const toBeHashed = Object.entries(config)
-      .sort(([kx, vx], [ky, vy]) => kx.toLowerCase().localeCompare(ky.toLowerCase()))
+      .sort(([kx, _vx], [ky, _vy]) => kx.localeCompare(ky))
       .reduce((acc, [k, v]) => ({...acc, [k]: v}), {});
 
     const asString = JSON.stringify(toBeHashed);
