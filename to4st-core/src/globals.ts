@@ -46,12 +46,12 @@ export const MIN_SEARCH_LEN = 3;
 /**
  * Max page size objects with steam id
  */
-export const MAX_PAGE_SIZE_WITH_STEAMID = 100;
+export const MAX_PAGE_SIZE_WITH_STEAMID = 500;
 
 /**
  * Max page size default
  */
-export const MAX_PAGE_SIZE = 200;
+export const MAX_PAGE_SIZE = 500;
 
 /**
  * Rounds used by bcrypt, 13 equals about 1 hash per minute
