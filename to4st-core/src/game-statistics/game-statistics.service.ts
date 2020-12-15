@@ -371,7 +371,7 @@ export class GameStatisticsService implements OnApplicationBootstrap {
                     {
                         ret = await saveGameMode(manager);
                     });
-                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(66, 333)[0]}
             );
         }
 
@@ -436,7 +436,7 @@ export class GameStatisticsService implements OnApplicationBootstrap {
                     {
                         ret = await saveServerMap(manager);
                     });
-                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(66, 333)[0]}
             );
         }
 
@@ -649,7 +649,7 @@ export class GameStatisticsService implements OnApplicationBootstrap {
                         const chunked = _.chunk(toInsert, 175).map(chunk => manager.save(PlayerRoundStats, chunk)); //chunk to avoid sqlite issues
                         await Promise.all(chunked);
                     });
-                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(66, 333)[0]}
             );
         }
 
@@ -709,7 +709,7 @@ export class GameStatisticsService implements OnApplicationBootstrap {
                         const chunked = _.chunk(toInsert, 150).map(chunk => manager.save(PlayerRoundWeaponStats, chunk)); //chunk to avoid sqlite issues
                         await Promise.all(chunked);
                     });
-                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(66, 333)[0]}
             );
         }
            
@@ -759,7 +759,7 @@ export class GameStatisticsService implements OnApplicationBootstrap {
                     {      
                         await insertSetId(manager);
                     });
-                    }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]}
+                    }, {retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(66, 333)[0]}
                 );
             }
         }

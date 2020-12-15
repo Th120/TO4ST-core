@@ -282,7 +282,7 @@ export class GameserverConfigService implements OnApplicationBootstrap{
         await manager.save(Gameserver, new Gameserver({id: inserted.gameserver.id, currentName: ret.currentName || undefined, gameserverConfig: new GameserverConfig({gameserver: new Gameserver({id: inserted.gameserver.id})})}));
 
       })}, 
-      { retries: 6, onFailedAttempt: async (error) => {await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0]} }
+      { retries: 6, onFailedAttempt: async (error) => {await TIMEOUT_PROMISE_FACTORY(66, 333)[0]} }
     );
 
     return ret;
@@ -344,7 +344,7 @@ export class GameserverConfigService implements OnApplicationBootstrap{
         ret = await manager.findOne(MatchConfig, {relations: ["gameMode"], where: {id: saved.id}});        
       });
     }, 
-      { retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(0.0666, 0.33)[0] }
+      { retries: MAX_RETRIES, onFailedAttempt: async (error) => await TIMEOUT_PROMISE_FACTORY(66, 333)[0] }
     );
       
     return ret;

@@ -379,7 +379,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
                 asc: sorted.reverse(), 
                 desc: sorted
             });
-            await TIMEOUT_PROMISE_FACTORY(0.2, 0.3)[0]; // lazy
+            await TIMEOUT_PROMISE_FACTORY(200, 300)[0]; // lazy
         }
 
         this.playerStatsCache = orderByMap;
