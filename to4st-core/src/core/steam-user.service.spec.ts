@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SteamUserService } from './steam-user.service';
+import { DEFAULT_AVATAR_FULL, DEFAULT_AVATAR_MEDIUM, SteamUserService } from './steam-user.service';
 import { chance } from 'jest-chance';
 import { AppConfigService } from './app-config.service';
 import { genTypeORMTestCFG, randomSteamId64s, N} from '../testUtils';
@@ -165,9 +165,9 @@ describe('SteamUserService', () => {
 
     resultNotFilled.forEach(x => {
       expect(steamIds).toContain(x.steamId64);
-      expect(x.avatarBigUrl).toBe("");
-      expect(x.avatarMediumUrl).toBe("");
-      expect(x.name).toBe("");
+      expect(x.avatarBigUrl).toBe(DEFAULT_AVATAR_FULL);
+      expect(x.avatarMediumUrl).toBe(DEFAULT_AVATAR_MEDIUM);
+      expect(x.name).toBe(x.steamId64);
       expect(x.lastUpdate).toBeNull();
     });
 

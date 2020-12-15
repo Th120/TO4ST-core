@@ -11,6 +11,15 @@ import { isValidSteamId, TIMEOUT_PROMISE_FACTORY, } from '../shared/utils';
 import { AppConfigService } from './app-config.service';
 import moment from 'moment';
 
+/**
+ * Default avatar image if unable to retrieve, full size
+ */
+export const DEFAULT_AVATAR_FULL = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/c5/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg";
+
+/**
+ * Default avatar image if unable to retrieve, medium size
+ */
+export const DEFAULT_AVATAR_MEDIUM = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/c5/c5d56249ee5d28a07db4ac9f7f60af961fab5426_medium.jpg";
 
 /**
  * Duration steam user info stays in cache before updated
@@ -298,7 +307,25 @@ export class SteamUserService implements OnApplicationBootstrap
         if(filteredByCache.length > 0)
         {
             const found = await this.steamUserRepo.find({where: filteredByCache});
-            found.forEach(x => SteamUserService.steamUserCache.set(x.steamId64, x));
+            found.filter(x => x.name).forEach(x => SteamUserService.steamUserCache.set(x.steamId64, x));
+
+            // no user info in database
+            const notFound = steamIds.filter(x => !found.find(y => y.name && y.steamId64 === x));
+
+            notFound.map(x => new SteamUser(
+                {
+                    steamId64: x, 
+                    name: x, 
+                    avatarBigUrl: DEFAULT_AVATAR_FULL, 
+                    avatarMediumUrl: DEFAULT_AVATAR_MEDIUM, 
+                    lastUpdate: null
+                },
+            )).forEach(x => SteamUserService.steamUserCache.set(x.steamId64, x, 30 * 1000));
+
+            if(notFound.length > 0)
+            {
+                await this.updateSteamUsers(notFound, true);
+            }
         }
         
         return steamIds.map(x => SteamUserService.steamUserCache.get(x)).filter(x => !!x);
