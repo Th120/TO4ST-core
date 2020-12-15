@@ -1,8 +1,8 @@
 FROM node:14 AS builder
 ENV NODE_ENV=production
 WORKDIR /usr/src/app
-COPY package.json yarn.lock ./
 RUN npm install -g @nestjs/cli
+COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --production
 COPY . .
 RUN yarn build
