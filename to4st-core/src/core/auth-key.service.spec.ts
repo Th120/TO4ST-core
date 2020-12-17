@@ -43,7 +43,7 @@ describe('AuthKeyService', () => {
   });
 
   const randomAuthKey =  () => {
-    return new AuthKey({authKey: chance.guid({version: 4}), description: chance.sentence(), lastUse: roundDate(chance.date())});
+    return new AuthKey({authKey: chance.guid({version: 4}), description: chance.sentence(), lastUse: chance.date()});
   };
 
 
@@ -110,8 +110,7 @@ describe('AuthKeyService', () => {
       await service.createUpdateAuthKey(toInsert);
     });
       
-    let [res, total, pages] = await service.getAuthKeys({page: 1, pageSize:N + 1});  
-    
+    let [res, total, pages] = await service.getAuthKeys({page: 1});  
     
     if(res.length != total)
     {
@@ -120,7 +119,6 @@ describe('AuthKeyService', () => {
         res = [...res, ...(await service.getAuthKeys({page: i}))[0]];
       }
     }
-
 
     expect(res.length).toBe(N);
     expect(total).toBe(N);

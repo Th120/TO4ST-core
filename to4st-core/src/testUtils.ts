@@ -8,6 +8,7 @@ import { monkeypatch as monkeyPostgres } from './libs/db/pg-utc-timestamp-monkey
 import { monkeypatch as monkeySQLite } from './libs/db/sqlite-concurrent-transtactions-monkey-patch';
 import { accountIdToSteamId64, getNextNFromRingArray } from './shared/utils';
 import { Logger } from "@nestjs/common";
+import { MAX_PAGE_SIZE } from "./globals";
 
 /**
  * Min N used for bulk insert tests
@@ -16,7 +17,7 @@ export const MIN_N = 10;
 /**
  * default N used for bulk insert / delete tests
  */
-export const N = Math.max(500, MIN_N);
+export const N = Math.max(MAX_PAGE_SIZE + 10, MIN_N);
 
 /**
  * Range of valid accountIds start
