@@ -5,6 +5,16 @@ import { Expose } from 'class-transformer';
 
 import { transformSteamId64AccountId, roundDate } from '../shared/utils';
 
+/**
+ * Default avatar image if unable to retrieve, full size
+ */
+ export const DEFAULT_AVATAR_FULL = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/c5/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg";
+
+ /**
+  * Default avatar image if unable to retrieve, medium size
+  */
+ export const DEFAULT_AVATAR_MEDIUM = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/c5/c5d56249ee5d28a07db4ac9f7f60af961fab5426_medium.jpg";
+
 
 /**
  * Entity for steam user info in database
@@ -34,16 +44,16 @@ export class SteamUser {
    * Current big avatar
    */
   @Expose()
-  @Field(() => String)
-  @Column({default: ""})
+  @Field(() => String,  {nullable: true})
+  @Column({default: DEFAULT_AVATAR_FULL})
   avatarBigUrl: string;
 
   /**
    * Current medium avatar
   */
   @Expose()
-  @Field(() => String)
-  @Column({default: ""})
+  @Field(() => String, {nullable: true})
+  @Column({default: DEFAULT_AVATAR_MEDIUM})
   avatarMediumUrl: string;
 
   /**

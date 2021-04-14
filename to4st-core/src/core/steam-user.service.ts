@@ -6,20 +6,11 @@ import _ from "lodash"
 import LRUCache from "lru-cache"
 
 
-import { SteamUser } from './steam-user.entity';
+import { DEFAULT_AVATAR_FULL, DEFAULT_AVATAR_MEDIUM, SteamUser } from './steam-user.entity';
 import { isValidSteamId, TIMEOUT_PROMISE_FACTORY, } from '../shared/utils';
 import { AppConfigService } from './app-config.service';
 import moment from 'moment';
 
-/**
- * Default avatar image if unable to retrieve, full size
- */
-export const DEFAULT_AVATAR_FULL = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/c5/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg";
-
-/**
- * Default avatar image if unable to retrieve, medium size
- */
-export const DEFAULT_AVATAR_MEDIUM = "https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/avatars/c5/c5d56249ee5d28a07db4ac9f7f60af961fab5426_medium.jpg";
 
 /**
  * Duration steam user info stays in cache before updated
