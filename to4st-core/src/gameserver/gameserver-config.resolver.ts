@@ -503,6 +503,7 @@ export class GameserverConfigResolver {
      * @param options 
      */
     @Query(() => PaginatedGameserverConfig)
+    @RequiredAuthPlayerRoles([AuthPlayerRole.gameControl])
     @AllowTacByteAccess()
     async gameserverConfigs(@Args({name: "options", type: () => GameserverConfigsQuery}) options: GameserverConfigsQuery): Promise<PaginatedGameserverConfig>
     {
