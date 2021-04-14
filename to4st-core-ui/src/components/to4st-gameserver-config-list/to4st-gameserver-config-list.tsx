@@ -141,7 +141,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
     },
     {
       name: "Server Description",
-      detailInput: (item, cb) => <input type="text" placeholder="Contact" value={item?.serverDescription ?? ""} class="input" onChange={event => cb("serverDescription", (event.target as HTMLInputElement).value.trim()) } />,
+      detailInput: (item, cb) => <input type="text" placeholder="Server Description" value={item?.serverDescription ?? ""} class="input" onChange={event => cb("serverDescription", (event.target as HTMLInputElement).value.trim()) } />,
       shouldBeVisible: () => false,
     },
     {
