@@ -524,6 +524,7 @@ export class GameserverConfigResolver {
      */
     @Query(() => GameserverConfig, {nullable: true})
     @AllowTacByteAccess()
+    @RequiredAuthPlayerRoles([AuthPlayerRole.gameControl])
     async gameserverConfig(@RequestingGameserver() gameserver: Gameserver, @Args("gameserverId", {nullable: true}) gameserverId?: string)
     {
         return await this.gameserverConfigService.getGameserverConfig(gameserver?.id || gameserverId);
