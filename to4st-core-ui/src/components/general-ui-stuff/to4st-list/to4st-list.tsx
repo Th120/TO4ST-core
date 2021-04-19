@@ -11,6 +11,8 @@ import {
   Watch
 } from "@stencil/core";
 
+import isEqual from "lodash/isEqual";
+
 import { nanoid } from "nanoid";
 
 /**
@@ -274,9 +276,9 @@ export class To4stList implements ComponentInterface {
   }
 
   resetSelectedItem() {
-    if(this.allowSelect && this.content.length > 0 && (!this.currentSelectedItem || !this.content.find(x => x === this.currentSelectedItem)))
+    if(this.allowSelect && this.content.length > 0)
     {
-      this.currentSelectedItem = this.content[0];
+      this.currentSelectedItem = this.content.find(x => isEqual(x, this.currentSelectedItem)) ?? this.content[0];
       this.itemSelected.emit(this.currentSelectedItem);
     }
   }
@@ -389,6 +391,7 @@ export class To4stList implements ComponentInterface {
           onDelete={() => this.removeItem.emit(this.currentItem)}
           onSave={e => {
             this.pendingRequest = true;
+            this.currentSelectedItem = this.currentItem;
             this.saveItem.emit({
               transactionId: this.currentFormTransactionId,
               item: this.currentItem,
@@ -532,10 +535,10 @@ export class To4stList implements ComponentInterface {
                       if(this.allowSelect)
                       {
                         this.currentSelectedItem = item;
-                        this.itemSelected.emit(item);
+                        this.itemSelected.emit(this.currentSelectedItem);
                       }
                     }}
-                    class={{"is-selected": this.allowSelect && this.currentSelectedItem === item}}
+                    class={{"is-selected": this.allowSelect && isEqual(this.currentSelectedItem,  item)}}
                     >
                     {this.columns.map(col =>
                       !col.shouldBeVisible || col.shouldBeVisible() ? (

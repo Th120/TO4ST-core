@@ -97,7 +97,7 @@ export class To4stGameserverList implements ComponentInterface {
     } catch (e) {
 
       afterEx.emit(extractGraphQLErrors(e));
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -114,7 +114,7 @@ export class To4stGameserverList implements ComponentInterface {
       await this.updateContent();
 
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 

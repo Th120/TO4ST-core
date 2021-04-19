@@ -204,7 +204,7 @@ export class To4stMatchConfigList implements ComponentInterface {
 
       this.gameModes = found.content;
 
-    })().catch(e => console.log("error while loading gameModes", e))
+    })().catch(e => console.error("error while loading gameModes", e))
   }
 
   async saveMatchConfig(entity: any, transactionId: string, afterEx: EventEmitter<string>) 
@@ -249,7 +249,7 @@ export class To4stMatchConfigList implements ComponentInterface {
         afterEx.emit("");
     } catch (e) {
       afterEx.emit(extractGraphQLErrors(e));
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -260,7 +260,7 @@ export class To4stMatchConfigList implements ComponentInterface {
     try {
       await this.apiClient.client.chain.mutation.deleteMatchConfig({options: {id: o.id}}).execute(false);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
 
     onDeletedEntity();

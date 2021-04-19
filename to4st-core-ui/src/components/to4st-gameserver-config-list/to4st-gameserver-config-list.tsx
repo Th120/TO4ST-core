@@ -198,7 +198,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
         afterEx.emit("");
     } catch (e) {
       afterEx.emit(extractGraphQLErrors(e));
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -217,7 +217,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
     try {
       await this.apiClient.client.chain.mutation.deleteGameserverConfig({gameserverId: o.gameserver.id}).execute(false);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
     onDeletedEntity();
   }

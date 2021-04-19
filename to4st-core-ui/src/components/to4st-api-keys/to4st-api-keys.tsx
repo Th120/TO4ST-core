@@ -169,7 +169,7 @@ export class To4stApiKeys implements ComponentInterface {
       await this.updateContent();
     } catch (e) {
       afterEx.emit(extractGraphQLErrors(e));
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -203,7 +203,7 @@ export class To4stApiKeys implements ComponentInterface {
         .execute(false);
       await this.updateContent();
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 

@@ -169,7 +169,7 @@ export class To4stGeneralSettings implements ComponentInterface {
       this.currentPassword = "";
       this.currentRepeat = "";
     } catch (e) {
-      console.log(e)
+      console.error(e)
       this.currentError = extractGraphQLErrors(e);
     }
   }

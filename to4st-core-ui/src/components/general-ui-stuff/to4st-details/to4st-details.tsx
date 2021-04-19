@@ -15,7 +15,6 @@ import { ColumnProps, FilterProps } from "../to4st-list/to4st-list";
 import range from "lodash/range"
 import chunk from "lodash/chunk"
 import isEqual from 'lodash/isEqual';
-import { splitIntoNChunks } from "../../../libs/utils";
 import iso8601 from "iso8601-validator"
 import { nanoid } from "nanoid";
 
@@ -253,11 +252,12 @@ export class To4stDetailEdit implements ComponentInterface {
   async removeEntity(entity: any)
   {
     this.deleteActive = false;
-    this.deleteEntity.emit({entity: entity, onDeletedEntity: () => {this.updateContent(); this.currentItem = undefined; this.currentItemClone = undefined; console.log()}}); 
+    this.deleteEntity.emit({entity: entity, onDeletedEntity: () => {this.updateContent(); this.currentItem = undefined; this.currentItemClone = undefined;}}); 
   }
 
   itemSelected(item: any)
   {
+    console.log(item);
     this.currentItem = {...this.defaultCreateObject, ...item};
     this.reset();
   }

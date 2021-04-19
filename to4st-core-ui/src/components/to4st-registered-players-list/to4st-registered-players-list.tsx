@@ -225,7 +225,7 @@ export class To4stRegisteredPlayersList implements ComponentInterface {
     } catch (e) {
 
       afterEx.emit(extractGraphQLErrors(e));
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -250,7 +250,7 @@ export class To4stRegisteredPlayersList implements ComponentInterface {
       await this.updateContent();
 
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
