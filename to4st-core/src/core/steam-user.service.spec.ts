@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DEFAULT_AVATAR_FULL, DEFAULT_AVATAR_MEDIUM, SteamUserService } from './steam-user.service';
+import { SteamUserService } from './steam-user.service';
 import { chance } from 'jest-chance';
 import { AppConfigService } from './app-config.service';
 import { genTypeORMTestCFG, randomSteamId64s, N} from '../testUtils';
@@ -9,7 +9,7 @@ import { AppConfig } from './app-config.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import testConfiguration from '../testConfiguration';
-import { SteamUser } from './steam-user.entity';
+import { DEFAULT_AVATAR_FULL, DEFAULT_AVATAR_MEDIUM, SteamUser } from './steam-user.entity';
 import { isValidSteamId, steamId64ToAccountId } from '../shared/utils';
 import * as realChance from "chance"
 
