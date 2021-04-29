@@ -328,7 +328,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
         Logger.log("Finished database query", "PlayerStats cache", true);
 
         const orderByMap = new Map<OrderPlayerBaseStats, {asc: PlayerStatistics[], desc: PlayerStatistics[]}>([
-            [OrderPlayerBaseStats.sumKills, { asc: res.reverse(), desc: res} ],
+            [OrderPlayerBaseStats.sumKills, { asc: [...res].reverse(), desc: res} ],
             [OrderPlayerBaseStats.sumDeaths, null],
             [OrderPlayerBaseStats.sumScore, null],
             [OrderPlayerBaseStats.sumDamage, null],
@@ -342,15 +342,15 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
 
         Logger.log(`Begin sorting`, "PlayerStats cache", true);
     
-        for (let stats of orderByMap)
+        for (let orderBy of orderByMap.keys())
         {
-            if(stats[0] === OrderPlayerBaseStats.sumKills)
+            if(orderBy === OrderPlayerBaseStats.sumKills)
             {
                 continue;
             }
 
-            const sorted = res.sort((x, y) => {
-                switch (stats[0])
+            const sorted = [...res].sort((x, y) => {
+                switch (orderBy)
                 {
                     case OrderPlayerBaseStats.sumDeaths:
                         return y.deaths - x.deaths;
@@ -375,8 +375,8 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
                return y.avgDamagePerRound - x.avgDamagePerRound
             });
 
-            orderByMap.set(stats[0], {
-                asc: sorted.reverse(), 
+            orderByMap.set(orderBy, {
+                asc: [...sorted].reverse(), 
                 desc: sorted
             });
             await TIMEOUT_PROMISE_FACTORY(200, 300)[0]; // lazy

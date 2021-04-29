@@ -868,6 +868,41 @@ describe('AggregatedGameStatisticsService', () => {
 
    }, );
 
+   it('Get Playerstats For Game Sort By Score, cached', async() => { 
+
+    const randGame = playerRoundStats.map(x => x.round.game)[chance.integer({min: 0}) % playerRoundStats.length];
+
+    testLog("Calculate expected result ...", 'Get Playerstats For Game Sort By Score, cached', true);
+
+    await service.updateCachedStats();
+ 
+    const sorted = aggregatedPlayerRoundStats(playerRoundStats, (x) => x.round.game.id === randGame.id, (x, y) => y.totalScore - x.totalScore, true);   
+ 
+    testLog("Calculated expected result ...", 'Get Playerstats For Game Sort By Kills, cached', true);
+ 
+    testLog("Run service", 'Get Playerstats For Game Sort By Score, cached', true);
+ 
+    let [res, total, pages] = await service.getPlayerStatistics({game: randGame, orderBy: OrderPlayerBaseStats.sumScore, orderDesc: true, cached: true});
+ 
+    expect(total).toBe(sorted.length);
+
+    //Get all pages and merge them into result archive
+    if(res.length != total) 
+    {
+      for(let i = 2; i <= pages; i++)
+      {
+        res = [...res, ...(await service.getPlayerStatistics({page: i, game: randGame, orderBy: OrderPlayerBaseStats.sumScore, orderDesc: true, cached: true}))[0]];
+      }
+    }
+
+    testLog("Service found result", 'Get Playerstats For Game Sort By Score, cached', true);
+    
+    expect(res.length).toBe(sorted.length);
+    
+    res.forEach((x, idx) => expect(x.steamId64).toBe(sorted[idx].steamId64));
+
+   }, );
+
    it('Get Playerstats, Sort By Kills, min score', async() => { 
    
     testLog("Calculate expected result ...", 'Get Playerstats For Game Sort By Kills, min score', true);
