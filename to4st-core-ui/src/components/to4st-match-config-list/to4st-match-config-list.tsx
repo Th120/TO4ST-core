@@ -96,7 +96,7 @@ export class To4stMatchConfigList implements ComponentInterface {
     {
       name: "Map Length",
       shouldBeVisible: () => false,
-      detailInput: (item, cb) => <input type="number" placeholder="Map Length" min="1" max="99" value={item?.mapLength ?? 0} class="input" onChange={event => cb("warmUpLength", parseInt((event.target as HTMLInputElement).value)) } />,
+      detailInput: (item, cb) => <input type="number" placeholder="Map Length" min="1" max="99" value={item?.mapLength ?? 0} class="input" onChange={event => cb("mapLength", parseInt((event.target as HTMLInputElement).value)) } />,
     },
     {
       name: "Round Length",
