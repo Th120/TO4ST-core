@@ -176,7 +176,7 @@ export class GameserverResolver {
             configFilter: options.configFilter
         });
        
-        return { content: gameservers, totalCount: count , pageCount: pageCount};
+        return new PaginatedGameserver({ content: gameservers, totalCount: count , pageCount: pageCount});
     }
 
     /**

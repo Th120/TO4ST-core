@@ -103,7 +103,7 @@ export class AuthKeyResolver {
     {
         const [keys, count, pageCount] = await this.authKeyService.getAuthKeys({page: options?.page, pageSize: options?.pageSize, orderDesc: options?.orderDesc, search: options?.search});
         
-        return { content: keys, totalCount: count, pageCount: pageCount };
+        return new PaginatedAuthKey({ content: keys, totalCount: count, pageCount: pageCount });
     }
     
     /**

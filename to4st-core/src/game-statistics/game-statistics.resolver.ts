@@ -635,7 +635,7 @@ export class GameResolver {
             onlyFinishedGames: options.onlyFinishedGames
         });
         
-        return { content: games, totalCount: count , pageCount: pageCount};
+        return new PaginatedGame({ content: games, totalCount: count , pageCount: pageCount});
     }
 
     /**
@@ -737,7 +737,7 @@ export class RoundResolver {
             onlyFinishedRounds: options.onlyFinishedRounds
         });
         
-        return { content: rounds, totalCount: count , pageCount: pageCount};
+        return new PaginatedRound({ content: rounds, totalCount: count , pageCount: pageCount});
     }
 
 
@@ -831,7 +831,7 @@ export class GameModeResolver {
     async gameModes(): Promise<PaginatedGameMode>
     {     
         const [found, count, pages] = await this.statsService.getGameModes({});
-        return { content: found, totalCount: count , pageCount: pages};
+        return new PaginatedGameMode({ content: found, totalCount: count , pageCount: pages});
     }
 }
 
@@ -861,7 +861,7 @@ export class PlayerRoundStatsResolver {
             round: new Round({id: options.roundId})
         });
         
-        return { content: rounds, totalCount: count , pageCount: pageCount};
+        return new PaginatedPlayerRoundStats({ content: rounds, totalCount: count , pageCount: pageCount});
     }
 
     /**
@@ -931,7 +931,7 @@ export class PlayerRoundWeaponStatsResolver {
             round: new Round({id: options.roundId})
         });
         
-        return { content: rounds, totalCount: count , pageCount: pageCount};
+        return new PaginatedPlayerRoundWeaponStats({ content: rounds, totalCount: count , pageCount: pageCount});
     }
 
     /**

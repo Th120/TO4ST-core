@@ -259,7 +259,7 @@ export class BanResolver {
 
         });
         
-        return { content: bans, totalCount: count , pageCount: pageCount};
+        return new PaginatedBan({ content: bans, totalCount: count , pageCount: pageCount});
     }
     
     /**

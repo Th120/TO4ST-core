@@ -190,7 +190,7 @@ export class RegisteredPlayerResolver {
             search: options.search,
         });
         
-        return { content: players, totalCount: count , pageCount: pageCount};
+        return new PaginatedRegisteredPlayers({ content: players, totalCount: count , pageCount: pageCount});
     }
 
     /**

@@ -3,7 +3,6 @@ import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import publicIp from 'public-ip';
 import { ConfigService } from '@nestjs/config';
 
-
 import { AppConfigService } from './app-config.service';
 import { createGraphqlClientTo4stMaster } from '../libs/client/graphql-client-to4st-master';
 
@@ -73,32 +72,34 @@ export class MasterHeartbeatService implements OnApplicationBootstrap
      */
     private async heartbeatLoop(): Promise<void>
     {
-        const appCfg = await this.appConfigService.getAppConfig(false);
-        const masterserverKey = appCfg.masterserverKey;
-
-        if(masterserverKey)
+        try
         {
-            const masterServer = process.env.NODE_ENV === "development" ? MASTERSERVER_URL_DEVELOPMENT : MASTERSERVER_URL;
+            const appCfg = await this.appConfigService.getAppConfig(false);
+            const masterserverKey = appCfg.masterserverKey;
 
-            const client = createGraphqlClientTo4stMaster(masterServer, masterserverKey);
-            const ownAddress = process.env.NODE_ENV === "development" ? `http://127.0.0.1:${this.cfgService.get<number>("port")}` : appCfg.ownAddress;
-            const address = ownAddress || `http://${await publicIp.v4()}:${this.cfgService.get<number>("port")}`;
+            if(masterserverKey)
+            {
+                const masterServer = process.env.NODE_ENV === "development" ? MASTERSERVER_URL_DEVELOPMENT : MASTERSERVER_URL;
 
-            try
-            {
-                await client.chain.mutation.heartBeat({address: address}).execute(false);
-            }
-            catch(e)
-            {
-                Logger.error("Could not send heartbeat to master server", e, "MasterHeartbeatService");
-            }
-            
+                const client = createGraphqlClientTo4stMaster(masterServer, masterserverKey);
+                const ownAddress = process.env.NODE_ENV === "development" ? `http://127.0.0.1:${this.cfgService.get<number>("port")}` : appCfg.ownAddress;
+                const address = ownAddress || `http://${await publicIp.v4()}:${this.cfgService.get<number>("port")}`;
+
+                await client.client.mutation({
+                    heartBeat: [
+                        {
+                            address: address
+                        },
+                        true
+                    ]
+                });
+            }            
+        }
+        catch(e)
+        {
+            Logger.error("Could not send heartbeat to master server", e, "MasterHeartbeatService");
         }
 
-        this.beatInterval = setTimeout(async () => {
-            await this.heartbeatLoop();
-        }, HEARBEAT_INTERVAL);
+        this.beatInterval = setTimeout(() => this.heartbeatLoop(), HEARBEAT_INTERVAL);
     }
-
-  
 }

@@ -42,7 +42,6 @@ import { AuthGuard } from './shared/auth.guard';
       { 
         fieldResolverEnhancers: ["interceptors", "guards", "filters"],
         autoSchemaFile: true,
-        playground: process.env.NODE_ENV !== "production",
         context: ({ req }) => ({ headers: req.headers }),
       }
     ),

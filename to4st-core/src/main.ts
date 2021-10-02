@@ -14,6 +14,6 @@ async function bootstrap() {
   app.enableShutdownHooks();
   
   await app.listen(port);
-  Logger.log("Listening on port: " + port.toString(), "NestApplication", true);
+  Logger.log("Listening on port: " + port.toString(), "NestApplication");
 }
 bootstrap();

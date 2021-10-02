@@ -60,7 +60,7 @@ const DEFAULT_GAMESERVER_COUNT = 3; // at least 3!
 const testLog = (message: string, context: string, timeDiff = true) => {
   if(SHOULD_LOG)
   {
-    Logger.log(message, context, timeDiff);
+    Logger.log(message, context);
   }
 };
 

@@ -32,6 +32,7 @@ export class AppConfigInput {
     @ValidateIf(x => x.banlistPartners !== undefined)
     @Field(() => [String], {nullable: true})
     @IsString({each: true})
+    @IsUrl({protocols: ['http','https'], require_valid_protocol: true}, {each: true}) 
     banlistPartners?: string[];
   
     /**

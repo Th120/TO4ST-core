@@ -57,7 +57,7 @@ export class LoginResolver {
         const token = await this.loginService.login(password);
         const appCfg = await this.appCfgService.getAppConfig(false);
             
-        return { jwt: token, appConfig: appCfg };
+        return new LoginResponse({ jwt: token, appConfig: appCfg });
     }
 
     /**
@@ -82,7 +82,7 @@ export class LoginResolver {
         const token = await this.loginService.login(hashPassword(password));
         const appCfg = await this.appCfgService.getAppConfig(false);
             
-        return { jwt: token, appConfig: appCfg };
+        return new LoginResponse({ jwt: token, appConfig: appCfg });
     }
 }
 

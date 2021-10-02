@@ -515,7 +515,7 @@ export class GameserverConfigResolver {
             orderByGameserverName: options.orderByGameserverName
         });
         
-        return { content: configs, totalCount: count , pageCount: pageCount};
+        return new PaginatedGameserverConfig({ content: configs, totalCount: count , pageCount: pageCount});
     }
 
     /**
@@ -622,7 +622,7 @@ export class MatchConfigResolver {
             orderDesc: options.orderDesc,
         });
         
-        return { content: configs, totalCount: count , pageCount: pageCount};
+        return new PaginatedMatchConfig({ content: configs, totalCount: count , pageCount: pageCount});
     }
 
     /**

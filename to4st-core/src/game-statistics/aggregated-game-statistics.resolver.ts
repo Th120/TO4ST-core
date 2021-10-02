@@ -271,7 +271,7 @@ export class PlayerStatisticsResolver {
             ranked: options.ranked
         });
         
-        return { content: playerStats, totalCount: count, pageCount: pageCount};
+        return new PaginatedPlayerStatistics({ content: playerStats, totalCount: count, pageCount: pageCount});
     }
 
     /**

@@ -10,10 +10,10 @@ import moment from 'moment';
 import { Gameserver } from './gameserver.entity';
 import { Ban } from './ban.entity';
 import {  MIN_SEARCH_LEN, MAX_PAGE_SIZE_WITH_STEAMID, TTL_CACHE_MS, CACHE_PREFETCH, PASSWORD_ALPHABET, DEFAULT_ID_LENGTH } from '../globals';
-import { createGraphqlClientTo4stCore} from "../libs/client/graphql-client-to4st-core"
 import { steamId64ToAccountId, mapDateForQuery, isValidSteamId } from '../shared/utils';
 import { SteamUserService } from '../core/steam-user.service';
 import { AppConfigService } from '../core/app-config.service';
+import { createGraphqlClientTo4stCore } from '../libs/client/graphql-client-to4st-core';
 
 
 /**
@@ -135,8 +135,35 @@ export class BanService {
 
         try
         {
-            const ban = await client.client.chain.query.banCheck({banCheck: {steamId64: steamId64, id1: id1, id2: id2}})
-            .execute({id: true, steamId64: true, expiredAt: true, reason: true, createdAt: true, gameserver: {id: true, currentName: true}});
+            const found = await client.client.query(
+                {
+                    banCheck: 
+                    [
+                        {
+                            banCheck: 
+                            {
+                                steamId64: steamId64,
+                                id1: id1, 
+                                id2: id2
+                            }
+                        }, 
+                        {
+                            id: true, 
+                            steamId64: true, 
+                            expiredAt: true, 
+                            reason: true, 
+                            createdAt: true, 
+                            gameserver: 
+                            {
+                                id: true, 
+                                currentName: true
+                            }
+                        }
+                    ]
+                });
+            
+
+            const ban = found.banCheck;
 
             if(ban?.id)
             {

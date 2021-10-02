@@ -8,7 +8,6 @@ import memoizee from "memoizee"
 import _ from 'lodash'
 import isURL from 'validator/lib/isURL';
 
-
 import { MIN_PW_LENGTH, SECRET_LENGTH, PASSWORD_ALPHABET, BCRYPT_ROUNDS, MAX_PW_LENGTH, TTL_CACHE_MS, CACHE_PREFETCH, DEFAULT_PW_LENGTH } from '../globals';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from './app-config.entity';
@@ -72,7 +71,7 @@ export class AppConfigService implements OnModuleInit {
     async initAppConfig(): Promise<void>
     {
         const instanceId = this.configService.get<string>("instanceId");
-        Logger.log(`Loading appConfig for instanceId <${instanceId}>`, "AppConfig", true);
+        Logger.log(`Loading appConfig for instanceId <${instanceId}>`, "AppConfig");
         
         try
         {
@@ -84,7 +83,7 @@ export class AppConfigService implements OnModuleInit {
     
                 if(!foundConfig)
                 {
-                    Logger.warn(`Could not find appConfig for instanceId <${instanceId}>, initialising new config...`, "AppConfig", true);
+                    Logger.warn(`Could not find appConfig for instanceId <${instanceId}>, initialising new config...`, "AppConfig");
                     
                     const password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
                     const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
@@ -95,13 +94,13 @@ export class AppConfigService implements OnModuleInit {
     
                     await manager.save(config);
 
-                    Logger.warn(`AppConfig initialised. Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig", true);
-                    Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig", false);
+                    Logger.warn(`AppConfig initialised. Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
+                    Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
                 }
                 /* istanbul ignore if  */ // won't be executed in tests with in-memory db
                 else if(!foundConfig.passwordInitialised)
                 {
-                    Logger.warn(`No proper password set for instanceId <${instanceId}>, initialising temp password...`, "AppConfig", true);
+                    Logger.warn(`No proper password set for instanceId <${instanceId}>, initialising temp password...`, "AppConfig");
                     
                     const password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
                     const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
@@ -110,13 +109,13 @@ export class AppConfigService implements OnModuleInit {
     
                     await manager.save(foundConfig);
 
-                    Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig", true);
-                    Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig", false);
+                    Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
+                    Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
                 }
                 /* istanbul ignore if  */ // won't be executed in tests with in-memory db
                 else if(this.configService.get<boolean>("forceResetPassword"))
                 {
-                    Logger.warn(`Reinitialising password for instanceId <${instanceId}>...`, "AppConfig", true);
+                    Logger.warn(`Reinitialising password for instanceId <${instanceId}>...`, "AppConfig");
                     
                     const password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
                     const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
@@ -125,13 +124,13 @@ export class AppConfigService implements OnModuleInit {
 
                     await manager.save(foundConfig);
 
-                    Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig", true);
-                    Logger.warn(`Remove the environment variable after setting a new password. Keep in mind only the most recent logged password of an instance is valid`, "AppConfig", false);
+                    Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
+                    Logger.warn(`Remove the environment variable after setting a new password. Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
                 }
                 /* istanbul ignore else */ // won't be executed in tests with in-memory db
                 else
                 {
-                    Logger.log(`AppConfig initialised.`, "AppConfig", true);
+                    Logger.log(`AppConfig initialised.`, "AppConfig");
                 }
 
                  /* istanbul ignore if */ // only used for e2e tests
@@ -141,7 +140,7 @@ export class AppConfigService implements OnModuleInit {
                         where: { instanceId: instanceId }
                     });
 
-                    const hashed =  hashPassword(process.env.E2E_PW_OVERRIDE) //double hash because password is expected to be pre hashed on the client
+                    const hashed = hashPassword(process.env.E2E_PW_OVERRIDE) //double hash because password is expected to be pre hashed on the client
                     overrideConfig.password = await bcrypt.hash(hashed, BCRYPT_ROUNDS);
                     overrideConfig.passwordInitialised = false;
 
@@ -161,7 +160,7 @@ export class AppConfigService implements OnModuleInit {
             /* istanbul ignore if  */ // won't throw in tests with in-memory db
             if(foundConfig?.passwordInitialised)
             {
-                Logger.log(`AppConfig initialised.`, "AppConfig", true);
+                Logger.log(`AppConfig initialised.`, "AppConfig");
             }
             /* istanbul ignore else */ // won't throw in tests with in-memory db
             else 

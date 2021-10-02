@@ -321,11 +321,11 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
     {
         const before = moment.utc().subtract(5, "seconds").toDate();
 
-        Logger.log("Generating PlayerStats cache for games before: " + before.toString(), "PlayerStats cache", true);
+        Logger.log("Generating PlayerStats cache for games before: " + before.toString(), "PlayerStats cache");
 
         const [res, total] = await this.getPlayerStatistics({orderBy: OrderPlayerBaseStats.sumKills, ranked: true, orderDesc: true, endedBefore: before, overridePagination: true});
 
-        Logger.log("Finished database query", "PlayerStats cache", true);
+        Logger.log("Finished database query", "PlayerStats cache");
 
         const orderByMap = new Map<OrderPlayerBaseStats, {asc: PlayerStatistics[], desc: PlayerStatistics[]}>([
             [OrderPlayerBaseStats.sumKills, { asc: [...res].reverse(), desc: res} ],
@@ -340,7 +340,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
             [OrderPlayerBaseStats.gamesPlayed, null],
         ]);
 
-        Logger.log(`Begin sorting`, "PlayerStats cache", true);
+        Logger.log(`Begin sorting`, "PlayerStats cache");
     
         for (let orderBy of orderByMap.keys())
         {
@@ -384,7 +384,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
 
         this.playerStatsCache = orderByMap;
 
-        Logger.log(`Done, Cache has ${orderByMap.size * total * 2} entries.`, "PlayerStats cache", true);
+        Logger.log(`Done, Cache has ${orderByMap.size * total * 2} entries.`, "PlayerStats cache");
     }
     
     /**
