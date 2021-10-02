@@ -4,12 +4,12 @@ import { Component, h, EventEmitter, Event, Prop, Host } from "@stencil/core";
  * Component which implements a simple switch
  */
 @Component({
-  tag: "to4st-switch"
+  tag: "to4st-switch",
 })
 export class To4stSwitch {
   /**
-  * On toggle
-  */
+   * On toggle
+   */
   @Event() toggle!: EventEmitter<boolean>;
 
   /**
@@ -52,8 +52,7 @@ export class To4stSwitch {
    * Toggle!
    */
   doToggle() {
-    if(!this.disabled)
-    {
+    if (!this.disabled) {
       this.value = !this.value;
       this.toggle.emit(this.value);
     }
@@ -69,7 +68,7 @@ export class To4stSwitch {
           class={{
             control: true,
             "is-expanded": true,
-            "has-margin-top-8": true
+            "has-margin-top-8": true,
           }}
         >
           <input
@@ -78,7 +77,7 @@ export class To4stSwitch {
               switch: true,
               "is-danger": this.isError,
               "is-warning": this.isWarning,
-              "is-rtl": this.rtl
+              "is-rtl": this.rtl,
             }}
             type="checkbox"
             checked={this.value}

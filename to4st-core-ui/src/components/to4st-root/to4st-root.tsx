@@ -2,8 +2,11 @@ import { Component, h, ComponentInterface, State } from "@stencil/core";
 import jwt_decode from "jwt-decode";
 
 import { app } from "../../global/context";
-import { AppConfig } from "../../libs/api-client/schema";
-import { APIClient, createAPI } from "../../libs/api";
+import { createAPI, TApiClient } from "../../libs/api";
+import {
+  AppConfigService,
+  TAppInfoApi,
+} from "../../services/app-config.service";
 
 /**
  * Token key local storare
@@ -18,18 +21,18 @@ const TOKEN_KEY = "TO4ST-core_Token";
 @Component({
   tag: "to4st-root",
   styleUrl: "to4st-root.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stRoot implements ComponentInterface {
   /**
    * API client
    */
-  @app.Provide("api") api: APIClient;
+  @app.Provide("api") api: TApiClient;
 
   /**
    * Current appConfig
    */
-  @app.Provide("appConfig") appConfig: AppConfig;
+  @app.Provide("appConfig") appConfig: TAppInfoApi;
 
   /**
    * Is logged in as admin?
@@ -38,35 +41,14 @@ export class To4stRoot implements ComponentInterface {
 
   /**
    * Refresh appConfig
-   * @param updated Override instead of fetching from API
    */
-  async refreshAppConfig(updated: AppConfig = null) {
-    if (updated) {
-      this.appConfig = updated;
-    } else {
-      try {
-        this.appConfig = await this.api.client.chain.query
-          .appConfig({ cached: !this.isAdmin })
-          .execute({
-            instanceId: true,
-            publicStats: true,
-            publicBanQuery: true,
-            banlistPartners: true,
-            masterserverKey: true,
-            steamWebApiKey: true,
-            ownAddress: true,
-            minScoreStats: true,
-            playerStatsCacheAge: true,
-            appInfo: {
-              uniquePlayers: true,
-              gamesPlayed: true,
-              roundsPlayed: true,
-              activeBans: true
-            }
-          });
-      } catch (e) {
-        console.error(e);
-      }
+  async refreshAppConfig() {
+    try {
+      this.appConfig = await AppConfigService.get(this.api).appInfo(
+        !this.isAdmin
+      );
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -87,7 +69,7 @@ export class To4stRoot implements ComponentInterface {
         this.api = createAPI(oldToken);
 
         try {
-          const validToken = await this.api.client.chain.query.authValid.execute();
+          const validToken = await this.api.client.query({ authValid: true });
           if (validToken) {
             this.isAdmin = true;
           } else {
@@ -110,14 +92,14 @@ export class To4stRoot implements ComponentInterface {
    * @param loginResult current appConfig, token
    */
   async afterSuccessfulLogin(loginResult: {
-    appconfig: AppConfig;
+    appconfig: TAppInfoApi;
     token: string;
   }) {
     localStorage.setItem(TOKEN_KEY, loginResult.token);
+    this.api = createAPI(loginResult.token);
     this.isAdmin = true;
     this.appConfig = loginResult.appconfig;
     this.loginOpen = false;
-    this.api = await createAPI(loginResult.token);
   }
 
   /**
@@ -141,18 +123,21 @@ export class To4stRoot implements ComponentInterface {
       <div>
         <to4st-header
           onLogin={() => (this.loginOpen = true)}
-          onLogout={e => this.logout()}
+          onLogout={(e) => this.logout()}
         ></to4st-header>
         <to4st-login-modal
           visible={this.loginOpen}
           onClose={() => (this.loginOpen = false)}
-          onSuccessfulLogin={e => this.afterSuccessfulLogin(e.detail)}
+          onSuccessfulLogin={(e) => this.afterSuccessfulLogin(e.detail)}
         ></to4st-login-modal>
         <main>
           <stencil-router>
             <stencil-route-switch scrollTopOffset={0}>
               <stencil-route url="/" component="to4st-home" exact={true} />
-              <stencil-route url="/gameserver-config" component="to4st-gameserver-config" />
+              <stencil-route
+                url="/gameserver-config"
+                component="to4st-gameserver-config"
+              />
               <stencil-route url="/to4st-settings" component="to4st-settings" />
               <stencil-route
                 url="/gameserver-settings"

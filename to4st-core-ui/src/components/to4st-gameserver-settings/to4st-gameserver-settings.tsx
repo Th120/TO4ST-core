@@ -3,11 +3,9 @@ import { Component, ComponentInterface, Host, h, State } from "@stencil/core";
 @Component({
   tag: "to4st-gameserver-settings",
   styleUrl: "to4st-gameserver-settings.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stGameserverSettings implements ComponentInterface {
-
-
   render() {
     return (
       <Host>

@@ -8,7 +8,7 @@ import {
   EventEmitter,
   State,
   Listen,
-  Watch
+  Watch,
 } from "@stencil/core";
 
 import isEqual from "lodash/isEqual";
@@ -52,7 +52,6 @@ export interface ColumnProps<T> {
    * Should be visible by predicate
    */
   shouldBeVisible?: () => boolean;
-
 }
 
 /**
@@ -77,7 +76,7 @@ export type InputState = "none" | "create" | "edit";
 @Component({
   tag: "to4st-list",
   styleUrl: "to4st-list.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stList implements ComponentInterface {
   /**
@@ -260,8 +259,7 @@ export class To4stList implements ComponentInterface {
     orderDesc: boolean;
   }>;
 
-  async componentWillUpdate()
-  {
+  async componentWillUpdate() {
     this.resetSelectedItem();
   }
 
@@ -270,15 +268,15 @@ export class To4stList implements ComponentInterface {
    */
   async componentWillLoad() {
     this.resetTransactionId();
-    
-    this.resetSelectedItem();
 
+    this.resetSelectedItem();
   }
 
   resetSelectedItem() {
-    if(this.allowSelect && this.content.length > 0)
-    {
-      this.currentSelectedItem = this.content.find(x => isEqual(x, this.currentSelectedItem)) ?? this.content[0];
+    if (this.allowSelect && this.content.length > 0) {
+      this.currentSelectedItem =
+        this.content.find((x) => isEqual(x, this.currentSelectedItem)) ??
+        this.content[0];
       this.itemSelected.emit(this.currentSelectedItem);
     }
   }
@@ -381,22 +379,22 @@ export class To4stList implements ComponentInterface {
           currentInputState={this.currentInputState}
           columns={this.columns}
           onCloseErrorMessage={() => (this.currentError = "")}
-          onClose={e => {
+          onClose={(e) => {
             this.currentInputState = "none";
             this.currentError = "";
           }}
-          onChangeKeyValue={e =>
+          onChangeKeyValue={(e) =>
             this.changeValueCurrentItem(e.detail.key, e.detail.value)
           }
           onDelete={() => this.removeItem.emit(this.currentItem)}
-          onSave={e => {
+          onSave={(e) => {
             this.pendingRequest = true;
             this.currentSelectedItem = this.currentItem;
             this.saveItem.emit({
               transactionId: this.currentFormTransactionId,
               item: this.currentItem,
               isEdit: this.currentInputState == "edit",
-              afterSaveExecuted: this.afterSave
+              afterSaveExecuted: this.afterSave,
             });
           }}
         ></to4st-edit-modal>
@@ -404,7 +402,7 @@ export class To4stList implements ComponentInterface {
         <div
           class={{
             "modal loadingModal": true,
-            "is-active": this.loadingInputBlock
+            "is-active": this.loadingInputBlock,
           }}
         >
           <div class="modal-background"></div>
@@ -429,7 +427,7 @@ export class To4stList implements ComponentInterface {
                   <div
                     class={{
                       control: true,
-                      "is-hidden": !this.hasCreate
+                      "is-hidden": !this.hasCreate,
                     }}
                   >
                     <button
@@ -447,15 +445,15 @@ export class To4stList implements ComponentInterface {
                     "field has-addons": true,
                     "is-hidden":
                       !this.hasSearch ||
-                      (this.content.length === 0 && !this.isSearching)
+                      (this.content.length === 0 && !this.isSearching),
                   }}
                 >
                   <a
                     class={{
                       button: true,
-                      "is-hidden": this.filters.length === 0
+                      "is-hidden": this.filters.length === 0,
                     }}
-                    onClick={e => (this.filterModalVisible = true)}
+                    onClick={(e) => (this.filterModalVisible = true)}
                   >
                     <i class="fas fa-filter"></i>
                   </a>
@@ -464,7 +462,7 @@ export class To4stList implements ComponentInterface {
                       type="text"
                       class="input"
                       placeholder="Search"
-                      onKeyUp={event =>
+                      onKeyUp={(event) =>
                         this.searchItem.emit(
                           (event.target as HTMLInputElement).value.trim()
                         )
@@ -482,16 +480,16 @@ export class To4stList implements ComponentInterface {
                 "table is-fullwidth is-hoverable": true,
                 "is-striped": this.striped,
                 "is-hidden":
-                  this.content && this.content.length == 0 && !this.isSearching
+                  this.content && this.content.length == 0 && !this.isSearching,
               }}
             >
               <thead>
-                {this.columns.map(col =>
+                {this.columns.map((col) =>
                   !col.shouldBeVisible || col.shouldBeVisible() ? (
                     <th
                       class={{
                         "is-hidden-mobile":
-                          col.hiddenMobile && col.hiddenMobile()
+                          col.hiddenMobile && col.hiddenMobile(),
                       }}
                     >
                       {col.name}{" "}
@@ -499,7 +497,7 @@ export class To4stList implements ComponentInterface {
                         ""
                       ) : (
                         <a
-                          onClick={e => {
+                          onClick={(e) => {
                             this.orderDesc =
                               this.currentOrderBy !== col.name
                                 ? true
@@ -507,7 +505,7 @@ export class To4stList implements ComponentInterface {
                             this.currentOrderBy = col.name;
                             this.changedOrder.emit({
                               orderBy: col.name,
-                              orderDesc: this.orderDesc
+                              orderDesc: this.orderDesc,
                             });
                           }}
                         >
@@ -528,19 +526,21 @@ export class To4stList implements ComponentInterface {
                 {!this.hasUpdate ? "" : <th></th>}
               </thead>
               <tbody>
-                {this.content.map(item => (
-                  <tr 
-                  onClick={() => 
-                    {
-                      if(this.allowSelect)
-                      {
+                {this.content.map((item) => (
+                  <tr
+                    onClick={() => {
+                      if (this.allowSelect) {
                         this.currentSelectedItem = item;
                         this.itemSelected.emit(this.currentSelectedItem);
                       }
                     }}
-                    class={{"is-selected": this.allowSelect && isEqual(this.currentSelectedItem,  item)}}
-                    >
-                    {this.columns.map(col =>
+                    class={{
+                      "is-selected":
+                        this.allowSelect &&
+                        isEqual(this.currentSelectedItem, item),
+                    }}
+                  >
+                    {this.columns.map((col) =>
                       !col.shouldBeVisible || col.shouldBeVisible() ? (
                         <td class={{ "is-hidden-mobile": !!col.hiddenMobile }}>
                           {col.tableContent(item)}
@@ -584,7 +584,10 @@ export class To4stList implements ComponentInterface {
                 <nav
                   class={{
                     "pagination is-right": true,
-                    "is-hidden": !this.hasPagination || this.pagesCount <=1 || this.content.length == 0
+                    "is-hidden":
+                      !this.hasPagination ||
+                      this.pagesCount <= 1 ||
+                      this.content.length == 0,
                   }}
                   role="navigation"
                   aria-label="pagination"
@@ -595,7 +598,7 @@ export class To4stList implements ComponentInterface {
                         class={{
                           "pagination-link": true,
                           "is-hidden":
-                            this.pagesCount < 3 || this.currentPage < 3
+                            this.pagesCount < 3 || this.currentPage < 3,
                         }}
                         onClick={() => this.pagination.emit(1)}
                       >
@@ -607,7 +610,7 @@ export class To4stList implements ComponentInterface {
                         class={{
                           "pagination-ellipsis": true,
                           "is-hidden":
-                            this.pagesCount < 3 || this.currentPage < 4
+                            this.pagesCount < 3 || this.currentPage < 4,
                         }}
                       >
                         &hellip;
@@ -617,7 +620,7 @@ export class To4stList implements ComponentInterface {
                       <a
                         class={{
                           "pagination-link": true,
-                          "is-hidden": this.currentPage < 2
+                          "is-hidden": this.currentPage < 2,
                         }}
                         onClick={() =>
                           this.pagination.emit(this.currentPage - 1)
@@ -635,7 +638,7 @@ export class To4stList implements ComponentInterface {
                       <a
                         class={{
                           "pagination-link": true,
-                          "is-hidden": this.pagesCount < this.currentPage + 1
+                          "is-hidden": this.pagesCount < this.currentPage + 1,
                         }}
                         onClick={() =>
                           this.pagination.emit(this.currentPage + 1)
@@ -648,7 +651,7 @@ export class To4stList implements ComponentInterface {
                       <span
                         class={{
                           "pagination-ellipsis": true,
-                          "is-hidden": this.pagesCount < this.currentPage + 3
+                          "is-hidden": this.pagesCount < this.currentPage + 3,
                         }}
                       >
                         &hellip;
@@ -658,7 +661,7 @@ export class To4stList implements ComponentInterface {
                       <a
                         class={{
                           "pagination-link": true,
-                          "is-hidden": this.pagesCount < this.currentPage + 2
+                          "is-hidden": this.pagesCount < this.currentPage + 2,
                         }}
                         onClick={() => this.pagination.emit(this.pagesCount)}
                       >

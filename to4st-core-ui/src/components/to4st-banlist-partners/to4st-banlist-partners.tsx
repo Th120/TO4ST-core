@@ -4,11 +4,15 @@ import {
   Host,
   h,
   State,
-  EventEmitter
+  EventEmitter,
 } from "@stencil/core";
-import { AuthKey, AppConfig, APIClient } from "../../libs/api";
+import { TApiClient } from "../../libs/api";
 import { app } from "../../global/context";
 import { extractGraphQLErrors } from "../../libs/utils";
+import {
+  AppConfigService,
+  TAppInfoApi,
+} from "../../services/app-config.service";
 
 /**
  * Interface by list to handle banlist partner url
@@ -31,7 +35,7 @@ interface BanlistPartner {
 @Component({
   tag: "to4st-banlist-partners",
   styleUrl: "to4st-banlist-partners.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stBanlistPartners implements ComponentInterface {
   /**
@@ -42,12 +46,12 @@ export class To4stBanlistPartners implements ComponentInterface {
   /**
    * App config
    */
-  @app.Context("appConfig") appConfig!: AppConfig;
+  @app.Context("appConfig") appConfig!: TAppInfoApi;
 
   /**
    * API client
    */
-  @app.Context("api") apiClient = {} as APIClient;
+  @app.Context("api") apiClient = {} as TApiClient;
 
   /**
    * Columns of banlist partner type
@@ -55,22 +59,22 @@ export class To4stBanlistPartners implements ComponentInterface {
   columns = [
     {
       name: "URL",
-      tableContent: key => <p>{key.URL}</p>,
+      tableContent: (key) => <p>{key.URL}</p>,
       input: (item, cb) => (
         <input
           type="text"
           placeholder="URL"
           value={item?.URL ?? ""}
           class="input"
-          onChange={event =>
+          onChange={(event) =>
             cb.emit({
               key: "URL",
-              value: (event.target as HTMLInputElement).value.trim()
+              value: (event.target as HTMLInputElement).value.trim(),
             })
           }
         />
-      )
-    }
+      ),
+    },
   ];
 
   /**
@@ -80,14 +84,14 @@ export class To4stBanlistPartners implements ComponentInterface {
   onAppConfigUpdated() {
     this.partners = this.appConfig?.banlistPartners?.map((s, i) => ({
       URL: s,
-      id: i
+      id: i,
     }));
   }
 
   /**
    * Save banlist partner
-   * @param partner 
-   * @param isEdit 
+   * @param partner
+   * @param isEdit
    * @param afterEx Callback executed when request resolves
    */
   async saveBanlistPartner(
@@ -103,26 +107,11 @@ export class To4stBanlistPartners implements ComponentInterface {
     }
 
     try {
-      const newcfg = await this.apiClient.client.chain.mutation
-        .updateAppConfig({
-          appConfig: { banlistPartners: currPartners.map(p => p.URL) }
-        })
-        .execute({
-          instanceId: true,
-          publicStats: true,
-          publicBanQuery: true,
-          banlistPartners: true,
-          masterserverKey: true,
-          steamWebApiKey: true,
-          ownAddress: true,
-          appInfo: {
-            uniquePlayers: true,
-            gamesPlayed: true,
-            roundsPlayed: true,
-            activeBans: true
-          }
-        });
-
+      const newcfg = await AppConfigService.get(
+        this.apiClient
+      ).createUpdateAppConfig({
+        banlistPartners: currPartners.map((p) => p.URL),
+      });
       afterEx.emit("");
       this.appConfig = newcfg;
     } catch (e) {
@@ -132,32 +121,19 @@ export class To4stBanlistPartners implements ComponentInterface {
 
   /**
    * Removes banlist partner
-   * @param partner 
+   * @param partner
    */
   async removeBanlistPartner(partner: BanlistPartner) {
     const filteredMapped = this.partners
-      .filter(p => p.id != partner.id)
-      .map(p => p.URL);
+      .filter((p) => p.id != partner.id)
+      .map((p) => p.URL);
 
     try {
-      const newcfg = await this.apiClient.client.chain.mutation
-        .updateAppConfig({ appConfig: { banlistPartners: filteredMapped } })
-        .execute({
-          instanceId: true,
-          publicStats: true,
-          publicBanQuery: true,
-          banlistPartners: true,
-          masterserverKey: true,
-          steamWebApiKey: true,
-          ownAddress: true,
-          appInfo: {
-            uniquePlayers: true,
-            gamesPlayed: true,
-            roundsPlayed: true,
-            activeBans: true
-          }
-        });
-
+      const newcfg = await AppConfigService.get(
+        this.apiClient
+      ).createUpdateAppConfig({
+        banlistPartners: filteredMapped,
+      });
       this.appConfig = newcfg;
     } catch (e) {
       console.error(e);
@@ -176,14 +152,14 @@ export class To4stBanlistPartners implements ComponentInterface {
           content={this.partners}
           hasSearch={false}
           hasPagination={false}
-          onSaveItem={e =>
+          onSaveItem={(e) =>
             this.saveBanlistPartner(
               e.detail.item,
               e.detail.isEdit,
               e.detail.afterSaveExecuted
             )
           }
-          onRemoveItem={e => this.removeBanlistPartner(e.detail)}
+          onRemoveItem={(e) => this.removeBanlistPartner(e.detail)}
         ></to4st-list>
       </Host>
     );

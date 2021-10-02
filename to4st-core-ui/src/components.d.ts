@@ -10,7 +10,7 @@ import { ColumnDetailProps } from "./components/general-ui-stuff/to4st-details/t
 import { EventEmitter } from "@stencil/core";
 import { RouterHistory } from "@stencil/router";
 import { ColumnProps as ColumnProps1, FilterProps as FilterProps1 } from "./components/general-ui-stuff/to4st-list/to4st-list";
-import { AppConfig } from "./libs/api";
+import { TAppInfoApi } from "./services/app-config.service";
 export namespace Components {
     interface To4stApiKeys {
     }
@@ -44,7 +44,10 @@ export namespace Components {
           * Override orderBy assign
          */
         "mapOrderByAssign": (orderByString: string) => string;
-        "mapPreSerializeEntity": (entity: any) => { mapped: any, fileName?: string };
+        "mapPreSerializeEntity": (entity: any) => {
+    mapped: any;
+    fileName?: string;
+  };
         "name": string;
         /**
           * Striped table
@@ -395,7 +398,10 @@ declare namespace LocalJSX {
           * Override orderBy assign
          */
         "mapOrderByAssign"?: (orderByString: string) => string;
-        "mapPreSerializeEntity"?: (entity: any) => { mapped: any, fileName?: string };
+        "mapPreSerializeEntity"?: (entity: any) => {
+    mapped: any;
+    fileName?: string;
+  };
         "name"?: string;
         /**
           * Event called when save request resolves
@@ -412,7 +418,6 @@ declare namespace LocalJSX {
     afterEx: EventEmitter<string>;
   }>) => void;
         "onUpdateEntities"?: (event: CustomEvent<{
-
     page?: number;
     search?: string;
     orderBy?: string;
@@ -632,7 +637,7 @@ declare namespace LocalJSX {
     /**
      * Current appConfig
      */
-    appconfig: AppConfig;
+    appconfig: TAppInfoApi;
 
     /**
      * Current JWT

@@ -5,7 +5,7 @@ import {
   h,
   Prop,
   Event,
-  EventEmitter
+  EventEmitter,
 } from "@stencil/core";
 import { FilterProps } from "../to4st-list/to4st-list";
 
@@ -15,7 +15,7 @@ import { FilterProps } from "../to4st-list/to4st-list";
 @Component({
   tag: "to4st-filter-modal",
   styleUrl: "to4st-filter-modal.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stFilterModal implements ComponentInterface {
   /**
@@ -51,7 +51,7 @@ export class To4stFilterModal implements ComponentInterface {
               ></button>
             </header>
             <section class="modal-card-body">
-              {this.filters.map(props =>
+              {this.filters.map((props) =>
                 props.input ? (
                   <div class="field is-horizontal">
                     <div class="field-label is-normal">

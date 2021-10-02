@@ -1,15 +1,14 @@
-import { Component, Host, h, ComponentInterface } from '@stencil/core';
+import { Component, Host, h, ComponentInterface } from "@stencil/core";
 
 /**
  * Player stats wrapper
  */
 @Component({
-  tag: 'to4st-player-statistics',
-  styleUrl: 'to4st-player-statistics.scss',
-  shadow: false
+  tag: "to4st-player-statistics",
+  styleUrl: "to4st-player-statistics.scss",
+  shadow: false,
 })
-export class To4stPlayerStatistics implements ComponentInterface  {
-
+export class To4stPlayerStatistics implements ComponentInterface {
   /**
    * Render player stats
    */
@@ -30,5 +29,4 @@ export class To4stPlayerStatistics implements ComponentInterface  {
       </Host>
     );
   }
-
 }

@@ -1,7 +1,7 @@
 import { Component, Host, h, ComponentInterface } from "@stencil/core";
 
 import { app } from "../../global/context";
-import { AppConfig } from "../../libs/api-client/schema";
+import { TAppInfoApi } from "../../services/app-config.service";
 
 /**
  * Homepage component
@@ -9,13 +9,13 @@ import { AppConfig } from "../../libs/api-client/schema";
 @Component({
   tag: "to4st-home",
   styleUrl: "to4st-home.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stHome implements ComponentInterface {
   /**
    * Current appConfig
    */
-  @app.Context("appConfig") appConfig!: AppConfig;
+  @app.Context("appConfig") appConfig!: TAppInfoApi;
 
   /**
    * Render homepage

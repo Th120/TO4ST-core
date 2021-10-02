@@ -7,7 +7,7 @@ import {
   Event,
   EventEmitter,
   State,
-  Listen
+  Listen,
 } from "@stencil/core";
 import { ColumnProps, InputState } from "../to4st-list/to4st-list";
 
@@ -17,7 +17,7 @@ import { ColumnProps, InputState } from "../to4st-list/to4st-list";
 @Component({
   tag: "to4st-edit-modal",
   styleUrl: "to4st-edit-modal.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stEditModal implements ComponentInterface {
   /**
@@ -116,7 +116,7 @@ export class To4stEditModal implements ComponentInterface {
               <div
                 class={{
                   "notification is-danger": true,
-                  "is-hidden": this.currentError.length == 0
+                  "is-hidden": this.currentError.length == 0,
                 }}
               >
                 <button
@@ -125,7 +125,7 @@ export class To4stEditModal implements ComponentInterface {
                 ></button>
                 {this.currentError}
               </div>
-              {this.columns.map(props =>
+              {this.columns.map((props) =>
                 props.input ? (
                   <div class="field is-horizontal">
                     <div class="field-label is-normal">
@@ -179,7 +179,7 @@ export class To4stEditModal implements ComponentInterface {
                   <div
                     class={{
                       "level-right": true,
-                      "is-hidden": this.currentInputState != "edit"
+                      "is-hidden": this.currentInputState != "edit",
                     }}
                   >
                     <div class={"level-item"}>
@@ -187,7 +187,7 @@ export class To4stEditModal implements ComponentInterface {
                         <div class="control">
                           <to4st-switch
                             value={this.deleteActive}
-                            onToggle={e => (this.deleteActive = e.detail)}
+                            onToggle={(e) => (this.deleteActive = e.detail)}
                           ></to4st-switch>
                         </div>
                       </div>

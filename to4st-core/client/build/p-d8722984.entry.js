@@ -1,1 +1,0 @@
-import{r,h as s,H as t}from"./p-88c3422c.js";const c=class{constructor(s){r(this,s)}render(){return s(t,null,s("slot",null))}};export{c as quantum_fetch}

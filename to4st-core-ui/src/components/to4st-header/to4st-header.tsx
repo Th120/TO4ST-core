@@ -7,12 +7,12 @@ import {
   Prop,
   ComponentInterface,
   EventEmitter,
-  Listen
+  Listen,
 } from "@stencil/core";
 import { RouterHistory, injectHistory } from "@stencil/router";
 
 import { app } from "../../global/context";
-import { AppConfig } from "../../libs/api";
+import { TAppInfoApi } from "../../services/app-config.service";
 
 /**
  * Navbar item interface
@@ -45,7 +45,7 @@ interface NavbarItem {
 @Component({
   tag: "to4st-header",
   styleUrl: "to4st-header.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stHeader implements ComponentInterface {
   /**
@@ -64,42 +64,42 @@ export class To4stHeader implements ComponentInterface {
   navbarItems: NavbarItem[] = [
     {
       title: "Home",
-      url: "/"
+      url: "/",
     },
     {
       title: "Player Statistics",
       url: "/player-statistics",
-      condition: () => !!this.isAdmin || !!this.appConfig?.publicStats
+      condition: () => !!this.isAdmin || !!this.appConfig?.publicStats,
     },
     {
       title: "Gameserver Config",
       url: "/gameserver-config",
-      condition: () => !!this.isAdmin
+      condition: () => !!this.isAdmin,
     },
     {
       title: "Settings",
       children: [
         {
           title: "TO4ST",
-          url: "/to4st-settings"
+          url: "/to4st-settings",
         },
         {
           title: "Gameservers",
-          url: "/gameserver-settings"
+          url: "/gameserver-settings",
         },
         {
           title: "Registered Players",
-          url: "/registered-players"
-        }
+          url: "/registered-players",
+        },
       ],
-      condition: () => !!this.isAdmin
-    }
+      condition: () => !!this.isAdmin,
+    },
   ];
 
   /**
    * Current appConfig
    */
-  @app.Context("appConfig") appConfig!: AppConfig;
+  @app.Context("appConfig") appConfig!: TAppInfoApi;
 
   /**
    * Logged in as admin?
@@ -144,7 +144,7 @@ export class To4stHeader implements ComponentInterface {
               class={{
                 "navbar-burger": true,
                 burger: true,
-                "is-active": this.navbarActive
+                "is-active": this.navbarActive,
               }}
               aria-label="menu"
               aria-expanded="false"
@@ -158,13 +158,13 @@ export class To4stHeader implements ComponentInterface {
           <div
             class={{
               "navbar-menu": true,
-              "is-active": this.navbarActive
+              "is-active": this.navbarActive,
             }}
           >
             <div class="navbar-start">
               {this.navbarItems
-                .filter(item => item.condition?.() ?? true)
-                .map(item =>
+                .filter((item) => item.condition?.() ?? true)
+                .map((item) =>
                   !item.children
                     ? this.renderNavItem(item)
                     : this.renderNavDropdown(item)
@@ -174,7 +174,7 @@ export class To4stHeader implements ComponentInterface {
               <div class="navbar-item">
                 <a
                   class={{ "button is-light": true }}
-                  onClick={e =>
+                  onClick={(e) =>
                     this.isAdmin ? this.logout.emit() : this.login.emit()
                   }
                 >
@@ -198,8 +198,8 @@ export class To4stHeader implements ComponentInterface {
         <a class="navbar-link">{item.title}</a>
         <div class="navbar-dropdown">
           {item.children
-            .filter(child => child.condition?.() ?? true)
-            .map(child => this.renderNavItem(child))}
+            .filter((child) => child.condition?.() ?? true)
+            .map((child) => this.renderNavItem(child))}
         </div>
       </a>
     );

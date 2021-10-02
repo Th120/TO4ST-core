@@ -1,8 +1,13 @@
 import { Component, ComponentInterface, Host, h, State } from "@stencil/core";
 
 import { app } from "../../global/context";
-import { AppConfig, AppConfigInput, APIClient } from "../../libs/api";
+import { TApiClient } from "../../libs/api";
 import { extractGraphQLErrors, hashPassword } from "../../libs/utils";
+import {
+  AppConfigService,
+  TAppConfigInput,
+  TAppInfoApi,
+} from "../../services/app-config.service";
 
 /**
  * Min password length to set
@@ -15,18 +20,18 @@ const MIN_PW_LENGTH = 9;
 @Component({
   tag: "to4st-general-settings",
   styleUrl: "to4st-general-settings.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stGeneralSettings implements ComponentInterface {
   /**
    * Current appConfig
    */
-  @app.Context("appConfig") appConfig!: AppConfig;
+  @app.Context("appConfig") appConfig!: TAppInfoApi;
 
   /**
    * API client
    */
-  @app.Context("api") apiClient = {} as APIClient;
+  @app.Context("api") apiClient = {} as TApiClient;
 
   /**
    * Current form password
@@ -72,8 +77,6 @@ export class To4stGeneralSettings implements ComponentInterface {
    * PlayerStats cache max age
    */
   @State() playerStatsCacheAge = 5;
-  
-  
 
   /**
    * Current error
@@ -103,7 +106,7 @@ export class To4stGeneralSettings implements ComponentInterface {
           this.publicBanQuery !== this.appConfig.publicBanQuery ||
           this.publicStats !== this.appConfig.publicStats ||
           this.minScoreStats !== this.appConfig.minScoreStats ||
-          this.playerStatsCacheAge!== this.appConfig.playerStatsCacheAge ||
+          this.playerStatsCacheAge !== this.appConfig.playerStatsCacheAge ||
           this.to4stMasterKey?.trim() !==
             this.appConfig.masterserverKey?.trim() ||
           this.addressOverride?.trim() !== this.appConfig.ownAddress?.trim() ||
@@ -115,7 +118,7 @@ export class To4stGeneralSettings implements ComponentInterface {
    * Commit new appConfig
    */
   async commit() {
-    const input = {} as AppConfigInput;
+    const input = {} as TAppConfigInput;
 
     this.currentError = "";
 
@@ -125,9 +128,7 @@ export class To4stGeneralSettings implements ComponentInterface {
       } else {
         this.currentError = "Passwords do not match.";
       }
-    }
-    else if(this.currentPassword.length > 0)
-    {
+    } else if (this.currentPassword.length > 0) {
       this.currentError = `Password must have at least ${MIN_PW_LENGTH} characters.`;
     }
 
@@ -144,32 +145,16 @@ export class To4stGeneralSettings implements ComponentInterface {
     }
 
     try {
-      const newcfg = await this.apiClient.client.chain.mutation
-        .updateAppConfig({ appConfig: input })
-        .execute({
-          instanceId: true,
-          publicStats: true,
-          publicBanQuery: true,
-          banlistPartners: true,
-          masterserverKey: true,
-          steamWebApiKey: true,
-          ownAddress: true,
-          minScoreStats: true,
-          playerStatsCacheAge: true,
-          appInfo: {
-            uniquePlayers: true,
-            gamesPlayed: true,
-            roundsPlayed: true,
-            activeBans: true
-          }
-        });
+      const newcfg = await AppConfigService.get(
+        this.apiClient
+      ).createUpdateAppConfig(input);
 
       this.appConfig = newcfg;
 
       this.currentPassword = "";
       this.currentRepeat = "";
     } catch (e) {
-      console.error(e)
+      console.error(e);
       this.currentError = extractGraphQLErrors(e);
     }
   }
@@ -190,7 +175,7 @@ export class To4stGeneralSettings implements ComponentInterface {
             <div
               class={{
                 "notification is-danger": true,
-                "is-hidden": this.currentError.length == 0
+                "is-hidden": this.currentError.length == 0,
               }}
             >
               <button
@@ -215,7 +200,7 @@ export class To4stGeneralSettings implements ComponentInterface {
                 <div class="field-body">
                   <to4st-switch
                     value={this.publicStats}
-                    onToggle={e => (this.publicStats = e.detail)}
+                    onToggle={(e) => (this.publicStats = e.detail)}
                   ></to4st-switch>
                 </div>
               </div>
@@ -226,7 +211,7 @@ export class To4stGeneralSettings implements ComponentInterface {
                 <div class="field-body">
                   <to4st-switch
                     value={this.publicBanQuery}
-                    onToggle={e => (this.publicBanQuery = e.detail)}
+                    onToggle={(e) => (this.publicBanQuery = e.detail)}
                   ></to4st-switch>
                 </div>
               </div>
@@ -241,11 +226,15 @@ export class To4stGeneralSettings implements ComponentInterface {
                       type="password"
                       placeholder="Password"
                       value={this.currentPassword}
-                      onKeyUp={e =>
-                        (this.currentPassword = (e.target as HTMLInputElement).value.trim())
+                      onKeyUp={(e) =>
+                        (this.currentPassword = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
-                      onChange={e =>
-                        (this.currentPassword = (e.target as HTMLInputElement).value.trim())
+                      onChange={(e) =>
+                        (this.currentPassword = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
                     />
                   </div>
@@ -267,16 +256,20 @@ export class To4stGeneralSettings implements ComponentInterface {
                           !pwEq,
                         "is-warning":
                           this.currentPassword.length > 0 &&
-                          this.currentRepeat.length == 0
+                          this.currentRepeat.length == 0,
                       }}
                       type="password"
                       placeholder="Repeat Password"
                       value={this.currentRepeat}
-                      onChange={e =>
-                        (this.currentRepeat = (e.target as HTMLInputElement).value.trim())
+                      onChange={(e) =>
+                        (this.currentRepeat = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
-                      onKeyUp={e =>
-                        (this.currentRepeat = (e.target as HTMLInputElement).value.trim())
+                      onKeyUp={(e) =>
+                        (this.currentRepeat = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
                     />
                   </div>
@@ -293,11 +286,15 @@ export class To4stGeneralSettings implements ComponentInterface {
                       type="text"
                       placeholder="Key"
                       value={this.to4stMasterKey}
-                      onChange={e =>
-                        (this.to4stMasterKey = (e.target as HTMLInputElement).value.trim())
+                      onChange={(e) =>
+                        (this.to4stMasterKey = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
-                      onKeyUp={e =>
-                        (this.to4stMasterKey = (e.target as HTMLInputElement).value.trim())
+                      onKeyUp={(e) =>
+                        (this.to4stMasterKey = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
                     />
                   </div>
@@ -311,18 +308,24 @@ export class To4stGeneralSettings implements ComponentInterface {
                   <div class="control">
                     <span
                       class="has-tooltip-arrow"
-                      data-tooltip={"Enter the tld-address the master \nshould use to contact your backend, e.g. 'https://abc.de'"}
+                      data-tooltip={
+                        "Enter the tld-address the master \nshould use to contact your backend, e.g. 'https://abc.de'"
+                      }
                     >
                       <input
                         class="input"
                         type="text"
                         placeholder=""
                         value={this.addressOverride}
-                        onChange={e =>
-                          (this.addressOverride = (e.target as HTMLInputElement).value.trim())
+                        onChange={(e) =>
+                          (this.addressOverride = (
+                            e.target as HTMLInputElement
+                          ).value.trim())
                         }
-                        onKeyUp={e =>
-                          (this.addressOverride = (e.target as HTMLInputElement).value.trim())
+                        onKeyUp={(e) =>
+                          (this.addressOverride = (
+                            e.target as HTMLInputElement
+                          ).value.trim())
                         }
                       />
                     </span>
@@ -331,20 +334,35 @@ export class To4stGeneralSettings implements ComponentInterface {
               </div>
               <div class="field is-horizontal">
                 <div class="field-label is-normal">
-                  <label class="label">Min score for aggregated player statistics</label>
+                  <label class="label">
+                    Min score for aggregated player statistics
+                  </label>
                 </div>
                 <div class="field-body">
                   <div class="control">
                     <span
                       class="has-tooltip-arrow"
-                      data-tooltip={"Min score needed for players to be visible in aggregated player stats"}
+                      data-tooltip={
+                        "Min score needed for players to be visible in aggregated player stats"
+                      }
                     >
-                    <input type="number" placeholder="Min Score" min="0" value={this.minScoreStats ?? 0} class="input" onChange={e =>
-                          (this.minScoreStats = parseInt((e.target as HTMLInputElement).value.trim()))
+                      <input
+                        type="number"
+                        placeholder="Min Score"
+                        min="0"
+                        value={this.minScoreStats ?? 0}
+                        class="input"
+                        onChange={(e) =>
+                          (this.minScoreStats = parseInt(
+                            (e.target as HTMLInputElement).value.trim()
+                          ))
                         }
-                        onKeyUp={e =>
-                          (this.minScoreStats = parseInt((e.target as HTMLInputElement).value.trim()))
-                        } />
+                        onKeyUp={(e) =>
+                          (this.minScoreStats = parseInt(
+                            (e.target as HTMLInputElement).value.trim()
+                          ))
+                        }
+                      />
                     </span>
                   </div>
                 </div>
@@ -359,12 +377,23 @@ export class To4stGeneralSettings implements ComponentInterface {
                       class="has-tooltip-arrow"
                       data-tooltip={"In minutes, 0 to disable Cache"}
                     >
-                    <input type="number" placeholder="minutes" min="0" value={this.playerStatsCacheAge ?? 0} class="input" onChange={e =>
-                          (this.playerStatsCacheAge = parseInt((e.target as HTMLInputElement).value.trim()))
+                      <input
+                        type="number"
+                        placeholder="minutes"
+                        min="0"
+                        value={this.playerStatsCacheAge ?? 0}
+                        class="input"
+                        onChange={(e) =>
+                          (this.playerStatsCacheAge = parseInt(
+                            (e.target as HTMLInputElement).value.trim()
+                          ))
                         }
-                        onKeyUp={e =>
-                          (this.playerStatsCacheAge = parseInt((e.target as HTMLInputElement).value.trim()))
-                        } />
+                        onKeyUp={(e) =>
+                          (this.playerStatsCacheAge = parseInt(
+                            (e.target as HTMLInputElement).value.trim()
+                          ))
+                        }
+                      />
                     </span>
                   </div>
                 </div>
@@ -380,11 +409,15 @@ export class To4stGeneralSettings implements ComponentInterface {
                       type="text"
                       placeholder="Key"
                       value={this.steamWebApiKey}
-                      onChange={e =>
-                        (this.steamWebApiKey = (e.target as HTMLInputElement).value.trim())
+                      onChange={(e) =>
+                        (this.steamWebApiKey = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
-                      onKeyUp={e =>
-                        (this.steamWebApiKey = (e.target as HTMLInputElement).value.trim())
+                      onKeyUp={(e) =>
+                        (this.steamWebApiKey = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
                     />
                   </div>
@@ -409,9 +442,9 @@ export class To4stGeneralSettings implements ComponentInterface {
                   class={{
                     "button has-margin-top-30": true,
                     "is-primary": !hasPendingChanges,
-                    "is-warning": hasPendingChanges
+                    "is-warning": hasPendingChanges,
                   }}
-                  onClick={e => this.commit()}
+                  onClick={(e) => this.commit()}
                 >
                   Save
                 </a>

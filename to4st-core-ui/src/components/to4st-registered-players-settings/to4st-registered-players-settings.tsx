@@ -1,4 +1,4 @@
-import { Component, ComponentInterface, Host, h, } from "@stencil/core";
+import { Component, ComponentInterface, Host, h } from "@stencil/core";
 
 /**
  * Registered player settings
@@ -6,10 +6,9 @@ import { Component, ComponentInterface, Host, h, } from "@stencil/core";
 @Component({
   tag: "to4st-registered-players-settings",
   styleUrl: "to4st-registered-players-settings.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stRegisteredPlayersSettings implements ComponentInterface {
-
   /**
    * Render registered player list
    */

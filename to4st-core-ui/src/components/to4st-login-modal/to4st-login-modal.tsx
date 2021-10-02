@@ -6,14 +6,16 @@ import {
   EventEmitter,
   h,
   Prop,
-  State
+  State,
 } from "@stencil/core";
 
-
-import { APIClient, AppConfig } from "../../libs/api";
+import { TApiClient } from "../../libs/api";
 import { app } from "../../global/context";
 import { extractGraphQLErrors, hashPassword } from "../../libs/utils";
-
+import {
+  AppConfigService,
+  TAppInfoApi,
+} from "../../services/app-config.service";
 
 /**
  * Login modal
@@ -21,7 +23,7 @@ import { extractGraphQLErrors, hashPassword } from "../../libs/utils";
 @Component({
   tag: "to4st-login-modal",
   styleUrl: "to4st-login-modal.scss",
-  shadow: false
+  shadow: false,
 })
 export class To4stLoginModal implements ComponentInterface {
   /**
@@ -36,7 +38,7 @@ export class To4stLoginModal implements ComponentInterface {
     /**
      * Current appConfig
      */
-    appconfig: AppConfig;
+    appconfig: TAppInfoApi;
 
     /**
      * Current JWT
@@ -62,38 +64,21 @@ export class To4stLoginModal implements ComponentInterface {
   /**
    * API client
    */
-  @app.Context("api") apiClient = {} as APIClient;
+  @app.Context("api") apiClient = {} as TApiClient;
 
   /**
-   * Login 
+   * Login
    */
   async login() {
     if (this.currentPw?.length > 0) {
       try {
-        const loginResponse = await this.apiClient.client.chain.mutation
-          .login({ password: hashPassword(this.currentPw) })
-          .execute({
-            jwt: true,
-            appConfig: {
-              instanceId: true,
-              publicStats: true,
-              publicBanQuery: true,
-              banlistPartners: true,
-              masterserverKey: true,
-              steamWebApiKey: true,
-              ownAddress: true,
-              appInfo: {
-                uniquePlayers: true,
-                gamesPlayed: true,
-                roundsPlayed: true,
-                activeBans: true
-              }
-            }
-          });
+        const loginResponse = await AppConfigService.get(this.apiClient).login(
+          hashPassword(this.currentPw)
+        );
 
         this.successfulLogin.emit({
           appconfig: loginResponse.appConfig,
-          token: loginResponse.jwt
+          token: loginResponse.jwt,
         });
       } catch (e) {
         this.currentError = extractGraphQLErrors(e);
@@ -117,12 +102,12 @@ export class To4stLoginModal implements ComponentInterface {
               <button
                 class="delete"
                 aria-label="close"
-                onClick={e => this.close.emit()}
+                onClick={(e) => this.close.emit()}
               ></button>
             </header>
             <section class="modal-card-body">
               <form
-                onSubmit={e => {
+                onSubmit={(e) => {
                   e.preventDefault();
                   this.login();
                 }}
@@ -130,7 +115,7 @@ export class To4stLoginModal implements ComponentInterface {
                 <div
                   class={{
                     "notification is-danger": true,
-                    "is-hidden": this.currentError.length == 0
+                    "is-hidden": this.currentError.length == 0,
                   }}
                 >
                   <button
@@ -145,17 +130,19 @@ export class To4stLoginModal implements ComponentInterface {
                       type="password"
                       class={{
                         input: true,
-                        "is-danger": this.currentError.length > 0
+                        "is-danger": this.currentError.length > 0,
                       }}
                       placeholder="Password"
                       value={this.currentPw}
-                      onChange={e =>
-                        (this.currentPw = (e.target as HTMLInputElement).value.trim())
+                      onChange={(e) =>
+                        (this.currentPw = (
+                          e.target as HTMLInputElement
+                        ).value.trim())
                       }
                     />
                   </p>
                   <p class="control">
-                    <a class="button is-primary" onClick={e => this.login()}>
+                    <a class="button is-primary" onClick={(e) => this.login()}>
                       Login
                     </a>
                   </p>
