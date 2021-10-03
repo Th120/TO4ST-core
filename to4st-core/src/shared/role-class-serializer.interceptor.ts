@@ -6,7 +6,6 @@ import { Role } from './auth.utils';
 import { TransactionIdService } from '../core/transaction-id.service';
 import { Reflector } from '@nestjs/core';
 
-
 /**
  * Serializes response data based on role from context
  * Saves response data for transaction id if used
@@ -30,7 +29,13 @@ export class RoleClassSerializerInterceptor extends ClassSerializerInterceptor {
       .handle()
       .pipe(
         map((res: PlainLiteralObject | Array<PlainLiteralObject>) =>
-          this.serialize(res, { strategy: "excludeAll", groups: [ctx.role ?? Role.none]}),
+          {
+            if(!ctx.alreadyHandled)
+            {
+              return this.serialize(res, { strategy: "excludeAll", groups: [ctx.role ?? Role.none]});
+            }
+            return res;
+          }
         ),
         map(async result => {
             if(!!ctx.requestId && !ctx.alreadyHandled)
