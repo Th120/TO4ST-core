@@ -9,7 +9,7 @@ import * as jwt from 'jsonwebtoken';
 import { Role, AuthPlayerRole } from '../src/shared/auth.utils';
 import { randomSteamId64, randomSteamId64s } from '../src/testUtils';
 import { RegisteredPlayer } from '../src/gameserver/registered-player.entity';
-import { RegisteredPlayerInput } from '../src/libs/client/graphql-client-to4st-core';
+
 
 describe('player auth (e2e)', () => {
   let app: INestApplication;
