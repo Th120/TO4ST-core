@@ -196,6 +196,12 @@ export class AppConfigService implements OnModuleInit {
             config.banlistPartners.forEach(toBeValidated => {if(!isURL(toBeValidated)) throw new HttpException(`No valid URL: "${toBeValidated}"`, HttpStatus.NOT_ACCEPTABLE)});
         }     
 
+        if(config.ownAddress?.trim() && !isURL(config.ownAddress)) {
+            throw new HttpException(`No valid URL: "${config.ownAddress}"`, HttpStatus.NOT_ACCEPTABLE);
+        } 
+
+
+
         if(config.password)
         {
             if(config.password.length < MIN_PW_LENGTH)
