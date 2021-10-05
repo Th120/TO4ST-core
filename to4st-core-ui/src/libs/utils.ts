@@ -28,15 +28,11 @@ export function extractGraphQLErrors(error: any): string {
   const err = error instanceof Object ? error : null;
   if (err) {
     return (
-      error.errors
-        ?.map((e) => e.message)
-        .reduce(
-          (prev, curr) => `${prev.length == 0 ? prev : prev + ",\n"} ${curr}`,
-          ""
-        ) || "GraphQL Error empty"
+      err.errors
+        ?.map((e) => e.message.toString())
+        .join(",\n") || "GraphQL Error empty"
     );
   } else {
-    console.error(error);
     return "Did not receive valid GraphQL Error";
   }
 }

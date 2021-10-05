@@ -35,7 +35,14 @@ export function createAPI(bearerToken = ""): TApiClient {
                   },
           }
         );
-        return (await fetched.json()).data;
+
+        const decoded = await fetched.json();
+        
+        if(!!decoded.errors) {
+          throw decoded;
+        }
+
+        return decoded.data;
       },
       (query) => {
         console.log(query);
