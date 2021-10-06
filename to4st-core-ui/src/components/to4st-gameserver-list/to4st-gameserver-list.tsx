@@ -88,7 +88,7 @@ export class To4stGameserverList implements ComponentInterface {
     {
       name: "Last Contact",
       hiddenMobile: () => true,
-      tableContent: (server) => <p>{server.lastContact}</p>,
+      tableContent: (server) => <p>{server.lastContact?.toLocaleString()}</p>,
       sortable: true,
     },
   ] as ColumnProps<TGameserver>[];

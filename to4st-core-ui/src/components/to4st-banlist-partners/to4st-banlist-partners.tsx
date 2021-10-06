@@ -86,7 +86,6 @@ export class To4stBanlistPartners implements ComponentInterface {
       URL: s,
       id: i,
     }));
-    console.log("updated partners", this.partners)
   }
 
   /**
@@ -114,10 +113,9 @@ export class To4stBanlistPartners implements ComponentInterface {
         banlistPartners: currPartners.map((p) => p.URL),
       });
       afterEx.emit("");
-      console.log("saved", newcfg)
       this.appConfig = newcfg;
     } catch (e) {
-      console.log("err", e)
+      console.error("err", e);
       afterEx.emit(extractGraphQLErrors(e));
     }
   }

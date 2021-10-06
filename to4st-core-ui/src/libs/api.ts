@@ -37,8 +37,8 @@ export function createAPI(bearerToken = ""): TApiClient {
         );
 
         const decoded = await fetched.json();
-        
-        if(!!decoded.errors) {
+
+        if (!!decoded.errors) {
           throw decoded;
         }
 

@@ -361,7 +361,9 @@ export class To4stRegisteredPlayersList implements ComponentInterface {
               gameControl: player.gameControl,
             },
           },
-          {},
+          {
+            steamId64: true,
+          },
         ],
       });
       afterEx.emit();

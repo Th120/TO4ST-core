@@ -120,7 +120,7 @@ export class To4stApiKeys implements ComponentInterface {
     },
     {
       name: "Last Use",
-      tableContent: (key) => <p>{key.lastUse}</p>,
+      tableContent: (key) => <p>{key.lastUse?.toLocaleString()}</p>,
       sortable: true,
     },
   ] as ColumnProps<TAuthKey>[];
@@ -180,7 +180,9 @@ export class To4stApiKeys implements ComponentInterface {
               description: key.description,
             },
           },
-          {},
+          {
+            id: true,
+          },
         ],
       });
       afterEx.emit();

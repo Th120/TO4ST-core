@@ -40,7 +40,7 @@ const DEFAULT_GAMESERVER_CONFIG = {
   contact: "",
   mapNoReplay: 3,
   enableVoicechat: true,
-} as Partial<TGameserverConfig>;
+} as Omit<TGameserverConfig, "gameserver">;
 
 @Component({
   tag: "to4st-gameserver-config-list",
@@ -430,7 +430,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
       );
       const mapped = gameservers.map((x) => ({
         ...DEFAULT_GAMESERVER_CONFIG,
-        ...extractGameserverConfig(x),
+        ...extractGameserverConfig(x, DEFAULT_GAMESERVER_CONFIG),
       }));
 
       onFetchedData(mapped, pageCount);

@@ -262,7 +262,6 @@ export class To4stDetailEdit implements ComponentInterface {
   }
 
   itemSelected(item: any) {
-    console.log(item);
     this.currentItem = { ...this.defaultCreateObject, ...item };
     this.reset();
   }

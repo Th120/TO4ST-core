@@ -28,9 +28,8 @@ export function extractGraphQLErrors(error: any): string {
   const err = error instanceof Object ? error : null;
   if (err) {
     return (
-      err.errors
-        ?.map((e) => e.message.toString())
-        .join(",\n") || "GraphQL Error empty"
+      err.errors?.map((e) => e.message.toString()).join(",\n") ||
+      "GraphQL Error empty"
     );
   } else {
     return "Did not receive valid GraphQL Error";

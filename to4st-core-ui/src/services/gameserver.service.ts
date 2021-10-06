@@ -96,10 +96,14 @@ const mapGameserver = (x: TGameserverApi) => ({
 });
 export type TGameserver = ReturnType<typeof mapGameserver>;
 export const extractGameserverConfig: (
-  gameserver: TGameserver
-) => TGameserverConfig | undefined = (gameserver: TGameserver) =>
+  gameserver: TGameserver,
+  defaultGameserverConfig: Omit<TGameserverConfig, "gameserver">
+) => TGameserverConfig | undefined = (
+  gameserver: TGameserver,
+  defaultGameserverConfig: Omit<TGameserverConfig, "gameserver">
+) =>
   !gameserver.gameserverConfig
-    ? undefined
+    ? { ...defaultGameserverConfig, gameserver: gameserver }
     : { ...gameserver.gameserverConfig, gameserver: gameserver };
 export type TGameserverConfig = TGameserver["gameserverConfig"] & {
   gameserver: TGameserver;
@@ -207,7 +211,9 @@ export class GameserverService {
             {
               gameserverConfig: gameserverConfig,
             },
-            {},
+            {
+              gameserver: { id: true },
+            },
           ],
         });
       },
@@ -231,7 +237,9 @@ export class GameserverService {
             {
               gameserver: gameserver,
             },
-            {},
+            {
+              id: true,
+            },
           ],
         });
       },
@@ -286,7 +294,9 @@ export class GameserverService {
             {
               matchConfig: matchConfig,
             },
-            {},
+            {
+              id: true,
+            },
           ],
         });
       },

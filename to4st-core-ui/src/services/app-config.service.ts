@@ -108,11 +108,9 @@ export class AppConfigService {
   public static get(client: TApiClient) {
     return {
       appInfo: async (cached = true) => {
-        const re = await client.client.query(appInfoQuery(cached))
         const result: TAppInfoApi = (
-          re
+          await client.client.query(appInfoQuery(cached))
         ).appConfig;
-        console.log(re)
         return result;
       },
       createUpdateAppConfig: async (appConfig: TAppConfigInput) => {
