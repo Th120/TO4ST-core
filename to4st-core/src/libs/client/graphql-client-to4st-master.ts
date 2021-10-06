@@ -3,7 +3,12 @@ import axios from 'axios';
 import { Thunder } from './generated-master/zeus';
 import { Logger } from "@nestjs/common";
 
-export function createGraphqlClientTo4stMaster(url: string, masterserverKey, timeout = 5000)
+export type TApiClient = {
+    client: ReturnType<typeof Thunder>;
+    setTransactionId: (transactionId: string) => string;
+};
+
+export function createGraphqlClientTo4stMaster(url: string, masterserverKey, timeout = 5000): TApiClient
 {
     let currentTransationId = "";
     const changeTransactionId = (transactionId: string) => currentTransationId = transactionId;
