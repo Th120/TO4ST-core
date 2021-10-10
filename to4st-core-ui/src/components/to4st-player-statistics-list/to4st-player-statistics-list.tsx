@@ -23,7 +23,6 @@ const playerStatsQuery = (
           page: page,
           orderDesc: orderDesc,
           orderBy: orderBy,
-          ranked: true,
           cachedIfPossible: true,
         },
       },

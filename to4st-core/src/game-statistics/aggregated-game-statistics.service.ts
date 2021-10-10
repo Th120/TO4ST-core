@@ -323,7 +323,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
 
         Logger.log("Generating PlayerStats cache for games before: " + before.toString(), "PlayerStats cache");
 
-        const [res, total] = await this.getPlayerStatistics({orderBy: OrderPlayerBaseStats.sumKills, ranked: true, orderDesc: true, endedBefore: before, overridePagination: true});
+        const [res, total] = await this.getPlayerStatistics({orderBy: OrderPlayerBaseStats.sumKills, orderDesc: true, endedBefore: before, overridePagination: true});
 
         Logger.log("Finished database query", "PlayerStats cache");
 
@@ -408,6 +408,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
      */
     async getPlayerStatistics(options: IAggregatedPlayerStatisticsQuery): Promise<[PlayerStatistics[], number, number]>
     {
+        options = {...options}
         options.onlyFinishedRounds = options.onlyFinishedRounds ?? true;
 
         options.page = Math.max(1, options.page ?? 1);
@@ -415,7 +416,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
         options.orderDesc = options.orderDesc ?? true;
         options.orderBy = options.orderBy ? escapeOrderBy(options.orderBy) : OrderPlayerBaseStats.sumKills;
         options.ranked = options.ranked ?? false;
-
+        
         if(!!options.cached 
             && !!this.playerStatsCache 
             && !options.steamId64 
@@ -426,13 +427,14 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
             && !options.round
             && !options.gameMode
             && !options.game
-            && options.ranked
+            && !options.ranked
             && options.onlyFinishedRounds
             )
         {
             return this.getCachedPlayerStatistics(options.page, options.pageSize, options.orderBy, options.orderDesc, options.overridePagination);
         }
-        
+
+
         let queryBuilder = this.playerRoundStatsRepository.createQueryBuilder("prs");
 
         queryBuilder = queryBuilder.leftJoin("prs.round", "round");
