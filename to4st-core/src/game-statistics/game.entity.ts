@@ -35,7 +35,7 @@ export class Game {
     /**
      * Match config used for game (optional)
      */
-    @Field(() => MatchConfig)
+    @Field(() => MatchConfig, {nullable: true})
     @Expose()
     @ManyToOne(() => MatchConfig, { onDelete: "SET NULL", nullable: true })
     matchConfig?: MatchConfig;
