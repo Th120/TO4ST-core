@@ -356,7 +356,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
     const o = entity as TGameserverConfig;
 
     try {
-      GameserverService.get(this.apiClient).createUpdateGameserverConfig(
+      await GameserverService.get(this.apiClient).createUpdateGameserverConfig(
         {
           gameserverId: o.gameserver.id,
           currentMatchConfigId: o.currentMatchConfig.id,
