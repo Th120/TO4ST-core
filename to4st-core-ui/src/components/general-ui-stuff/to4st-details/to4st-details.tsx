@@ -335,17 +335,17 @@ export class To4stDetailEdit implements ComponentInterface {
   }
 
   pasteFromString(data: string) {
-    if (data && data.trim()) {
+    if (data?.trim()) {
       const parsed = JSON.parse(data, (key, value) =>
         typeof value === "string" && iso8601.test(value)
           ? new Date(value)
           : value
       );
-      const temp = {};
       Object.keys(parsed).forEach((key) => {
-        temp[key] = parsed[key];
+        this.currentItemClone[key] = parsed[key];
       });
-      this.currentItemClone = temp;
+
+      this.currentItemClone = { ...this.currentItemClone };
     }
   }
 
