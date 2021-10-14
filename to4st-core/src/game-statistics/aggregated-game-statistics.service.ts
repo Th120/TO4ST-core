@@ -532,7 +532,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
         }
 
         const mappedResult = ret.map(x => (
-            {
+            new PlayerStatistics({
                 steamId64: accountIdToSteamId64(parseInt(x.steamid64)), 
                 rank: parseInt(x.playerrank),
                 kills: parseInt(x.sumkills), 
@@ -545,7 +545,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
                 killDeathRatio: parseFloat(x.killdeath),
                 avgDamagePerRound: parseFloat(x.averagedamageperround),
                 avgScorePerRound: parseFloat(x.averagescoreperround),
-            } as PlayerStatistics));
+            })));
 
 
         const total = count === 0 ? mappedResult.length : count;
@@ -631,7 +631,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
       
         const ret = await queryBuilder.getRawMany();
 
-        const mappedResult = ret.map(x => (
+        const mappedResult = ret.map(x => new PlayerWeaponStatistics(
             {
                 steamId64: options.steamId64, 
                 totalDamage: parseFloat(x.sumdamage),
@@ -641,8 +641,7 @@ export class AggregatedGameStatisticsService implements OnApplicationBootstrap {
                 shotsChest: parseInt(x.sumshotschest),
                 shotsLegs: parseInt(x.sumshotslegs),
                 weapon: new Weapon({name: x.weapname, weaponType: x.weaptype}),
-
-            } as PlayerWeaponStatistics));
+            }));
         
 
         return mappedResult;

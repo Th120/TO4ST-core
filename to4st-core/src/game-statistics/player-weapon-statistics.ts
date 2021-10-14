@@ -65,4 +65,7 @@ export class PlayerWeaponStatistics {
     @Expose()
     weapon: Weapon;
     
+    constructor(partial: Partial<PlayerWeaponStatistics>) {
+        Object.assign(this, partial);
+    }
 }

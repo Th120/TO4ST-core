@@ -141,5 +141,9 @@ export class PlayerStatistics {
     @Field(() => Float)
     @Expose()
     avgScorePerRound: number;
+
+    constructor(partial: Partial<PlayerStatistics>) {
+        Object.assign(this, partial);
+    }
 }
 
