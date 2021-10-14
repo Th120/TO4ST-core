@@ -91,8 +91,8 @@ export class To4stGameserverConfigList implements ComponentInterface {
       sortable: true,
     },
     {
-      name: "Id",
-      tableContent: (gameserverCfg) => <p>{gameserverCfg?.gameserver?.id}</p>,
+      name: "Description",
+      tableContent: (gameserverCfg) => <p>{gameserverCfg?.gameserver.description}</p>,
       hiddenMobile: () => true,
     },
     {
@@ -327,7 +327,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
           class="input"
           onChange={(event) =>
             cb(
-              "warmUpLength",
+              "mapNoReplay",
               parseInt((event.target as HTMLInputElement).value)
             )
           }
