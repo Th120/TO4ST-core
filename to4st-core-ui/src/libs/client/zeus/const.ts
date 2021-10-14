@@ -1,1982 +1,1982 @@
 /* eslint-disable */
 
-export const AllTypesProps: Record<string, any> = {
-  DateTime: "String",
-  Team: "enum",
-  WeaponType: "enum",
-  Query: {
-    appConfig: {
-      cached: {
-        type: "Boolean",
-        array: false,
-        arrayRequired: false,
-        required: false,
-      },
-    },
-    authKeys: {
-      options: {
-        type: "AuthKeyQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    authKey: {
-      authKey: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    registeredPlayers: {
-      options: {
-        type: "RegisteredPlayersQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    registeredPlayer: {
-      options: {
-        type: "RegisteredPlayerQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    bans: {
-      options: {
-        type: "BanQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    banCheck: {
-      banCheck: {
-        type: "BanCheck",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    gameservers: {
-      options: {
-        type: "GameserversQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    gameserver: {
-      options: {
-        type: "GameserverQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    matchConfigs: {
-      options: {
-        type: "MatchConfigsQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    matchConfig: {
-      options: {
-        type: "MatchConfigQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    gameserverConfigs: {
-      options: {
-        type: "GameserverConfigsQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    gameserverConfig: {
-      gameserverId: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: false,
-      },
-    },
-    games: {
-      options: {
-        type: "GameQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    game: {
-      gameId: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    rounds: {
-      options: {
-        type: "RoundQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    round: {
-      roundId: {
-        type: "Float",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    playerRoundStats: {
-      options: {
-        type: "PlayerRoundStatsQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    playerRoundWeaponStats: {
-      options: {
-        type: "PlayerRoundWeaponStatsQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    playerStatistics: {
-      options: {
-        type: "PlayerStatisticsQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    playerWeaponStatistics: {
-      options: {
-        type: "PlayerWeaponStatisticsQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-  },
-  AuthKeyQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    search: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderDesc: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  RegisteredPlayersQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    search: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  RegisteredPlayerQuery: {
-    id: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  BanQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    search: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    bannedBySteamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    id1: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    id2: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderDesc: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderByExpirationDate: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    noExpiredBans: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  BanCheck: {
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    id1: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    id2: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    banId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    checkBanlistPartners: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  GameserversQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderDesc: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderBy: {
-      type: "GameserverConfigOrder",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    search: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    configFilter: {
-      type: "GameserverConfigFilter",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  GameserverConfigOrder: "enum",
-  GameserverConfigFilter: "enum",
-  GameserverQuery: {
-    id: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    authKey: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  MatchConfigsQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    configName: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderDesc: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  MatchConfigQuery: {
-    id: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    configName: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  GameserverConfigsQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    search: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderDesc: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderByGameserverName: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  GameQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderDesc: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderByEndedAt: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameserverId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedAfter: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedBefore: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    endedAfter: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    endedBefore: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    map: {
-      type: "ServerMapInput",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameMode: {
-      type: "GameModeInput",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    onlyFinishedGames: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    rankedOnly: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  ServerMapInput: {
-    name: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-  },
-  GameModeInput: {
-    name: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    isTeamBased: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  RoundQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderDesc: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedAfter: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedBefore: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    onlyFinishedRounds: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  PlayerRoundStatsQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    roundId: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-  },
-  PlayerRoundWeaponStatsQuery: {
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    roundId: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  PlayerStatisticsQuery: {
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    page: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    pageSize: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderDesc: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    orderBy: {
-      type: "OrderPlayerBaseStats",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameModeName: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    roundId: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedAfter: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedBefore: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    endedAfter: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    endedBefore: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    onlyFinishedRounds: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    cachedIfPossible: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    ranked: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  OrderPlayerBaseStats: "enum",
-  PlayerWeaponStatisticsQuery: {
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameModeName: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    roundId: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedAfter: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedBefore: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    endedAfter: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    endedBefore: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    onlyFinishedRounds: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  Mutation: {
-    updateAppConfig: {
-      appConfig: {
-        type: "AppConfigInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    deleteAuthKey: {
-      authKey: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    createUpdateAuthKey: {
-      authKey: {
-        type: "AuthKeyInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    login: {
-      password: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    loginDev: {
-      password: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    deleteRegisteredPlayer: {
-      steamId64: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    createUpdateRegisteredPlayer: {
-      registeredPlayer: {
-        type: "RegisteredPlayerInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    deleteBan: {
-      banId: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    createUpdateBan: {
-      banInput: {
-        type: "BanInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    deleteGameserver: {
-      gameserverId: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    createUpdateGameserver: {
-      gameserver: {
-        type: "GameserverInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    updateGameserver: {
-      gameserverUpdate: {
-        type: "GameserverUpdateInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    authPlayerToken: {
-      steamId64: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    deleteMatchConfig: {
-      options: {
-        type: "MatchConfigQuery",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    createUpdateMatchConfig: {
-      matchConfig: {
-        type: "MatchConfigInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    deleteGameserverConfig: {
-      gameserverId: {
-        type: "String",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    createUpdateGameserverConfig: {
-      gameserverConfig: {
-        type: "GameserverConfigInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    assignMatchConfig: {
-      gameserverConfig: {
-        type: "GameserverConfigInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    deleteGames: {
-      gameInputs: {
-        type: "GameInput",
-        array: true,
-        arrayRequired: true,
-        required: true,
-      },
-    },
-    createUpdateGame: {
-      gameInput: {
-        type: "GameInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    deleteRounds: {
-      roundInputs: {
-        type: "RoundInput",
-        array: true,
-        arrayRequired: true,
-        required: true,
-      },
-    },
-    createUpdateRound: {
-      roundInput: {
-        type: "RoundInput",
-        array: false,
-        arrayRequired: false,
-        required: true,
-      },
-    },
-    createUpdatePlayerRoundStats: {
-      playerRoundStatsInput: {
-        type: "PlayerRoundStatsInput",
-        array: true,
-        arrayRequired: true,
-        required: true,
-      },
-    },
-    createUpdatePlayerRoundWeaponStats: {
-      playerRoundWeaponStatsInput: {
-        type: "PlayerRoundWeaponStatsInput",
-        array: true,
-        arrayRequired: true,
-        required: true,
-      },
-    },
-  },
-  AppConfigInput: {
-    publicStats: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    banlistPartners: {
-      type: "String",
-      array: true,
-      arrayRequired: false,
-      required: true,
-    },
-    publicBanQuery: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    masterserverKey: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    steamWebApiKey: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    playerStatsCacheAge: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    minScoreStats: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    ownAddress: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    password: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  AuthKeyInput: {
-    id: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    authKey: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    description: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  RegisteredPlayerInput: {
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    rootAdmin: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    visibleRole: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    kick: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    ban: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    tempKickBan: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    mute: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    makeTeams: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    reservedSlots: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    broadcastMessage: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameControl: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  BanInput: {
-    banId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    id1: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    id2: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    bannedById64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    expiredAt: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    reason: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameserverId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  GameserverInput: {
-    id: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    authKey: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    currentName: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    description: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  GameserverUpdateInput: {
-    currentName: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  MatchConfigInput: {
-    id: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    configName: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameMode: {
-      type: "GameModeInput",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    matchEndLength: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    warmUpLength: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    mapLength: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    roundLength: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    preRoundLength: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    roundEndLength: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    roundLimit: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    midGameBreakLength: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    friendlyFireScale: {
-      type: "Float",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    playerVoteThreshold: {
-      type: "Float",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    maxTeamDamage: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    allowGhostcam: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    autoBalanceTeams: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    playerVoteTeamOnly: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    enablePlayerVote: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    autoSwapTeams: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    nadeRestriction: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    globalVoicechat: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    muteDeadToTeam: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    ranked: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    private: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  GameserverConfigInput: {
-    gameserverId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    currentMatchConfigId: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    currentGameserverName: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    voteLength: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    tempKickBanTime: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gamePassword: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    serverAdmins: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    serverDescription: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    website: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    contact: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    reservedSlots: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    mapNoReplay: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    balanceClans: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    allowSkipMapVote: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    autoRecordReplay: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    playerGameControl: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    enableMapVote: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    enableVoicechat: {
-      type: "Boolean",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  GameInput: {
-    id: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameserverId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    matchConfigId: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedAt: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    endedAt: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    map: {
-      type: "ServerMapInput",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameMode: {
-      type: "GameModeInput",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  RoundInput: {
-    id: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    gameId: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    startedAt: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    endedAt: {
-      type: "DateTime",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    scoreSpecialForces: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-    scoreTerrorists: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: false,
-    },
-  },
-  PlayerRoundStatsInput: {
-    roundId: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    kills: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    deaths: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    suicides: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    totalDamage: {
-      type: "Float",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    score: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    team: {
-      type: "Team",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-  },
-  PlayerRoundWeaponStatsInput: {
-    roundId: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    steamId64: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    weapon: {
-      type: "WeaponInput",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    totalDamage: {
-      type: "Float",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    shotsHead: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    shotsChest: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    shotsLegs: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    shotsArms: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    shotsFired: {
-      type: "Int",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-  },
-  WeaponInput: {
-    name: {
-      type: "String",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-    weaponType: {
-      type: "WeaponType",
-      array: false,
-      arrayRequired: false,
-      required: true,
-    },
-  },
-};
+export const AllTypesProps: Record<string,any> = {
+	DateTime: "String",
+	Team: "enum",
+	WeaponType: "enum",
+	Query:{
+		appConfig:{
+			cached:{
+				type:"Boolean",
+				array:false,
+				arrayRequired:false,
+				required:false
+			}
+		},
+		authKeys:{
+			options:{
+				type:"AuthKeyQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		authKey:{
+			authKey:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		registeredPlayers:{
+			options:{
+				type:"RegisteredPlayersQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		registeredPlayer:{
+			options:{
+				type:"RegisteredPlayerQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		bans:{
+			options:{
+				type:"BanQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		banCheck:{
+			banCheck:{
+				type:"BanCheck",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		gameservers:{
+			options:{
+				type:"GameserversQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		gameserver:{
+			options:{
+				type:"GameserverQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		matchConfigs:{
+			options:{
+				type:"MatchConfigsQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		matchConfig:{
+			options:{
+				type:"MatchConfigQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		gameserverConfigs:{
+			options:{
+				type:"GameserverConfigsQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		gameserverConfig:{
+			gameserverId:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:false
+			}
+		},
+		games:{
+			options:{
+				type:"GameQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		game:{
+			gameId:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		rounds:{
+			options:{
+				type:"RoundQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		round:{
+			roundId:{
+				type:"Float",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		playerRoundStats:{
+			options:{
+				type:"PlayerRoundStatsQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		playerRoundWeaponStats:{
+			options:{
+				type:"PlayerRoundWeaponStatsQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		playerStatistics:{
+			options:{
+				type:"PlayerStatisticsQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		playerWeaponStatistics:{
+			options:{
+				type:"PlayerWeaponStatisticsQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		}
+	},
+	AuthKeyQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		search:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderDesc:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	RegisteredPlayersQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		search:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	RegisteredPlayerQuery:{
+		id:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	BanQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		search:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		bannedBySteamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		id1:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		id2:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderDesc:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderByExpirationDate:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		noExpiredBans:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	BanCheck:{
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		id1:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		id2:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		banId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		checkBanlistPartners:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	GameserversQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderDesc:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderBy:{
+			type:"GameserverConfigOrder",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		search:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		configFilter:{
+			type:"GameserverConfigFilter",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	GameserverConfigOrder: "enum",
+	GameserverConfigFilter: "enum",
+	GameserverQuery:{
+		id:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		authKey:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	MatchConfigsQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		configName:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderDesc:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	MatchConfigQuery:{
+		id:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		configName:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	GameserverConfigsQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		search:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderDesc:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderByGameserverName:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	GameQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderDesc:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderByEndedAt:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameserverId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedAfter:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedBefore:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		endedAfter:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		endedBefore:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		map:{
+			type:"ServerMapInput",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameMode:{
+			type:"GameModeInput",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		onlyFinishedGames:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		rankedOnly:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	ServerMapInput:{
+		name:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:true
+		}
+	},
+	GameModeInput:{
+		name:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		isTeamBased:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	RoundQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderDesc:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedAfter:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedBefore:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		onlyFinishedRounds:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	PlayerRoundStatsQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		roundId:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		}
+	},
+	PlayerRoundWeaponStatsQuery:{
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		roundId:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	PlayerStatisticsQuery:{
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		page:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		pageSize:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderDesc:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		orderBy:{
+			type:"OrderPlayerBaseStats",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameModeName:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		roundId:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedAfter:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedBefore:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		endedAfter:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		endedBefore:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		onlyFinishedRounds:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		cachedIfPossible:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		ranked:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	OrderPlayerBaseStats: "enum",
+	PlayerWeaponStatisticsQuery:{
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameModeName:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		roundId:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedAfter:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedBefore:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		endedAfter:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		endedBefore:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		onlyFinishedRounds:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	Mutation:{
+		updateAppConfig:{
+			appConfig:{
+				type:"AppConfigInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		deleteAuthKey:{
+			authKey:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		createUpdateAuthKey:{
+			authKey:{
+				type:"AuthKeyInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		login:{
+			password:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		loginDev:{
+			password:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		deleteRegisteredPlayer:{
+			steamId64:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		createUpdateRegisteredPlayer:{
+			registeredPlayer:{
+				type:"RegisteredPlayerInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		deleteBan:{
+			banId:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		createUpdateBan:{
+			banInput:{
+				type:"BanInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		deleteGameserver:{
+			gameserverId:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		createUpdateGameserver:{
+			gameserver:{
+				type:"GameserverInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		updateGameserver:{
+			gameserverUpdate:{
+				type:"GameserverUpdateInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		authPlayerToken:{
+			steamId64:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		deleteMatchConfig:{
+			options:{
+				type:"MatchConfigQuery",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		createUpdateMatchConfig:{
+			matchConfig:{
+				type:"MatchConfigInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		deleteGameserverConfig:{
+			gameserverId:{
+				type:"String",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		createUpdateGameserverConfig:{
+			gameserverConfig:{
+				type:"GameserverConfigInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		assignMatchConfig:{
+			gameserverConfig:{
+				type:"GameserverConfigInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		deleteGames:{
+			gameInputs:{
+				type:"GameInput",
+				array:true,
+				arrayRequired:true,
+				required:true
+			}
+		},
+		createUpdateGame:{
+			gameInput:{
+				type:"GameInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		deleteRounds:{
+			roundInputs:{
+				type:"RoundInput",
+				array:true,
+				arrayRequired:true,
+				required:true
+			}
+		},
+		createUpdateRound:{
+			roundInput:{
+				type:"RoundInput",
+				array:false,
+				arrayRequired:false,
+				required:true
+			}
+		},
+		createUpdatePlayerRoundStats:{
+			playerRoundStatsInput:{
+				type:"PlayerRoundStatsInput",
+				array:true,
+				arrayRequired:true,
+				required:true
+			}
+		},
+		createUpdatePlayerRoundWeaponStats:{
+			playerRoundWeaponStatsInput:{
+				type:"PlayerRoundWeaponStatsInput",
+				array:true,
+				arrayRequired:true,
+				required:true
+			}
+		}
+	},
+	AppConfigInput:{
+		publicStats:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		banlistPartners:{
+			type:"String",
+			array:true,
+			arrayRequired:false,
+			required:true
+		},
+		publicBanQuery:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		masterserverKey:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		steamWebApiKey:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		playerStatsCacheAge:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		minScoreStats:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		ownAddress:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		password:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	AuthKeyInput:{
+		id:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		authKey:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		description:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	RegisteredPlayerInput:{
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		rootAdmin:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		visibleRole:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		kick:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		ban:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		tempKickBan:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		mute:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		makeTeams:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		reservedSlots:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		broadcastMessage:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameControl:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	BanInput:{
+		banId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		id1:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		id2:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		bannedById64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		expiredAt:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		reason:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameserverId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	GameserverInput:{
+		id:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		authKey:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		currentName:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		description:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	GameserverUpdateInput:{
+		currentName:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	MatchConfigInput:{
+		id:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		configName:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameMode:{
+			type:"GameModeInput",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		matchEndLength:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		warmUpLength:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		mapLength:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		roundLength:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		preRoundLength:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		roundEndLength:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		roundLimit:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		midGameBreakLength:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		friendlyFireScale:{
+			type:"Float",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		playerVoteThreshold:{
+			type:"Float",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		maxTeamDamage:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		allowGhostcam:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		autoBalanceTeams:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		playerVoteTeamOnly:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		enablePlayerVote:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		autoSwapTeams:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		nadeRestriction:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		globalVoicechat:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		muteDeadToTeam:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		ranked:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		private:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	GameserverConfigInput:{
+		gameserverId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		currentMatchConfigId:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		currentGameserverName:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		voteLength:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		tempKickBanTime:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gamePassword:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		serverAdmins:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		serverDescription:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		website:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		contact:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		reservedSlots:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		mapNoReplay:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		balanceClans:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		allowSkipMapVote:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		autoRecordReplay:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		playerGameControl:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		enableMapVote:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		enableVoicechat:{
+			type:"Boolean",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	GameInput:{
+		id:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameserverId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		matchConfigId:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedAt:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		endedAt:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		map:{
+			type:"ServerMapInput",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameMode:{
+			type:"GameModeInput",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	RoundInput:{
+		id:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		gameId:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		startedAt:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		endedAt:{
+			type:"DateTime",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		scoreSpecialForces:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		},
+		scoreTerrorists:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:false
+		}
+	},
+	PlayerRoundStatsInput:{
+		roundId:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		kills:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		deaths:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		suicides:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		totalDamage:{
+			type:"Float",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		score:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		team:{
+			type:"Team",
+			array:false,
+			arrayRequired:false,
+			required:true
+		}
+	},
+	PlayerRoundWeaponStatsInput:{
+		roundId:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		steamId64:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		weapon:{
+			type:"WeaponInput",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		totalDamage:{
+			type:"Float",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		shotsHead:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		shotsChest:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		shotsLegs:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		shotsArms:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		shotsFired:{
+			type:"Int",
+			array:false,
+			arrayRequired:false,
+			required:true
+		}
+	},
+	WeaponInput:{
+		name:{
+			type:"String",
+			array:false,
+			arrayRequired:false,
+			required:true
+		},
+		weaponType:{
+			type:"WeaponType",
+			array:false,
+			arrayRequired:false,
+			required:true
+		}
+	}
+}
 
-export const ReturnTypes: Record<string, any> = {
-  GameMode: {
-    name: "String",
-    isTeamBased: "Boolean",
-  },
-  MatchConfig: {
-    id: "Int",
-    configName: "String",
-    gameMode: "GameMode",
-    configHash: "String",
-    matchEndLength: "Int",
-    warmUpLength: "Int",
-    friendlyFireScale: "Float",
-    mapLength: "Int",
-    roundLength: "Int",
-    preRoundLength: "Int",
-    roundEndLength: "Int",
-    roundLimit: "Int",
-    allowGhostcam: "Boolean",
-    playerVoteThreshold: "Float",
-    autoBalanceTeams: "Boolean",
-    playerVoteTeamOnly: "Boolean",
-    maxTeamDamage: "Float",
-    enablePlayerVote: "Boolean",
-    autoSwapTeams: "Boolean",
-    midGameBreakLength: "Int",
-    nadeRestriction: "Boolean",
-    globalVoicechat: "Boolean",
-    muteDeadToTeam: "Boolean",
-    ranked: "Boolean",
-    private: "Boolean",
-  },
-  GameserverConfig: {
-    gameserver: "Gameserver",
-    currentMatchConfig: "MatchConfig",
-    currentName: "String",
-    voteLength: "Int",
-    gamePassword: "String",
-    reservedSlots: "Int",
-    balanceClans: "Boolean",
-    allowSkipMapVote: "Boolean",
-    tempKickBanTime: "Int",
-    autoRecordReplay: "Boolean",
-    playerGameControl: "Boolean",
-    enableMapVote: "Boolean",
-    serverAdmins: "String",
-    serverDescription: "String",
-    website: "String",
-    contact: "String",
-    mapNoReplay: "Int",
-    enableVoicechat: "Boolean",
-  },
-  Gameserver: {
-    id: "String",
-    authKey: "String",
-    currentName: "String",
-    description: "String",
-    lastContact: "DateTime",
-    gameserverConfig: "GameserverConfig",
-  },
-  ServerMap: {
-    name: "String",
-  },
-  Game: {
-    id: "String",
-    gameserver: "Gameserver",
-    matchConfig: "MatchConfig",
-    startedAt: "DateTime",
-    endedAt: "DateTime",
-    map: "ServerMap",
-    gameMode: "GameMode",
-    rounds: "Round",
-  },
-  AppConfig: {
-    instanceId: "String",
-    publicStats: "Boolean",
-    banlistPartners: "String",
-    publicBanQuery: "Boolean",
-    masterserverKey: "String",
-    steamWebApiKey: "String",
-    ownAddress: "String",
-    playerStatsCacheAge: "Int",
-    minScoreStats: "Int",
-    appInfo: "AppInfo",
-  },
-  Round: {
-    id: "Int",
-    game: "Game",
-    startedAt: "DateTime",
-    endedAt: "DateTime",
-    scoreSpecialForces: "Int",
-    scoreTerrorists: "Int",
-    playerRoundStats: "PlayerRoundStats",
-    playerRoundWeaponStats: "PlayerRoundWeaponStats",
-  },
-  PlayerRoundStats: {
-    round: "Round",
-    steamId64: "String",
-    kills: "Int",
-    deaths: "Int",
-    suicides: "Int",
-    totalDamage: "Float",
-    score: "Int",
-    team: "Team",
-    steamUser: "SteamUser",
-  },
-  Weapon: {
-    name: "String",
-    weaponType: "WeaponType",
-  },
-  PlayerRoundWeaponStats: {
-    steamId64: "String",
-    round: "Round",
-    weapon: "Weapon",
-    totalDamage: "Float",
-    shotsHead: "Int",
-    shotsChest: "Int",
-    shotsLegs: "Int",
-    shotsArms: "Int",
-    shotsFired: "Int",
-    steamUser: "SteamUser",
-  },
-  SteamUser: {
-    steamId64: "String",
-    name: "String",
-    avatarBigUrl: "String",
-    avatarMediumUrl: "String",
-  },
-  PaginatedGame: {
-    content: "Game",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedGameMode: {
-    content: "GameMode",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedPlayerRoundStats: {
-    content: "PlayerRoundStats",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedPlayerRoundWeaponStats: {
-    content: "PlayerRoundWeaponStats",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedRound: {
-    content: "Round",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PlayerStatistics: {
-    steamId64: "String",
-    rank: "Int",
-    kills: "Int",
-    deaths: "Int",
-    suicides: "Int",
-    killDeathRatio: "Float",
-    totalScore: "Int",
-    totalDamage: "Float",
-    numberGamesPlayed: "Int",
-    numberRoundsPlayed: "Int",
-    avgDamagePerRound: "Float",
-    avgScorePerRound: "Float",
-    steamUser: "SteamUser",
-  },
-  PlayerWeaponStatistics: {
-    steamId64: "String",
-    totalDamage: "Float",
-    totalShots: "Int",
-    shotsChest: "Int",
-    shotsLegs: "Int",
-    shotsArms: "Int",
-    shotsHead: "Int",
-    weapon: "Weapon",
-    steamUser: "SteamUser",
-  },
-  PaginatedPlayerStatistics: {
-    content: "PlayerStatistics",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedGameserver: {
-    content: "Gameserver",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  Ban: {
-    id: "String",
-    steamId64: "String",
-    bannedById64: "String",
-    createdAt: "DateTime",
-    expiredAt: "DateTime",
-    reason: "String",
-    gameserver: "Gameserver",
-    id1: "String",
-    id2: "String",
-    bannedSteamUser: "SteamUser",
-    bannedBySteamUser: "SteamUser",
-  },
-  RegisteredPlayer: {
-    steamId64: "String",
-    visibleRole: "String",
-    rootAdmin: "Boolean",
-    kick: "Boolean",
-    ban: "Boolean",
-    tempKickBan: "Boolean",
-    mute: "Boolean",
-    makeTeams: "Boolean",
-    reservedSlots: "Boolean",
-    broadcastMessage: "Boolean",
-    gameControl: "Boolean",
-    steamUser: "SteamUser",
-  },
-  AuthKey: {
-    id: "Int",
-    authKey: "String",
-    description: "String",
-    lastUse: "DateTime",
-  },
-  PaginatedRegisteredPlayers: {
-    content: "RegisteredPlayer",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedBan: {
-    content: "Ban",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedGameserverConfig: {
-    content: "GameserverConfig",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedMatchConfig: {
-    content: "MatchConfig",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  PaginatedAuthKey: {
-    content: "AuthKey",
-    totalCount: "Int",
-    pageCount: "Int",
-  },
-  LoginResponse: {
-    appConfig: "AppConfig",
-    jwt: "String",
-  },
-  AppInfo: {
-    gamesPlayed: "Int",
-    roundsPlayed: "Int",
-    activeBans: "Int",
-    uniquePlayers: "Int",
-  },
-  Query: {
-    appConfig: "AppConfig",
-    authKeys: "PaginatedAuthKey",
-    authKey: "AuthKey",
-    authValid: "Boolean",
-    registeredPlayers: "PaginatedRegisteredPlayers",
-    registeredPlayer: "RegisteredPlayer",
-    bans: "PaginatedBan",
-    banCheck: "Ban",
-    gameservers: "PaginatedGameserver",
-    gameserver: "Gameserver",
-    matchConfigs: "PaginatedMatchConfig",
-    matchConfig: "MatchConfig",
-    gameserverConfigs: "PaginatedGameserverConfig",
-    gameserverConfig: "GameserverConfig",
-    games: "PaginatedGame",
-    game: "Game",
-    rounds: "PaginatedRound",
-    round: "Round",
-    gameModes: "PaginatedGameMode",
-    playerRoundStats: "PaginatedPlayerRoundStats",
-    playerRoundWeaponStats: "PaginatedPlayerRoundWeaponStats",
-    playerStatistics: "PaginatedPlayerStatistics",
-    playerWeaponStatistics: "PlayerWeaponStatistics",
-  },
-  Mutation: {
-    updateAppConfig: "AppConfig",
-    deleteAuthKey: "Boolean",
-    createUpdateAuthKey: "AuthKey",
-    login: "LoginResponse",
-    loginDev: "LoginResponse",
-    deleteRegisteredPlayer: "Boolean",
-    createUpdateRegisteredPlayer: "RegisteredPlayer",
-    deleteBan: "Boolean",
-    createUpdateBan: "Ban",
-    deleteGameserver: "Boolean",
-    createUpdateGameserver: "Gameserver",
-    updateGameserver: "Gameserver",
-    authPlayerToken: "String",
-    deleteMatchConfig: "Boolean",
-    createUpdateMatchConfig: "MatchConfig",
-    deleteGameserverConfig: "Boolean",
-    createUpdateGameserverConfig: "GameserverConfig",
-    assignMatchConfig: "GameserverConfig",
-    deleteGames: "Boolean",
-    createUpdateGame: "Game",
-    deleteRounds: "Boolean",
-    createUpdateRound: "Round",
-    createUpdatePlayerRoundStats: "Boolean",
-    createUpdatePlayerRoundWeaponStats: "Boolean",
-  },
-};
+export const ReturnTypes: Record<string,any> = {
+	GameMode:{
+		name:"String",
+		isTeamBased:"Boolean"
+	},
+	MatchConfig:{
+		id:"Int",
+		configName:"String",
+		gameMode:"GameMode",
+		configHash:"String",
+		matchEndLength:"Int",
+		warmUpLength:"Int",
+		friendlyFireScale:"Float",
+		mapLength:"Int",
+		roundLength:"Int",
+		preRoundLength:"Int",
+		roundEndLength:"Int",
+		roundLimit:"Int",
+		allowGhostcam:"Boolean",
+		playerVoteThreshold:"Float",
+		autoBalanceTeams:"Boolean",
+		playerVoteTeamOnly:"Boolean",
+		maxTeamDamage:"Float",
+		enablePlayerVote:"Boolean",
+		autoSwapTeams:"Boolean",
+		midGameBreakLength:"Int",
+		nadeRestriction:"Boolean",
+		globalVoicechat:"Boolean",
+		muteDeadToTeam:"Boolean",
+		ranked:"Boolean",
+		private:"Boolean"
+	},
+	GameserverConfig:{
+		gameserver:"Gameserver",
+		currentMatchConfig:"MatchConfig",
+		currentName:"String",
+		voteLength:"Int",
+		gamePassword:"String",
+		reservedSlots:"Int",
+		balanceClans:"Boolean",
+		allowSkipMapVote:"Boolean",
+		tempKickBanTime:"Int",
+		autoRecordReplay:"Boolean",
+		playerGameControl:"Boolean",
+		enableMapVote:"Boolean",
+		serverAdmins:"String",
+		serverDescription:"String",
+		website:"String",
+		contact:"String",
+		mapNoReplay:"Int",
+		enableVoicechat:"Boolean"
+	},
+	Gameserver:{
+		id:"String",
+		authKey:"String",
+		currentName:"String",
+		description:"String",
+		lastContact:"DateTime",
+		gameserverConfig:"GameserverConfig"
+	},
+	ServerMap:{
+		name:"String"
+	},
+	Game:{
+		id:"String",
+		gameserver:"Gameserver",
+		matchConfig:"MatchConfig",
+		startedAt:"DateTime",
+		endedAt:"DateTime",
+		map:"ServerMap",
+		gameMode:"GameMode",
+		rounds:"Round"
+	},
+	AppConfig:{
+		instanceId:"String",
+		publicStats:"Boolean",
+		banlistPartners:"String",
+		publicBanQuery:"Boolean",
+		masterserverKey:"String",
+		steamWebApiKey:"String",
+		ownAddress:"String",
+		playerStatsCacheAge:"Int",
+		minScoreStats:"Int",
+		appInfo:"AppInfo"
+	},
+	Round:{
+		id:"Int",
+		game:"Game",
+		startedAt:"DateTime",
+		endedAt:"DateTime",
+		scoreSpecialForces:"Int",
+		scoreTerrorists:"Int",
+		playerRoundStats:"PlayerRoundStats",
+		playerRoundWeaponStats:"PlayerRoundWeaponStats"
+	},
+	PlayerRoundStats:{
+		round:"Round",
+		steamId64:"String",
+		kills:"Int",
+		deaths:"Int",
+		suicides:"Int",
+		totalDamage:"Float",
+		score:"Int",
+		team:"Team",
+		steamUser:"SteamUser"
+	},
+	Weapon:{
+		name:"String",
+		weaponType:"WeaponType"
+	},
+	PlayerRoundWeaponStats:{
+		steamId64:"String",
+		round:"Round",
+		weapon:"Weapon",
+		totalDamage:"Float",
+		shotsHead:"Int",
+		shotsChest:"Int",
+		shotsLegs:"Int",
+		shotsArms:"Int",
+		shotsFired:"Int",
+		steamUser:"SteamUser"
+	},
+	SteamUser:{
+		steamId64:"String",
+		name:"String",
+		avatarBigUrl:"String",
+		avatarMediumUrl:"String"
+	},
+	PaginatedGame:{
+		content:"Game",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedGameMode:{
+		content:"GameMode",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedPlayerRoundStats:{
+		content:"PlayerRoundStats",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedPlayerRoundWeaponStats:{
+		content:"PlayerRoundWeaponStats",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedRound:{
+		content:"Round",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PlayerStatistics:{
+		steamId64:"String",
+		rank:"Int",
+		kills:"Int",
+		deaths:"Int",
+		suicides:"Int",
+		killDeathRatio:"Float",
+		totalScore:"Int",
+		totalDamage:"Float",
+		numberGamesPlayed:"Int",
+		numberRoundsPlayed:"Int",
+		avgDamagePerRound:"Float",
+		avgScorePerRound:"Float",
+		steamUser:"SteamUser"
+	},
+	PlayerWeaponStatistics:{
+		steamId64:"String",
+		totalDamage:"Float",
+		totalShots:"Int",
+		shotsChest:"Int",
+		shotsLegs:"Int",
+		shotsArms:"Int",
+		shotsHead:"Int",
+		weapon:"Weapon",
+		steamUser:"SteamUser"
+	},
+	PaginatedPlayerStatistics:{
+		content:"PlayerStatistics",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedGameserver:{
+		content:"Gameserver",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	Ban:{
+		id:"String",
+		steamId64:"String",
+		bannedById64:"String",
+		createdAt:"DateTime",
+		expiredAt:"DateTime",
+		reason:"String",
+		gameserver:"Gameserver",
+		id1:"String",
+		id2:"String",
+		bannedSteamUser:"SteamUser",
+		bannedBySteamUser:"SteamUser"
+	},
+	RegisteredPlayer:{
+		steamId64:"String",
+		visibleRole:"String",
+		rootAdmin:"Boolean",
+		kick:"Boolean",
+		ban:"Boolean",
+		tempKickBan:"Boolean",
+		mute:"Boolean",
+		makeTeams:"Boolean",
+		reservedSlots:"Boolean",
+		broadcastMessage:"Boolean",
+		gameControl:"Boolean",
+		steamUser:"SteamUser"
+	},
+	AuthKey:{
+		id:"Int",
+		authKey:"String",
+		description:"String",
+		lastUse:"DateTime"
+	},
+	PaginatedRegisteredPlayers:{
+		content:"RegisteredPlayer",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedBan:{
+		content:"Ban",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedGameserverConfig:{
+		content:"GameserverConfig",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedMatchConfig:{
+		content:"MatchConfig",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	PaginatedAuthKey:{
+		content:"AuthKey",
+		totalCount:"Int",
+		pageCount:"Int"
+	},
+	LoginResponse:{
+		appConfig:"AppConfig",
+		jwt:"String"
+	},
+	AppInfo:{
+		gamesPlayed:"Int",
+		roundsPlayed:"Int",
+		activeBans:"Int",
+		uniquePlayers:"Int"
+	},
+	Query:{
+		appConfig:"AppConfig",
+		authKeys:"PaginatedAuthKey",
+		authKey:"AuthKey",
+		authValid:"Boolean",
+		registeredPlayers:"PaginatedRegisteredPlayers",
+		registeredPlayer:"RegisteredPlayer",
+		bans:"PaginatedBan",
+		banCheck:"Ban",
+		gameservers:"PaginatedGameserver",
+		gameserver:"Gameserver",
+		matchConfigs:"PaginatedMatchConfig",
+		matchConfig:"MatchConfig",
+		gameserverConfigs:"PaginatedGameserverConfig",
+		gameserverConfig:"GameserverConfig",
+		games:"PaginatedGame",
+		game:"Game",
+		rounds:"PaginatedRound",
+		round:"Round",
+		gameModes:"PaginatedGameMode",
+		playerRoundStats:"PaginatedPlayerRoundStats",
+		playerRoundWeaponStats:"PaginatedPlayerRoundWeaponStats",
+		playerStatistics:"PaginatedPlayerStatistics",
+		playerWeaponStatistics:"PlayerWeaponStatistics"
+	},
+	Mutation:{
+		updateAppConfig:"AppConfig",
+		deleteAuthKey:"Boolean",
+		createUpdateAuthKey:"AuthKey",
+		login:"LoginResponse",
+		loginDev:"LoginResponse",
+		deleteRegisteredPlayer:"Boolean",
+		createUpdateRegisteredPlayer:"RegisteredPlayer",
+		deleteBan:"Boolean",
+		createUpdateBan:"Ban",
+		deleteGameserver:"Boolean",
+		createUpdateGameserver:"Gameserver",
+		updateGameserver:"Gameserver",
+		authPlayerToken:"String",
+		deleteMatchConfig:"Boolean",
+		createUpdateMatchConfig:"MatchConfig",
+		deleteGameserverConfig:"Boolean",
+		createUpdateGameserverConfig:"GameserverConfig",
+		assignMatchConfig:"GameserverConfig",
+		deleteGames:"Boolean",
+		createUpdateGame:"Game",
+		deleteRounds:"Boolean",
+		createUpdateRound:"Round",
+		createUpdatePlayerRoundStats:"Boolean",
+		createUpdatePlayerRoundWeaponStats:"Boolean"
+	}
+}
