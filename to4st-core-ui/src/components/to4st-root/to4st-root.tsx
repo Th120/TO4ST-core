@@ -56,30 +56,60 @@ export class To4stRoot implements ComponentInterface {
    * Init website
    */
   async componentWillLoad() {
-    const oldToken = localStorage.getItem(TOKEN_KEY);
-
     this.api = createAPI();
+    const yesterday = new Date(new Date().valueOf() - 1000 * 60 * 60 * 24); //at least one day should remain to avoid token being invalidated during session
 
-    const decoded: any = oldToken?.length > 0 ? jwt_decode(oldToken) : null;
+    const injectTokenFromFragment = location.hash.slice(1);
 
-    if (decoded?.exp) {
-      const expiredAt = new Date(decoded.exp * 1000);
-      const yesterday = new Date(new Date().valueOf() - 1000 * 60 * 60 * 24); //at least one day should remain to avoid token being invalidated during session
-      if (expiredAt.valueOf() > yesterday.valueOf()) {
-        this.api = createAPI(oldToken);
+    if(!!injectTokenFromFragment) {
+      try {
+        // token is encoded in base64
+        const decodedBase64 = atob(injectTokenFromFragment);
+        const decoded: any = jwt_decode(decodedBase64);
 
-        try {
-          const validToken = await this.api.client.query({ authValid: true });
-          if (validToken) {
-            this.isAdmin = true;
-          } else {
+        if (decoded?.exp) {
+          const expiredAt = new Date(decoded.exp * 1000);
+          
+          if (expiredAt.valueOf() > yesterday.valueOf()) {
+            this.api = createAPI(decodedBase64);
+
+            const validToken = await this.api.client.query({ authValid: true });
+            if (validToken) {
+              this.isAdmin = true;
+            } else {
+              this.api = createAPI();
+            }
+          }
+        }
+      } catch (e) {
+        this.api = createAPI();
+        console.error(e);
+      }
+    }
+    else
+    {
+      const oldToken = localStorage.getItem(TOKEN_KEY);
+      const decoded: any = oldToken?.length > 0 ? jwt_decode(oldToken) : null;
+
+      if (decoded?.exp) {
+        const expiredAt = new Date(decoded.exp * 1000);
+
+        if (expiredAt.valueOf() > yesterday.valueOf()) {
+          this.api = createAPI(oldToken);
+  
+          try {
+            const validToken = await this.api.client.query({ authValid: true });
+            if (validToken) {
+              this.isAdmin = true;
+            } else {
+              localStorage.removeItem(TOKEN_KEY);
+              this.api = createAPI();
+            }
+          } catch (e) {
             localStorage.removeItem(TOKEN_KEY);
             this.api = createAPI();
+            console.error(e);
           }
-        } catch (e) {
-          localStorage.removeItem(TOKEN_KEY);
-          this.api = createAPI();
-          console.error(e);
         }
       }
     }

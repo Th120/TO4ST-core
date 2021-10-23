@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "description": "to4st-core-ui",
   "scripts": {
-    "build": "mkdir -p ./www && rm -r ./www && stencil build && rm -r ../to4st-core/client && cp -r ./www ../to4st-core/client",
+    "build": "rm -rf ./www && stencil build && rm -r ../to4st-core/client && cp -r ./www ../to4st-core/client",
     "start": "stencil build --dev --watch --serve",
     "test": "stencil test --spec --e2e",
     "test.watch": "stencil test --spec --e2e --watchAll",
