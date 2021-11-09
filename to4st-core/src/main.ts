@@ -10,10 +10,11 @@ import { Logger } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = app.get(ConfigService).get<number>("port");
+  const ip = app.get(ConfigService).get<string>("ip");
 
   app.enableShutdownHooks();
   
-  await app.listen(port);
-  Logger.log("Listening on port: " + port.toString(), "NestApplication");
+  await app.listen(port, ip);
+  Logger.log("Listening on " + ip + ":" + port.toString(), "NestApplication");
 }
 bootstrap();

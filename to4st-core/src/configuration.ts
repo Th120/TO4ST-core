@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
+  ip: process.env.IP ?? '0.0.0.0',
   forceResetPassword: !!process.env.RESET_PASSWORD,
   instanceId: process.env.INSTANCE_ID ?? 'default',
   database: {
