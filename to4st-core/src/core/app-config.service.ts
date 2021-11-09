@@ -85,7 +85,13 @@ export class AppConfigService implements OnModuleInit {
                 {
                     Logger.warn(`Could not find appConfig for instanceId <${instanceId}>, initialising new config...`, "AppConfig");
                     
-                    const password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
+                    if(this.configService.get<string>("password").length > 0)
+                    {
+                        var password = await this.configService.get<string>("password");
+                    }
+                    else {
+                        var password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
+                    }
                     const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
 
                     const hash = await bcrypt.hash(hashed, BCRYPT_ROUNDS);
@@ -96,6 +102,29 @@ export class AppConfigService implements OnModuleInit {
 
                     Logger.warn(`AppConfig initialised. Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
                     Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
+                }
+                /* istanbul ignore if  */ // won't be executed in tests with in-memory db
+                else if(this.configService.get<boolean>("forceResetPassword"))
+                {
+                 
+                    Logger.warn(`Reinitialising password for instanceId <${instanceId}>...`, "AppConfig");
+                    foundConfig.passwordInitialised = false;
+                    if(this.configService.get<string>("password").length > 0)
+                    {
+                        var password = await this.configService.get<string>("password");
+                        foundConfig.passwordInitialised = true;
+                    }
+                    else {
+                        var password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
+                    }
+                    
+                    const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
+                    foundConfig.password = await bcrypt.hash(hashed, BCRYPT_ROUNDS);
+
+                    await manager.save(foundConfig);
+
+                    Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
+                    Logger.warn(`Remove the environment variable after setting a new password. Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
                 }
                 /* istanbul ignore if  */ // won't be executed in tests with in-memory db
                 else if(!foundConfig.passwordInitialised)
@@ -111,21 +140,6 @@ export class AppConfigService implements OnModuleInit {
 
                     Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
                     Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
-                }
-                /* istanbul ignore if  */ // won't be executed in tests with in-memory db
-                else if(this.configService.get<boolean>("forceResetPassword"))
-                {
-                    Logger.warn(`Reinitialising password for instanceId <${instanceId}>...`, "AppConfig");
-                    
-                    const password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
-                    const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
-                    foundConfig.password = await bcrypt.hash(hashed, BCRYPT_ROUNDS);
-                    foundConfig.passwordInitialised = false;
-
-                    await manager.save(foundConfig);
-
-                    Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
-                    Logger.warn(`Remove the environment variable after setting a new password. Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
                 }
                 /* istanbul ignore else */ // won't be executed in tests with in-memory db
                 else
