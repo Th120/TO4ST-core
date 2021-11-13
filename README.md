@@ -25,7 +25,7 @@ The port which is used by the application
 IP the server binds to; optional.
 - RESET_PASSWORD  
 Resets the password by generating a new one or loading a default password
-- INIT_PASSWORD
+- INIT_PASSWORD  
 Default password that is used on first start or when no new password is assigned. If undefined a random password is generated and logged.
 - INSTANCE_ID  
 You can start some instances which use the same database in general, but each one has a different configuration.  
