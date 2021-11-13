@@ -158,7 +158,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "reservedSlots",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "0")
             )
           }
         />
@@ -328,7 +328,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "mapNoReplay",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "0")
             )
           }
         />

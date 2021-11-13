@@ -132,7 +132,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "matchendLength",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "1")
             )
           }
         />
@@ -152,7 +152,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "warmUpLength",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "0")
             )
           }
         />
@@ -173,7 +173,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "friendlyFireScale",
-              parseFloat((event.target as HTMLInputElement).value)
+              parseFloat((event.target as HTMLInputElement).value || "0")
             )
           }
         />
@@ -191,7 +191,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           value={item?.mapLength ?? 0}
           class="input"
           onChange={(event) =>
-            cb("mapLength", parseInt((event.target as HTMLInputElement).value))
+            cb("mapLength", parseInt((event.target as HTMLInputElement).value || "1"))
           }
         />
       ),
@@ -210,7 +210,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "roundLength",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "1")
             )
           }
         />
@@ -224,13 +224,13 @@ export class To4stMatchConfigList implements ComponentInterface {
           type="number"
           placeholder="Pre Round Length"
           min="1"
-          max="20"
+          max="60"
           value={item?.preRoundLength ?? 0}
           class="input"
           onChange={(event) =>
             cb(
               "preRoundLength",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "1")
             )
           }
         />
@@ -250,7 +250,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "roundEndLength",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "1")
             )
           }
         />
@@ -268,7 +268,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           value={item?.roundLimit ?? 0}
           class="input"
           onChange={(event) =>
-            cb("roundLimit", parseInt((event.target as HTMLInputElement).value))
+            cb("roundLimit", parseInt((event.target as HTMLInputElement).value || "0"))
           }
         />
       ),
@@ -298,7 +298,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "playerVoteThreshold",
-              parseFloat((event.target as HTMLInputElement).value)
+              parseFloat((event.target as HTMLInputElement).value || "0")
             )
           }
         />
@@ -338,7 +338,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "maxTeamDamage",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "0")
             )
           }
         />
@@ -382,7 +382,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           onChange={(event) =>
             cb(
               "midGameBreakLength",
-              parseInt((event.target as HTMLInputElement).value)
+              parseInt((event.target as HTMLInputElement).value || "0")
             )
           }
         />
