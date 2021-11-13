@@ -21,6 +21,8 @@ The alternative to docker right now is cloning the repo and using the builded ve
 ### ENV Variables
 - PORT  
 The port which is used by the application
+- IP 
+IP the server binds to; optional.
 - RESET_PASSWORD  
 Resets the password by generating a new one or loading a default password
 - INIT_PASSWORD
