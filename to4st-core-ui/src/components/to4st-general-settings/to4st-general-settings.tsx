@@ -309,7 +309,7 @@ export class To4stGeneralSettings implements ComponentInterface {
                     <span
                       class="has-tooltip-arrow"
                       data-tooltip={
-                        "Enter the tld-address the master \nshould use to contact your backend, e.g. 'https://abc.de'"
+                        "Enter the address the master\nshould use to contact your backend (including the protocol),\ne.g. 'https://abc.de' or 'http://123.123.123.123:5000'"
                       }
                     >
                       <input
@@ -354,12 +354,12 @@ export class To4stGeneralSettings implements ComponentInterface {
                         class="input"
                         onChange={(e) =>
                           (this.minScoreStats = parseInt(
-                            (e.target as HTMLInputElement).value.trim()
+                            (e.target as HTMLInputElement).value.trim() || "1000"
                           ))
                         }
                         onKeyUp={(e) =>
                           (this.minScoreStats = parseInt(
-                            (e.target as HTMLInputElement).value.trim()
+                            (e.target as HTMLInputElement).value.trim() || "1000"
                           ))
                         }
                       />
@@ -385,12 +385,12 @@ export class To4stGeneralSettings implements ComponentInterface {
                         class="input"
                         onChange={(e) =>
                           (this.playerStatsCacheAge = parseInt(
-                            (e.target as HTMLInputElement).value.trim()
+                            (e.target as HTMLInputElement).value.trim() || "5"
                           ))
                         }
                         onKeyUp={(e) =>
                           (this.playerStatsCacheAge = parseInt(
-                            (e.target as HTMLInputElement).value.trim()
+                            (e.target as HTMLInputElement).value.trim() || "5"
                           ))
                         }
                       />
