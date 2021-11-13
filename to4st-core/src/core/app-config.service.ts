@@ -11,7 +11,7 @@ import isURL from 'validator/lib/isURL';
 import { MIN_PW_LENGTH, SECRET_LENGTH, PASSWORD_ALPHABET, BCRYPT_ROUNDS, MAX_PW_LENGTH, TTL_CACHE_MS, CACHE_PREFETCH, DEFAULT_PW_LENGTH } from '../globals';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from './app-config.entity';
-import { hashPassword } from '../shared/utils';
+import { hashPassword, maskPassword } from '../shared/utils';
 
 
 /**
@@ -85,7 +85,8 @@ export class AppConfigService implements OnModuleInit {
                 {
                     Logger.warn(`Could not find appConfig for instanceId <${instanceId}>, initialising new config...`, "AppConfig");
                     
-                    const password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
+                    const initPasswordOverride = this.configService.get<string>("initPassword")?.trim();
+                    const password = !initPasswordOverride ? await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)() : initPasswordOverride;
                     const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
 
                     const hash = await bcrypt.hash(hashed, BCRYPT_ROUNDS);
@@ -94,38 +95,47 @@ export class AppConfigService implements OnModuleInit {
     
                     await manager.save(config);
 
-                    Logger.warn(`AppConfig initialised. Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
+                    if(!initPasswordOverride) 
+                    {
+                        Logger.warn(`AppConfig initialised. Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
+                    }
+                    else
+                    {
+                        Logger.log(`AppConfig initialised. Password override <${maskPassword(password)}> used. Please assign a proper password in your config`, "AppConfig");
+                    }
+
                     Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
                 }
                 /* istanbul ignore if  */ // won't be executed in tests with in-memory db
-                else if(!foundConfig.passwordInitialised)
+                else if(!foundConfig.passwordInitialised || this.configService.get<boolean>("forceResetPassword"))
                 {
-                    Logger.warn(`No proper password set for instanceId <${instanceId}>, initialising temp password...`, "AppConfig");
+                    if(!foundConfig.passwordInitialised) 
+                    {
+                        Logger.warn(`No proper password set for instanceId <${instanceId}>, initialising password...`, "AppConfig");
+                    }
+                    else
+                    {
+                        Logger.warn(`Reinitialising password for instanceId <${instanceId}>...`, "AppConfig");
+                    }
                     
-                    const password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
+                    const initPasswordOverride = this.configService.get<string>("initPassword")?.trim();
+                    const password = !initPasswordOverride ? await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)() : initPasswordOverride;
                     const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
                     
                     foundConfig.password = await bcrypt.hash(hashed, BCRYPT_ROUNDS);
     
                     await manager.save(foundConfig);
 
-                    Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
-                    Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
-                }
-                /* istanbul ignore if  */ // won't be executed in tests with in-memory db
-                else if(this.configService.get<boolean>("forceResetPassword"))
-                {
-                    Logger.warn(`Reinitialising password for instanceId <${instanceId}>...`, "AppConfig");
-                    
-                    const password = await customAlphabet(PASSWORD_ALPHABET, DEFAULT_PW_LENGTH)();
-                    const hashed =  hashPassword(password) //double hash because password is expected to be pre hashed on the client
-                    foundConfig.password = await bcrypt.hash(hashed, BCRYPT_ROUNDS);
-                    foundConfig.passwordInitialised = false;
+                    if(!initPasswordOverride) 
+                    {
+                        Logger.warn(`AppConfig initialised. Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
+                        Logger.warn(`Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
+                    }
+                    else
+                    {
+                        Logger.warn(`AppConfig initialised. Password override <${maskPassword(password)}> used. Please assign a proper password in the admin panel`, "AppConfig");
+                    }
 
-                    await manager.save(foundConfig);
-
-                    Logger.warn(`Default admin panel password for this session <${password}>. Please set a proper password in the admin panel`, "AppConfig");
-                    Logger.warn(`Remove the environment variable after setting a new password. Keep in mind only the most recent logged password of an instance is valid`, "AppConfig");
                 }
                 /* istanbul ignore else */ // won't be executed in tests with in-memory db
                 else

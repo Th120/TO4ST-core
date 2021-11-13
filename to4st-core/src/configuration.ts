@@ -2,6 +2,7 @@
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   forceResetPassword: !!process.env.RESET_PASSWORD,
+  initPassword: process.env.INIT_PASSWORD,
   instanceId: process.env.INSTANCE_ID ?? 'default',
   database: {
     type: process.env.DATABASE_TYPE ?? 'sqlite',

@@ -22,7 +22,9 @@ The alternative to docker right now is cloning the repo and using the builded ve
 - PORT  
 The port which is used by the application
 - RESET_PASSWORD  
-Resets the password and logs a new random password
+Resets the password by generating a new one or loading a default password
+- INIT_PASSWORD
+Default password that is used on first start or when no new password is assigned. If undefined a random password is generated and logged.
 - INSTANCE_ID  
 You can start some instances which use the same database in general, but each one has a different configuration.  
 Two instance ids can be used to host one instance of the backend which allows public access to player stats / ban queries and a private one just for gameservers.
@@ -42,8 +44,8 @@ Password for MySQL / Postgres database
 The path to the SQLite database if used
 
 ## Getting started
-When an instance, which is using an unused instance id, is started for the first time it is initialized with a random password that is logged.  
-The software will use a different random password on every start until a new password is assigned in the UI.        
+When an instance, which is using an unused instance id, is started for the first time it is initialized with a random password which is logged or with a default password that has been set in the environment.  
+The software will use a different random or the default password on every start until a new password is assigned in the UI.        
 
 In order to use the software with your gameservers you need to generate an auth key for each server which has to be done using the "Gameservers" settings page. The auth key and the address of the backend has to be added to the TO4cfg.ini which is located in the root dir of the gameserver package.
 

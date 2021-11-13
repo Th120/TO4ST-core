@@ -195,5 +195,14 @@ export const TIMEOUT_PROMISE_FACTORY: (minTime: number, maxTime?: number) => [Pr
   return [promise, cb];
 };
 
+/**
+ * Mask a password string (replaces x chars with *)
+ * @param password Password
+ * @returns Masked password
+ */
+export function maskPassword(password: string): string {
+  return [...password].map((c, i) => i / password.length < 0.5 ? c : "*").join("");
+}
+
 
   
