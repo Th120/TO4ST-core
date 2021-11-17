@@ -1,5 +1,5 @@
 import { Resolver, ObjectType, InputType, Query, Field, Int, Args, Mutation, Parent, Float, ResolveField } from '@nestjs/graphql';
-import { UseInterceptors, UseGuards, UsePipes, ValidationPipe, HttpException, HttpStatus, } from '@nestjs/common';
+import { UseInterceptors, UseGuards, UsePipes, ValidationPipe, HttpException, HttpStatus, Logger, } from '@nestjs/common';
 import { ValidateIf, IsInt, IsBoolean, IsString, IsDate, IsNumber, ValidateNested } from 'class-validator';
 
 
@@ -21,6 +21,7 @@ import { SteamUser } from '../core/steam-user.entity';
 import { SteamUserService } from '../core/steam-user.service';
 import { TransactionInterceptor } from '../shared/transaction.interceptor';
 import { MatchConfig } from '../gameserver/match-config.entity';
+
 
 
 /**
@@ -658,7 +659,8 @@ export class GameResolver {
     @AllowTacByteAccess()
     async rounds(@Parent() game: Game,) 
     {
-        return await this.statsService.getRounds({game: game});
+        const [ foundRounds ] = await this.statsService.getRounds({game: game});
+        return foundRounds;
     }
 
     /**
@@ -773,7 +775,8 @@ export class RoundResolver {
     @AllowTacByteAccess()
     async playerRoundStats(@Parent() round: Round,) 
     {
-        return await this.statsService.getRoundStatistics({round: round, overridePageSize: true})
+        const [ foundStats ] = await this.statsService.getRoundStatistics({round: round, overridePageSize: true});
+        return foundStats;
     }
 
     /**
@@ -784,7 +787,8 @@ export class RoundResolver {
     @AllowTacByteAccess()
     async playerRoundWeaponStats(@Parent() round: Round,) 
     {
-        return await this.statsService.getRoundWeaponStatistics({round: round, overridePageSize: true})
+        const [ foundWeaponStats ] = await this.statsService.getRoundWeaponStatistics({round: round, overridePageSize: true});
+        return foundWeaponStats;
     }
 
     /**
