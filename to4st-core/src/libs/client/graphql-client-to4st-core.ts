@@ -26,7 +26,13 @@ export function createGraphqlClientTo4stCore(url: string, timeout = 5000): TApiC
                     } 
                 })
 
-                return res.data;
+                // throw graphql errors
+                if(!!res.data["errors"])
+                {
+                    throw res.data["errors"];
+                }
+
+                return res.data["data"];
             }, 
         (query) => {
             Logger.log(query);

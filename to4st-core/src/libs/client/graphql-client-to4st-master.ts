@@ -27,7 +27,13 @@ export function createGraphqlClientTo4stMaster(url: string, masterserverKey, tim
                     } 
                 })
 
-                return res.data;
+                // throw graphql errors
+                if(!!res.data["errors"])
+                {
+                    throw res.data["errors"];
+                }
+
+                return res.data["data"];
             }, 
         (query) => {
             Logger.log(query);
