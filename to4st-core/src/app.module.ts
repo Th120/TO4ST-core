@@ -15,7 +15,7 @@ import { AllExceptionsFilter } from './shared/all-exceptions.filter';
 import testConfiguration from './testConfiguration';
 import { GameserverModule } from './gameserver/gameserver.module';
 import { AppCoreModule } from './core/app-core.module';
-import {TypeOrmConfigService} from './type-orm-config.service'
+import { TypeOrmConfigService } from './type-orm-config.service'
 import { AuthGuard } from './shared/auth.guard';
 
 
@@ -42,7 +42,7 @@ import { AuthGuard } from './shared/auth.guard';
       { 
         fieldResolverEnhancers: ["interceptors", "guards", "filters"],
         autoSchemaFile: true,
-        context: ({ req }) => ({ headers: req.headers }),
+        context: ({ req }) => ({ headers: req.headers })
       }
     ),
     ServeStaticModule.forRoot({

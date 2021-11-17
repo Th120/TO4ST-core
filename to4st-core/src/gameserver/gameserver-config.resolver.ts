@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, InputType, Field, Int, ObjectType, Float } from '@nestjs/graphql';
-import { ValidateIf, IsInt, IsString, IsBoolean, ValidateNested, IsNumber } from 'class-validator';
+import { ValidateIf, IsInt, IsString, IsBoolean, ValidateNested, IsNumber, Min, Max } from 'class-validator';
 import { UseInterceptors, HttpException, HttpStatus } from '@nestjs/common';
 
 
@@ -64,6 +64,7 @@ class GameserverConfigInput
      */
     @ValidateIf(x => x.voteLength !== undefined)
     @IsInt()
+    @Min(0)
     @Field(() => Int, {nullable: true})
     voteLength: number;
 
@@ -72,6 +73,7 @@ class GameserverConfigInput
      */
     @ValidateIf(x => x.tempKickBanTime !== undefined)
     @IsInt()
+    @Min(1)
     @Field(() => Int, {nullable: true})
     tempKickBanTime: number;
 
@@ -120,6 +122,7 @@ class GameserverConfigInput
      */
     @ValidateIf(x => x.reservedSlots !== undefined)
     @IsInt()
+    @Min(0)
     @Field(() => Int, {nullable: true})
     reservedSlots: number;
 
@@ -128,6 +131,7 @@ class GameserverConfigInput
      */
     @ValidateIf(x => x.mapNoReplay !== undefined)
     @IsInt()
+    @Min(0)
     @Field(() => Int, {nullable: true})
     mapNoReplay: number;
 
@@ -215,6 +219,7 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.matchendLength !== undefined)
     @IsInt()
+    @Min(0)
     @Field(() => Int, {nullable: true})
     matchEndLength: number;
 
@@ -223,6 +228,8 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.warmUpLength !== undefined)
     @IsInt()
+    @Min(1)
+    @Max(300)
     @Field(() => Int, {nullable: true})
     warmUpLength: number;
 
@@ -231,6 +238,8 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.mapLength !== undefined)
     @IsInt()
+    @Min(1)
+    @Max(99)
     @Field(() => Int, {nullable: true})
     mapLength: number;
 
@@ -239,6 +248,8 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.roundLength !== undefined)
     @IsInt()
+    @Min(1)
+    @Max(3599)
     @Field(() => Int, {nullable: true})
     roundLength: number;
 
@@ -248,6 +259,7 @@ class MatchConfigInput
     @ValidateIf(x => x.preRoundLength !== undefined)
     @IsInt()
     @Field(() => Int, {nullable: true})
+    @Min(1)
     preRoundLength: number;
 
     /**
@@ -256,6 +268,7 @@ class MatchConfigInput
     @ValidateIf(x => x.roundEndLength !== undefined)
     @IsInt()
     @Field(() => Int, {nullable: true})
+    @Min(1)
     roundEndLength: number;
 
     /**
@@ -263,6 +276,8 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.roundLimit !== undefined)
     @IsInt()
+    @Min(0)
+    @Max(99)
     @Field(() => Int, {nullable: true})
     roundLimit: number;
 
@@ -271,6 +286,8 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.midGameBreakLength !== undefined)
     @IsInt()
+    @Min(0)
+    @Max(300)
     @Field(() => Int, {nullable: true})
     midGameBreakLength: number;
 
@@ -279,6 +296,8 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.friendlyFireScale !== undefined)
     @IsNumber()
+    @Max(100)
+    @Min(0)
     @Field(() => Float, {nullable: true})
     friendlyFireScale: number;
 
@@ -287,6 +306,8 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.playerVoteThreshold !== undefined)
     @IsNumber()
+    @Max(100)
+    @Min(0)
     @Field(() => Float, {nullable: true})
     playerVoteThreshold: number;
 
@@ -295,6 +316,7 @@ class MatchConfigInput
      */
     @ValidateIf(x => x.maxTeamDamage !== undefined)
     @IsInt()
+    @Min(0)
     @Field(() => Int, {nullable: true})
     maxTeamDamage: number;
 
