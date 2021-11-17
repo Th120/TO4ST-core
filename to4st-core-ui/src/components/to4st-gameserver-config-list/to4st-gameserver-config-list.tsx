@@ -242,7 +242,7 @@ export class To4stGameserverConfigList implements ComponentInterface {
         <input
           type="number"
           placeholder="Vote Length"
-          min="5"
+          min="0"
           value={item?.voteLength ?? 0}
           class="input"
           onChange={(event) =>

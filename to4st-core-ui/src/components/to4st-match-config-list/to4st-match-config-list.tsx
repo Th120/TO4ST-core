@@ -292,7 +292,7 @@ export class To4stMatchConfigList implements ComponentInterface {
           min="0"
           max="100"
           step="0.5"
-          placeholder="Friendly Fire Scale"
+          placeholder="Player Vote Threshold"
           value={item?.playerVoteThreshold ?? 0}
           class="input"
           onChange={(event) =>
