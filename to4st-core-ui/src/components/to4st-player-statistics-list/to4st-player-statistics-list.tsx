@@ -23,7 +23,7 @@ const playerStatsQuery = (
           page: page,
           orderDesc: orderDesc,
           orderBy: orderBy,
-          cachedIfPossible: true,
+          cachedIfPossible: true
         },
       },
       {
@@ -247,7 +247,7 @@ export class To4stPlayerStatistics implements ComponentInterface {
    */
   async updateContent() {
     if ((this.isAdmin || this.appConfig?.publicStats) && !!this.apiClient) {
-      this.loadingData = true;
+      const delayedLoadTimer = setTimeout(() => { this.loadingData = true; }, 666);
       try {
         const res = (
           await this.apiClient.client.query(
@@ -271,6 +271,7 @@ export class To4stPlayerStatistics implements ComponentInterface {
         console.error(e);
       }
 
+      clearTimeout(delayedLoadTimer);
       this.loadingData = false;
     }
   }
