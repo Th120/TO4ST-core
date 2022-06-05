@@ -52,7 +52,7 @@ export class SteamUserService implements OnApplicationBootstrap
     /**
      * Cache used to speed up service for field resolvers
      */
-    private static steamUserCache = new LRUCache<string, SteamUser>({max: CACHESIZE, maxAge: TTL_STEAMUSER_CACHE, noDisposeOnSet: true, stale: true});
+    private static steamUserCache = new LRUCache<string, SteamUser>({max: CACHESIZE, ttl: TTL_STEAMUSER_CACHE, noDisposeOnSet: true, allowStale: true});
 
     /**
      * Interval used for lazy update of steam user data from database
@@ -311,7 +311,7 @@ export class SteamUserService implements OnApplicationBootstrap
                     avatarMediumUrl: DEFAULT_AVATAR_MEDIUM, 
                     lastUpdate: null
                 },
-            )).forEach(x => SteamUserService.steamUserCache.set(x.steamId64, x, 30 * 1000));
+            )).forEach(x => SteamUserService.steamUserCache.set(x.steamId64, x, { ttl: 30 * 1000 }));
 
             if(notFound.length > 0)
             {

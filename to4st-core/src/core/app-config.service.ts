@@ -2,7 +2,7 @@ import { Injectable, HttpException, HttpStatus, OnModuleInit } from '@nestjs/com
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { Repository, Connection, } from 'typeorm';
 import { nanoid, customAlphabet } from 'nanoid/async';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { Logger } from '@nestjs/common';
 import memoizee from "memoizee"
 import _ from 'lodash'

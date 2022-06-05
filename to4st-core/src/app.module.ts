@@ -7,7 +7,7 @@ import configuration from './configuration';
 import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as Joi from 'joi';
-
+import depthLimit from 'graphql-depth-limit';
 
 import { RoleClassSerializerInterceptor } from './shared/role-class-serializer.interceptor';
 import { GameStatisticsModule } from './game-statistics/game-statistics.module';
@@ -17,6 +17,7 @@ import { GameserverModule } from './gameserver/gameserver.module';
 import { AppCoreModule } from './core/app-core.module';
 import { TypeOrmConfigService } from './type-orm-config.service'
 import { AuthGuard } from './shared/auth.guard';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 
 /**
@@ -38,10 +39,13 @@ import { AuthGuard } from './shared/auth.guard';
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
     }),
-    GraphQLModule.forRoot(
-      { 
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+        driver: ApolloDriver,
+        validationRules: [depthLimit(7)],
+        introspection: process.env.NODE_ENV !== "production",
         fieldResolverEnhancers: ["interceptors", "guards", "filters"],
         autoSchemaFile: true,
+        playground: process.env.NODE_ENV !== "production",
         context: ({ req }) => ({ headers: req.headers })
       }
     ),

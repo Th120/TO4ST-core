@@ -9,7 +9,7 @@ import _ from 'lodash'
 import { AppConfig } from './app-config.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {MIN_PW_LENGTH, MAX_PW_LENGTH } from '../globals';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import testConfiguration from '../testConfiguration';
 
 

@@ -730,7 +730,7 @@ export class GameStatisticsService implements OnApplicationBootstrap {
         {
             // Only save weapons which do not exist in database yet and set ids in cache for all weapons
             const insertSetId = async (manager: EntityManager) => {
-                const foundWeapons = await manager.find(Weapon, {where: uniqWeapons.map(x => ({name: x.name}))});
+                const foundWeapons = await manager.find(Weapon, {where: uniqWeapons.map(x => ({name: x.name}) as Weapon)});
                     
                 foundWeapons.forEach(x => {
                     this.weaponIdCache.set(x.name, x.id);

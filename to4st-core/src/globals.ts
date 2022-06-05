@@ -54,9 +54,9 @@ export const MAX_PAGE_SIZE_WITH_STEAMID = 500;
 export const MAX_PAGE_SIZE = 500;
 
 /**
- * Rounds used by bcrypt, 13 equals about 1 hash per minute
+ * Rounds used by bcrypt, kinda low value due to bcryptjs performance loss
  */
-export const BCRYPT_ROUNDS = 13;
+export const BCRYPT_ROUNDS = 12;
 
 /**
  * Default TTL of memoized methods
