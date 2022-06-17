@@ -10,7 +10,7 @@ A backend can have a list of partner backends which are also queried when a game
 
 ## Developing
 Using Visual Studio Code on Linux / Windows with WSL is recommended.  
-Node 14 LTS is required. Using [nvm to install](https://github.com/nvm-sh/nvm) is recommended.  
+Node 16 LTS is required. Using [nvm to install](https://github.com/nvm-sh/nvm) is recommended.  
 You also need to [install the package manager yarn](https://yarnpkg.com/getting-started/install).  
 
 ## Deploying
